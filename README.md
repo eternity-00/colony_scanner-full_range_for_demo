@@ -12,6 +12,7 @@ and Releases.
 - Development workflow: [docs/GITHUB_WORKFLOW.md](docs/GITHUB_WORKFLOW.md)
 - Coding rules: [docs/CODING_RULES.md](docs/CODING_RULES.md)
 - Contribution guide: [CONTRIBUTING.md](CONTRIBUTING.md)
+- Editor defaults: [.editorconfig](.editorconfig)
 
 ## Work Areas
 
