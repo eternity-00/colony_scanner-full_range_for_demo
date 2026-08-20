@@ -1,0 +1,26 @@
+name: Documentation
+description: Documentation task or correction
+title: "[Docs] "
+labels: ["type:docs", "area:docs"]
+body:
+  - type: textarea
+    id: target
+    attributes:
+      label: Target Document
+      description: Which document or section should change?
+    validations:
+      required: true
+  - type: textarea
+    id: change
+    attributes:
+      label: Required Change
+      description: What should be added, corrected, or removed?
+    validations:
+      required: true
+  - type: textarea
+    id: reason
+    attributes:
+      label: Reason
+      description: Why is this change needed?
+    validations:
+      required: false

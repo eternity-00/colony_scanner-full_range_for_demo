@@ -1,0 +1,18 @@
+[
+  {
+    "title": "v0.1.0",
+    "description": "Repository structure, documentation, and baseline management workflow"
+  },
+  {
+    "title": "v0.2.0",
+    "description": "Device initialization, camera settings, and basic hardware control"
+  },
+  {
+    "title": "v0.3.0",
+    "description": "Image capture, AI colony analysis, and result storage workflow"
+  },
+  {
+    "title": "v1.0.0",
+    "description": "Demo-ready integrated Colony Counter system"
+  }
+]

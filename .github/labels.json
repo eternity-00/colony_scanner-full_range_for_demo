@@ -1,0 +1,112 @@
+[
+  {
+    "name": "area:product",
+    "color": "1f77b4",
+    "description": "Product scope, requirements, workflow, release scope"
+  },
+  {
+    "name": "area:architecture",
+    "color": "9467bd",
+    "description": "System structure, data flow, communication, integration"
+  },
+  {
+    "name": "area:ui",
+    "color": "ff7f0e",
+    "description": "User interface, screens, operation flow"
+  },
+  {
+    "name": "area:backend",
+    "color": "2ca02c",
+    "description": "API, DB, WebSocket, backend service logic"
+  },
+  {
+    "name": "area:hardware",
+    "color": "8c564b",
+    "description": "Camera, engine board, serial protocol, device state"
+  },
+  {
+    "name": "area:ai",
+    "color": "17becf",
+    "description": "AI inference, detection schema, analysis pipeline"
+  },
+  {
+    "name": "area:docs",
+    "color": "7f7f7f",
+    "description": "Repository and project documentation"
+  },
+  {
+    "name": "area:build",
+    "color": "bcbd22",
+    "description": "Build, packaging, deployment, CI"
+  },
+  {
+    "name": "type:feature",
+    "color": "0e8a16",
+    "description": "New user-facing or system behavior"
+  },
+  {
+    "name": "type:bug",
+    "color": "d73a4a",
+    "description": "Unexpected problem or regression"
+  },
+  {
+    "name": "type:docs",
+    "color": "0075ca",
+    "description": "Documentation update"
+  },
+  {
+    "name": "type:refactor",
+    "color": "cfd3d7",
+    "description": "Internal restructuring without behavior change"
+  },
+  {
+    "name": "type:test",
+    "color": "5319e7",
+    "description": "Test coverage or verification work"
+  },
+  {
+    "name": "type:chore",
+    "color": "ededed",
+    "description": "Maintenance task"
+  },
+  {
+    "name": "priority:p0",
+    "color": "b60205",
+    "description": "Release blocker, data loss, or device operation risk"
+  },
+  {
+    "name": "priority:p1",
+    "color": "d93f0b",
+    "description": "Core feature or demo blocker"
+  },
+  {
+    "name": "priority:p2",
+    "color": "fbca04",
+    "description": "Normal priority"
+  },
+  {
+    "name": "priority:p3",
+    "color": "c5def5",
+    "description": "Low priority cleanup or improvement"
+  },
+  {
+    "name": "status:blocked",
+    "color": "000000",
+    "description": "Blocked by dependency, decision, or environment"
+  },
+  {
+    "name": "status:needs-design",
+    "color": "bfdadc",
+    "description": "Needs UI, UX, or architecture decision"
+  },
+  {
+    "name": "status:needs-hardware",
+    "color": "f9d0c4",
+    "description": "Needs validation with physical device"
+  },
+  {
+    "name": "status:ready-for-review",
+    "color": "0e8a16",
+    "description": "Ready for review"
+  }
+]

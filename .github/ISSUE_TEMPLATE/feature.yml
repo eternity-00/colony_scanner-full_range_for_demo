@@ -1,0 +1,52 @@
+name: Feature
+description: New product, UI, backend, hardware, or AI behavior
+title: "[Feature] "
+labels: ["type:feature"]
+body:
+  - type: textarea
+    id: purpose
+    attributes:
+      label: Purpose
+      description: What should this feature accomplish?
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: What is included and excluded?
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - area:product
+        - area:architecture
+        - area:ui
+        - area:backend
+        - area:hardware
+        - area:ai
+        - area:docs
+        - area:build
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: Done Criteria
+      description: What must be true before this issue is closed?
+      placeholder: |
+        -
+    validations:
+      required: true
+  - type: textarea
+    id: verification
+    attributes:
+      label: Verification
+      description: How will this be tested or checked?
+      placeholder: |
+        -
+    validations:
+      required: true
