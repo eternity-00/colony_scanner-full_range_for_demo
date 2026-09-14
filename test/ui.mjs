@@ -19,5 +19,9 @@ try{
   await page.getByRole('button',{name:/가상장비 Simulator/}).click();assert.ok(await page.locator('.log tbody tr').count()>0);assert.match(await page.locator('.log').innerText(),/TX/);assert.match(await page.locator('.log').innerText(),/ACK/);
   await page.screenshot({path:'../docs/react-virtual-device.png',fullPage:true});assert.deepEqual(errors,[]);
  }finally{await browser.close()}
-}finally{server.kill('SIGTERM');rmSync(dir,{recursive:true,force:true})}
+}finally{
+ server.kill('SIGTERM');
+ await new Promise(resolve=>server.once('exit',resolve));
+ rmSync(dir,{recursive:true,force:true,maxRetries:5,retryDelay:100});
+}
 console.log('PASS: React UI, SSE connection, simulator fault input/recovery, registration, capture and I/O monitor.');
