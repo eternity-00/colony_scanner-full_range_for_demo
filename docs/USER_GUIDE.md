@@ -1,5 +1,7 @@
 # Colony Scanner React UI 및 가상장비 사용설명서
 
+> **v1.1 변경 (2026-09-15):** 가상장비는 LCD 내부 탭이 아닌 별도 **Virtual Device Console** 창에서 실행한다. LCD를 먼저 실행한 뒤 프로젝트 폴더에서 `./open-virtual-device.sh`를 실행한다. 촬영 이력의 `보기`는 한 웰 기준의 실제 공개 배양 이미지를 표시한다.
+
 | 항목 | 내용 |
 |---|---|
 | 문서 ID | CC-REACT-VDEV-USER-260914 |

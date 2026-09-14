@@ -8,7 +8,8 @@
     "vite": "vite",
     "build": "vite build",
     "start": "node server/index.mjs",
-    "simulator": "node server/index.mjs",
+    "simulator": "node simulator-app/server.mjs",
+    "open:simulator": "./open-virtual-device.sh",
     "test": "node --test test/server.test.mjs",
     "test:ui": "node test/ui.mjs",
     "check": "npm test && npm run build && npm run test:ui"

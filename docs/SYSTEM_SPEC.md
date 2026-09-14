@@ -1,5 +1,7 @@
 # Colony Scanner React UI 및 가상장비 전체 명세서
 
+> **v1.1 변경 (2026-09-15):** LCD 내부의 가상장비 탭을 제거했다. 가상 입력·I/O 패킷은 독립 실행되는 `simulator-app/`의 Virtual Device Console에서만 조작한다. 촬영 결과는 6-well 합성 이미지가 아니라 한 웰을 나타내는 공개 배양 이미지 참조로 보관한다. 데모 자산은 Madprime의 Wikimedia Commons `E. coli colonies` 이미지(CC0)이며, 표시에는 네트워크 연결이 필요하다.
+
 | 항목 | 내용 |
 |---|---|
 | 문서 ID | CC-REACT-VDEV-SPEC-260914 |

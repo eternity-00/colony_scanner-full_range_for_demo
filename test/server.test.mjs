@@ -23,7 +23,7 @@ test('virtual scanner command, I/O, safety and persistence flow',()=>{
   assert.throws(()=>c.execute(request(4,'home',3)),e=>e.code==='DEVICE_BUSY');
   c.execute(request(5,'pause',3));c.tick(100);assert.equal(c.snapshot().devices[2].job.status,'paused');
   c.execute(request(6,'resume',3));c.tick(100);
-  assert.equal(p().runs.length,1);assert.equal(p().runs[0].imageState,'held');assert.ok(existsSync(join(dir,'images',p().runs[0].image)));
+  assert.equal(p().runs.length,1);assert.equal(p().runs[0].imageState,'held');assert.match(p().runs[0].image,/^https:\/\//);
   for(let i=0;i<5;i++){c.execute(request(10+i,'capture',3,{plateId:p().id}));c.tick(100);}
   assert.equal(p().runs.length,6);assert.equal(p().runs.filter(r=>r.imageState==='held').length,5);assert.equal(p().runs[0].imageState,'expired');
   c.execute(request(20,'sim.input',3,{pcConnected:false}));c.execute(request(21,'capture',3,{plateId:p().id}));c.tick(100);

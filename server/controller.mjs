@@ -24,13 +24,13 @@ export class Controller extends EventEmitter {
  tick(ms){this.adapter.tick(ms);if(this.db.autoRun)this.schedule();this.publish();}
  nextAt(p){return p.registeredAt+(p.runs.length+1)*this.db.routine.cycleHours*3600000+this.db.routine.delay*60000;}
  schedule(){for(const d of this.adapter.devices){if(!d.connected||d.doorOpen||d.fault||busy(d))continue;const p=this.db.plates.find(p=>p.deviceId===d.id&&!p.removedAt&&!p.paused&&p.runs.length<Math.floor(this.db.routine.days*24/this.db.routine.cycleHours)&&this.nextAt(p)<=Date.now());if(p){this.execute({requestId:randomUUID(),command:'capture',deviceId:d.id,args:{plateId:p.id}},'scheduler');}}}
- image(p,run){const wells=Array.from({length:6},(_,i)=>{const x=150+(i%3)*180,y=150+Math.floor(i/3)*180;const dots=Array.from({length:7+run.n*2},(_,j)=>`<circle cx="${x+Math.sin(j*2.4+i+run.n)*45}" cy="${y+Math.cos(j*1.7+i)*45}" r="${2+(j%3)}" fill="#766750"/>`).join('');return `<circle cx="${x}" cy="${y}" r="70" fill="#e4d1a1" stroke="#97a6b5" stroke-width="5"/>${dots}`;}).join('');return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 490"><rect width="660" height="490" fill="#111b35"/><rect x="45" y="50" width="570" height="370" rx="45" fill="#dce4e8"/>${wells}<text x="30" y="465" fill="#c2d0e8" font-family="sans-serif" font-size="16">VIRTUAL SCANNER ${p.deviceId} / RUN ${run.n} / SYNTHETIC IMAGE</text></svg>`;}
+ imageSource(){return 'https://commons.wikimedia.org/wiki/Special:FilePath/Ecoli_colonies.png?width=900';}
  onEvent(e){
   this.io('RX',e.type,e.deviceId,e.requestId,e);
   if(e.type==='job.completed'||e.type==='job.failed'){
    const j=e.job;if(j.type==='capture'){
     const p=this.db.plates.find(p=>p.id===j.plateId);if(p){const success=e.type==='job.completed',r={n:p.runs.length+1,at:Date.now(),imageState:success?'held':'failed',image:null,transferred:success&&e.transferred,error:success?null:e.message};
-     if(success){r.image=`${randomUUID()}.svg`;writeFileSync(join(this.dataDir,'images',r.image),this.image(p,r));}
+     if(success)r.image=this.imageSource();
      p.runs.push(r);const held=p.runs.filter(r=>r.imageState==='held');held.slice(0,Math.max(0,held.length-5)).forEach(r=>this.expire(r));
      if(p.runs.filter(r=>r.imageState!=='failed'&&!r.transferred).length>=2)this.log('WARN',`${p.id} · 미전송 2건 이상 · 삭제 전 전송 상태 확인`);
     }
@@ -39,7 +39,7 @@ export class Controller extends EventEmitter {
   }
   this.persist();this.publish();
  }
- expire(r){if(r.image&&existsSync(join(this.dataDir,'images',r.image)))unlinkSync(join(this.dataDir,'images',r.image));r.image=null;r.imageState='expired';}
+ expire(r){if(r.image&&!/^https?:\/\//.test(r.image)&&existsSync(join(this.dataDir,'images',r.image)))unlinkSync(join(this.dataDir,'images',r.image));r.image=null;r.imageState='expired';}
  execute(input,source='ui'){
   const {command,deviceId,args={},requestId}=input;
   assert(typeof requestId==='string'&&/^[a-zA-Z0-9_-]{8,100}$/.test(requestId),'INVALID_REQUEST_ID','8~100자 requestId가 필요합니다.',400);
