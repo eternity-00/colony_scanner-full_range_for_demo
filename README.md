@@ -1,6 +1,6 @@
 # Colony Scanner React + Virtual Device Demo
 
-다운로드 폴더의 UI 시안과 `CC_LCD_UI_Spec_v1.1_260911.docx`를 기준으로 만든 React 19 애플리케이션입니다. UI와 장비 상태를 분리했으며, Node.js 가상장비 서버가 스캐너 4대의 입력·출력과 작업 상태를 관리합니다.
+UI 시안과 `CC_LCD_UI_Spec_v1.1_260911.docx`를 기준으로 만든 React 19 애플리케이션입니다. UI와 장비 상태를 분리했으며, Node.js 가상장비 서버가 스캐너 4대의 입력·출력과 작업 상태를 관리합니다.
 
 ![가상장비 입력과 I/O 패킷 모니터](docs/virtual-device.png)
 
