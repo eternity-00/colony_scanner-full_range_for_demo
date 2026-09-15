@@ -3,12 +3,13 @@ import {createReadStream,existsSync,statSync} from 'node:fs';
 import {extname,join,normalize,resolve,sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {Controller} from './controller.mjs';
+import {RemoteDeviceAdapter} from './remote-device.mjs';
 
 const root=resolve(fileURLToPath(new URL('..',import.meta.url)));
 const dataDir=resolve(process.env.COLONY_DATA_DIR||join(root,'data'));
 const port=Number(process.env.PORT||8787);
 const host=process.env.HOST||'127.0.0.1';
-const controller=new Controller({dataDir,stageMs:Number(process.env.STAGE_MS||1600)});
+const controller=new Controller({dataDir,adapter:new RemoteDeviceAdapter({url:process.env.VIRTUAL_ENGINE_URL||'http://127.0.0.1:8790'})});
 const clients=new Set();
 const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml','.png':'image/png','.json':'application/json; charset=utf-8','.ico':'image/x-icon'};
 const cors={'access-control-allow-origin':'*','access-control-allow-methods':'GET, POST, OPTIONS','access-control-allow-headers':'content-type'};
@@ -21,12 +22,12 @@ export const server=createServer(async(req,res)=>{
  try{
   const url=new URL(req.url,'http://localhost');
   if(req.method==='OPTIONS')return res.writeHead(204,cors).end();
-  if(req.method==='GET'&&url.pathname==='/api/health')return json(res,200,{ok:true,mode:'virtual',time:Date.now()});
+  if(req.method==='GET'&&url.pathname==='/api/health')return json(res,200,{ok:true,mode:'external-device',engineConnected:controller.adapter.engineConnected,time:Date.now()});
   if(req.method==='GET'&&url.pathname==='/api/state')return json(res,200,controller.snapshot());
   if(req.method==='GET'&&url.pathname==='/api/events'){
    res.writeHead(200,{'content-type':'text/event-stream','cache-control':'no-cache','connection':'keep-alive','x-accel-buffering':'no'});clients.add(res);sse(res,controller.snapshot());const keep=setInterval(()=>res.write(': keepalive\n\n'),15000);req.on('close',()=>{clearInterval(keep);clients.delete(res);});return;
   }
-  if(req.method==='POST'&&url.pathname==='/api/commands')return json(res,202,controller.execute(await body(req)));
+  if(req.method==='POST'&&url.pathname==='/api/commands')return json(res,202,await controller.execute(await body(req)));
   if(req.method==='GET'&&url.pathname.startsWith('/api/images/')){
    const name=url.pathname.slice('/api/images/'.length);if(!/^[a-z0-9-]+\.png$/i.test(name))return json(res,400,{code:'INVALID_IMAGE',message:'잘못된 이미지 이름입니다.'});
    const file=join(dataDir,'images',name);if(!existsSync(file))return json(res,404,{code:'IMAGE_NOT_FOUND',message:'영상이 만료되었거나 없습니다.'});res.writeHead(200,{'content-type':'image/png','cache-control':'private, max-age=60',...cors});return createReadStream(file).pipe(res);
@@ -37,7 +38,7 @@ export const server=createServer(async(req,res)=>{
  }catch(error){json(res,error.status||500,{code:error.code||'INTERNAL_ERROR',message:error.status?error.message:'서버 처리 중 오류가 발생했습니다.'});}
 });
 
-if(process.env.NODE_ENV!=='test')server.listen(port,host,()=>console.log(`Colony virtual device: http://${host}:${port}`));
+if(process.env.NODE_ENV!=='test')server.listen(port,host,()=>console.log(`Colony Scanner LCD: http://${host}:${port}`));
 const shutdown=()=>server.close(()=>{controller.close();process.exit(0)});
 process.on('SIGINT',shutdown);process.on('SIGTERM',shutdown);
 export {controller};

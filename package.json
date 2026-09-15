@@ -1,6 +1,6 @@
 {
   "name": "colony-scanner-react-demo",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,6 +8,8 @@
     "vite": "vite",
     "build": "vite build",
     "start": "node server/index.mjs",
+    "system": "node scripts/system.mjs",
+    "engine": "node simulator-app/engine.mjs",
     "simulator": "node simulator-app/server.mjs",
     "open:simulator": "./open-virtual-device.sh",
     "test": "node --test test/server.test.mjs",
