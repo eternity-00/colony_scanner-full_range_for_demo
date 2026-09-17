@@ -11,7 +11,8 @@ export class Controller extends EventEmitter {
   super();this.dataDir=dataDir;mkdirSync(join(dataDir,'images'),{recursive:true});this.stateFile=join(dataDir,'state.json');this.revision=0;this.adminPin=process.env.ADMIN_PIN||'0000';this.session={role:'analyst',failed:0,lockUntil:0,idleAt:null};
   if(existsSync(this.stateFile)){this.db=JSON.parse(readFileSync(this.stateFile,'utf8'));assert(this.db.version===1,'BAD_STATE','지원하지 않는 데이터 파일입니다.',500);}
   else {const plates=[];[18,24,15,6].forEach((count,i)=>{for(let slot=1;slot<=count;slot++)plates.push({id:`DEMO-${i+1}-${String(slot).padStart(2,'0')}`,deviceId:i+1,slot,registeredAt:Date.now()-(slot*30+180)*60000,removedAt:null,paused:false,runs:[]});});this.db={version:1,plates,routine:{cycleHours:12,days:42,delay:0},autoRun:false,logs:[],io:[],receipts:[],devices:[]};}
-  for(const p of this.db.plates)for(const r of p.runs){if(typeof r.image==='string'&&r.image.endsWith('.svg')){r.image=null;r.imageState='expired';}}
+  for(const p of this.db.plates)for(const r of p.runs){if(typeof r.image==='string'&&r.image.endsWith('.svg')){r.image=null;r.imageState='expired';}
+   if(r.imageState==='held'&&!r.images?.length){const b=(Number(String(r.image||'').match(/\d+/)?.[0])||r.n)-1;r.images=Array.from({length:6},(_,i)=>`well-${((b+i)%9)+1}.png`);r.image=null;}}
   this.adapter=adapter||new VirtualDeviceAdapter({stageMs,config:this.db.devices});
   for(const d of this.db.devices)if(busy(d)&&d.job.type==='capture'){const p=this.db.plates.find(p=>p.id===d.job.plateId);if(p)p.runs.push({n:p.runs.length+1,at:Date.now(),imageState:'failed',image:null,transferred:false,error:'서버 재시작으로 작업 중단'});this.log('WARN',`SCANNER ${d.id} · 서버 재시작으로 진행 중인 작업 종료`);}
   this.adapter.on('event',e=>this.onEvent(e));this.adapter.on?.('change',()=>this.publish());this.persist();
@@ -25,13 +26,13 @@ export class Controller extends EventEmitter {
  tick(ms){this.adapter.tick?.(ms);if(this.session.role==='admin'&&Date.now()-this.session.idleAt>=300000){this.session={role:'analyst',failed:0,lockUntil:0,idleAt:null};this.log('INFO','관리자 권한 자동 해제');}if(this.db.autoRun)this.schedule();this.publish();}
  nextAt(p){return p.registeredAt+(p.runs.length+1)*this.db.routine.cycleHours*3600000+this.db.routine.delay*60000;}
  async schedule(){if(this.scheduling)return;this.scheduling=true;try{for(const d of this.adapter.devices){if(!d.connected||d.doorOpen||d.fault||busy(d))continue;const p=this.db.plates.find(p=>p.deviceId===d.id&&!p.removedAt&&!p.paused&&p.runs.length<Math.floor(this.db.routine.days*24/this.db.routine.cycleHours)&&this.nextAt(p)<=Date.now());if(p)await this.execute({requestId:randomUUID(),command:'capture',deviceId:d.id,args:{plateId:p.id}},'scheduler');}}catch(error){this.log('WARN',`자동 촬영 시작 실패 · ${error.message}`);}finally{this.scheduling=false;}}
- imageSource(){return 'https://commons.wikimedia.org/wiki/Special:FilePath/Ecoli_colonies.png?width=900';}
+ imageSet(){this.imgSeq=(this.imgSeq||0)+1;return Array.from({length:6},(_,i)=>`well-${((this.imgSeq+i)%9)+1}.png`);}
  onEvent(e){
   this.io('RX',e.type,e.deviceId,e.requestId,e);
   if(e.type==='job.completed'||e.type==='job.failed'){
    const j=e.job;if(j.type==='capture'){
     const p=this.db.plates.find(p=>p.id===j.plateId);if(p){const success=e.type==='job.completed',r={n:p.runs.length+1,at:Date.now(),imageState:success?'held':'failed',image:null,transferred:success&&e.transferred,error:success?null:e.message};
-     if(success)r.image=this.imageSource();
+     if(success)r.images=this.imageSet();
      p.runs.push(r);const held=p.runs.filter(r=>r.imageState==='held');held.slice(0,Math.max(0,held.length-5)).forEach(r=>this.expire(r));
      if(p.runs.filter(r=>r.imageState!=='failed'&&!r.transferred).length>=2)this.log('WARN',`${p.id} · 미전송 2건 이상 · 삭제 전 전송 상태 확인`);
     }
@@ -40,7 +41,7 @@ export class Controller extends EventEmitter {
   }
   this.persist();this.publish();
  }
- expire(r){if(r.image&&!/^https?:\/\//.test(r.image)&&existsSync(join(this.dataDir,'images',r.image)))unlinkSync(join(this.dataDir,'images',r.image));r.image=null;r.imageState='expired';}
+ expire(r){const list=r.images||(r.image?[r.image]:[]);for(const f of list)if(!/^https?:\/\//.test(f)&&!/^well-\d+\.png$/.test(f)&&existsSync(join(this.dataDir,'images',f)))unlinkSync(join(this.dataDir,'images',f));r.images=null;r.image=null;r.imageState='expired';}
  async execute(input,source='ui'){
   const {command,deviceId,args={},requestId}=input;
   assert(typeof requestId==='string'&&/^[a-zA-Z0-9_-]{8,100}$/.test(requestId),'INVALID_REQUEST_ID','8~100자 requestId가 필요합니다.',400);

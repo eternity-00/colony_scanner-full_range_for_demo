@@ -1,4 +1,5 @@
 import {createServer} from 'node:http';
+import {spawn} from 'node:child_process';
 import {createReadStream,existsSync,statSync} from 'node:fs';
 import {extname,join,normalize,resolve,sep} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -27,6 +28,7 @@ export const server=createServer(async(req,res)=>{
   if(req.method==='GET'&&url.pathname==='/api/events'){
    res.writeHead(200,{'content-type':'text/event-stream','cache-control':'no-cache','connection':'keep-alive','x-accel-buffering':'no'});clients.add(res);sse(res,controller.snapshot());const keep=setInterval(()=>res.write(': keepalive\n\n'),15000);req.on('close',()=>{clearInterval(keep);clients.delete(res);});return;
   }
+  if(req.method==='POST'&&url.pathname==='/api/exit'){const kiosk=process.env.COLONY_KIOSK==='1';json(res,200,{exiting:true,kiosk});if(kiosk)setTimeout(()=>{try{spawn('pkill',['-f','user-data-dir=/tmp/colony']);}catch{}},200);return;}
   if(req.method==='POST'&&url.pathname==='/api/commands')return json(res,202,await controller.execute(await body(req)));
   if(req.method==='GET'&&url.pathname.startsWith('/api/images/')){
    const name=url.pathname.slice('/api/images/'.length);if(!/^[a-z0-9-]+\.png$/i.test(name))return json(res,400,{code:'INVALID_IMAGE',message:'잘못된 이미지 이름입니다.'});
