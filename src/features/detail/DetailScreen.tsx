@@ -2,7 +2,7 @@ import type {AppState, Plate, Run} from '../../api/types.ts';
 import type {SendCommand, TabKey} from '../../config/defines.ts';
 import {Badge} from '../../shared/Badge.tsx';
 import {Tray} from '../../shared/Tray.tsx';
-import {fmt} from '../../utils/datetime.ts';
+import {elapsedLabel, fmt} from '../../utils/datetime.ts';
 import {nextAt, pending, platesFor, pos, status, tone, totalRuns} from '../../utils/plate.ts';
 import {RunsTable} from './RunsTable.tsx';
 
@@ -31,9 +31,6 @@ export function DetailScreen({
   if (!device) return null;
 
   const plate = state.plates.find(p => p.deviceId === deviceId && p.slot === slot && !p.removedAt);
-  const elapsed = plate
-    ? Math.max(0, Math.floor((state.serverTime - plate.registeredAt) / 86400000))
-    : 0;
   const done = plate ? plate.runs.length >= totalRuns(state) : false;
 
   return (
@@ -89,7 +86,7 @@ export function DetailScreen({
                 <div className="ig">
                   <small>경과 / 회차</small>
                   <b>
-                    {elapsed}일{' '}
+                    {elapsedLabel(plate.registeredAt, state.serverTime)}{' '}
                     <em>
                       · {plate.runs.length}/{totalRuns(state)}회
                     </em>

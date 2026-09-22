@@ -2,6 +2,7 @@ import {useEffect, useRef, useState} from 'react';
 import type {AppState} from '../api/types.ts';
 import type {TabKey} from '../config/defines.ts';
 import {hms, ymd} from '../utils/datetime.ts';
+import {tempAbnormal} from '../utils/plate.ts';
 
 interface Props {
   state: AppState;
@@ -40,6 +41,11 @@ export function Header({state, tab, operator, onRole, onMenu}: Props) {
   const linked = devices.filter(d => d.connected).length;
   const titles = TITLES(state);
 
+  // 피드백 2.2 — 인큐베이터 온도 현재값은 관리자에게만 상시 노출하고,
+  // 분석자에게는 목표 범위를 벗어났을 때만 보여준다.
+  const abnormal = devices.some(tempAbnormal);
+  const showTemperature = state.session.role === 'admin' || abnormal;
+
   return (
     <header>
       <button className="burger" onClick={onMenu} aria-label="메뉴">
@@ -53,10 +59,14 @@ export function Header({state, tab, operator, onRole, onMenu}: Props) {
         <small>{titles[tab]?.[1]}</small>
       </div>
       <div className="head-status">
+        {showTemperature && (
+          <span className={`hstat ${abnormal ? 'bad' : ''}`}>
+            {(devices.reduce((a, d) => a + d.temperature, 0) / devices.length).toFixed(1)} ℃
+          </span>
+        )}
         <span className="hstat">
-          {(devices.reduce((a, d) => a + d.temperature, 0) / 4).toFixed(1)} ℃
+          CO₂ {(devices.reduce((a, d) => a + d.co2, 0) / devices.length).toFixed(1)} %
         </span>
-        <span className="hstat">CO₂ {(devices.reduce((a, d) => a + d.co2, 0) / 4).toFixed(1)} %</span>
         <span className={`hstat ${linked === 4 && !errors ? '' : 'bad'}`}>
           유선 연결 {linked} / 4
         </span>

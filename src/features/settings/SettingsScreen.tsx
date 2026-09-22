@@ -1,6 +1,11 @@
 import {useState, type ReactNode} from 'react';
 import type {AppState, Routine} from '../../api/types.ts';
-import {ADMIN_IDLE_LIMIT_SEC, SLOTS_PER_DEVICE, type SendCommand} from '../../config/defines.ts';
+import {
+  ADMIN_IDLE_LIMIT_SEC,
+  MAX_INCUBATION_DAYS,
+  SLOTS_PER_DEVICE,
+  type SendCommand,
+} from '../../config/defines.ts';
 import {Badge} from '../../shared/Badge.tsx';
 import {Toggle} from '../../shared/Toggle.tsx';
 import {download} from '../../utils/download.ts';
@@ -15,20 +20,32 @@ interface Props {
 
 type SectionKey = 'login' | 'routine' | 'environment' | 'network' | 'backup' | 'info';
 
-const NAV: readonly (readonly [SectionKey, string])[] = [
-  ['login', '로그인 정보'],
-  ['routine', '검사 루틴'],
-  ['environment', '온도 · CO₂'],
-  ['network', '유선 통신'],
-  ['backup', '로그 · 백업'],
-  ['info', '장비 정보'],
+/**
+ * [키, 라벨, 관리자 전용 여부]
+ * 피드백 2.2 — 장비 설정 변경은 관리자만. 2.3 — 전용 항목은 비활성으로 두지 않고
+ * 목록에서 아예 빼서 조작 실수를 줄인다.
+ */
+const NAV: readonly (readonly [SectionKey, string, boolean])[] = [
+  ['login', '로그인 정보', false],
+  ['routine', '검사 루틴', true],
+  ['environment', '온도 · CO₂', true],
+  ['network', '유선 통신', false],
+  ['backup', '로그 · 백업', false],
+  ['info', '장비 정보', false],
 ];
 
 /** [키, 라벨, 단위, 최소, 최대, 설명] */
 const ROUTINE_FIELDS: readonly (readonly [keyof Routine, string, string, number, number, string])[] =
   [
     ['cycleHours', '촬영 주기', '시간', 1, 48, '플레이트 1매를 다시 촬영하기까지의 간격'],
-    ['days', '총 배양 기간', '일', 1, 90, '배양을 유지할 전체 기간'],
+    [
+      'days',
+      '총 배양 기간',
+      '일',
+      1,
+      MAX_INCUBATION_DAYS,
+      `배양을 유지할 전체 기간 · 최대 ${MAX_INCUBATION_DAYS}일`,
+    ],
     ['delay', '주기 시작 지연', '분', 0, 720, '투입 시각 이후 첫 촬영까지 미루는 시간'],
   ];
 
@@ -41,6 +58,9 @@ export function SettingsScreen({state, send, operator, setOperator, onRole}: Pro
   });
 
   const isAdmin = state.session.role === 'admin';
+  const nav = NAV.filter(([, , adminOnly]) => isAdmin || !adminOnly);
+  // 관리자 권한이 자동 해제되면 보고 있던 관리자 전용 항목에서 빠져나온다.
+  const active = nav.some(([key]) => key === section) ? section : 'login';
 
   const sections: Record<SectionKey, ReactNode> = {
     login: (
@@ -260,9 +280,9 @@ export function SettingsScreen({state, send, operator, setOperator, onRole}: Pro
   return (
     <div className="settings-shell">
       <aside className="card settings-nav">
-        {NAV.map(([key, label]) => (
+        {nav.map(([key, label]) => (
           <button
-            className={section === key ? 'selected' : ''}
+            className={active === key ? 'selected' : ''}
             key={key}
             onClick={() => setSection(key)}
           >
@@ -270,7 +290,7 @@ export function SettingsScreen({state, send, operator, setOperator, onRole}: Pro
           </button>
         ))}
       </aside>
-      {sections[section]}
+      {sections[active]}
     </div>
   );
 }

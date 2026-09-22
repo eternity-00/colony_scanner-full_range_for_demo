@@ -4,7 +4,7 @@ import type {SendCommand} from '../../config/defines.ts';
 import {Badge} from '../../shared/Badge.tsx';
 import {LogTable} from '../../shared/LogTable.tsx';
 import {Modal} from '../../shared/Modal.tsx';
-import {status, tone} from '../../utils/plate.ts';
+import {status, tempAbnormal, tone} from '../../utils/plate.ts';
 
 interface Props {
   state: AppState;
@@ -53,6 +53,9 @@ export function DeviceScreen({state, send}: Props) {
   const [logOpen, setLogOpen] = useState(false);
 
   const faulted = state.devices.filter(d => d.fault || d.doorOpen);
+  // 피드백 2.2 — 촬영·광학 파라미터 변경은 관리자만.
+  // 온도 현재값은 관리자에게만 상시, 분석자에게는 이상 시에만 보여준다.
+  const isAdmin = state.session.role === 'admin';
 
   return (
     <div className="device-page">
@@ -89,7 +92,13 @@ export function DeviceScreen({state, send}: Props) {
               <dt>구동 4축</dt>
               <dd>{d.fault === 'Z_LIMIT' ? 'Z축 오류' : '정상'}</dd>
               <dt>히팅</dt>
-              <dd>{d.fault === 'HEATER' ? '오류' : `${d.temperature.toFixed(1)}℃`}</dd>
+              <dd>
+                {d.fault === 'HEATER'
+                  ? '오류'
+                  : isAdmin || tempAbnormal(d)
+                    ? `${d.temperature.toFixed(1)}℃`
+                    : '정상'}
+              </dd>
               <dt>조명 / 전원</dt>
               <dd>{d.light ? 'ON' : '정상'} / DC 24V</dd>
             </dl>
@@ -119,35 +128,43 @@ export function DeviceScreen({state, send}: Props) {
 
       <section className="card cal-row">
         <div className="cal-label">
-          <h2>캘리브레이션</h2>
-          <small>선택 항목을 전체 스캐너에 일괄 실행합니다.</small>
+          <h2>{isAdmin ? '캘리브레이션' : '장비 이력'}</h2>
+          <small>
+            {isAdmin
+              ? '선택 항목을 전체 스캐너에 일괄 실행합니다.'
+              : '캘리브레이션은 관리자 권한이 필요합니다.'}
+          </small>
         </div>
-        <select
-          value={calibration}
-          onChange={e => setCalibration(e.target.value as CalibrationKind)}
-        >
-          <option value="camera">카메라 초점·배율</option>
-          <option value="axis">구동 4축 원점</option>
-          <option value="heat">히팅 온도</option>
-          <option value="light">조명 광량</option>
-        </select>
-        <button
-          className="primary cal-run"
-          onClick={() =>
-            Promise.all(state.devices.map(d => send('calibrate', d.id, {kind: calibration})))
-          }
-        >
-          실행
-        </button>
-        <button
-          className="outline-danger cal-btn"
-          onClick={() =>
-            window.confirm('전체 스캐너를 재초기화하시겠습니까?') &&
-            Promise.all(state.devices.map(d => send('reset', d.id)))
-          }
-        >
-          전체 스캐너 재초기화
-        </button>
+        {isAdmin && (
+          <>
+            <select
+              value={calibration}
+              onChange={e => setCalibration(e.target.value as CalibrationKind)}
+            >
+              <option value="camera">카메라 초점·배율</option>
+              <option value="axis">구동 4축 원점</option>
+              <option value="heat">히팅 온도</option>
+              <option value="light">조명 광량</option>
+            </select>
+            <button
+              className="primary cal-run"
+              onClick={() =>
+                Promise.all(state.devices.map(d => send('calibrate', d.id, {kind: calibration})))
+              }
+            >
+              실행
+            </button>
+            <button
+              className="outline-danger cal-btn"
+              onClick={() =>
+                window.confirm('전체 스캐너를 재초기화하시겠습니까?') &&
+                Promise.all(state.devices.map(d => send('reset', d.id)))
+              }
+            >
+              전체 스캐너 재초기화
+            </button>
+          </>
+        )}
         <button className="ghost cal-btn" onClick={() => setLogOpen(true)}>
           <Stroke>
             <path d="M8 6h13M8 12h13M8 18h13" />

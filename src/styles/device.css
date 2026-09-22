@@ -35,4 +35,6 @@
 .cal-btn svg{width:18px;height:18px}
 .cal-btn.ghost{border:1px solid var(--line);background:#fff;color:#344054}
 .cal-btn.ghost:hover{background:#f4f6fb;border-color:#c9d4ea}
+/* 분석자 모드에서는 캘리브레이션 컨트롤이 빠져 버튼만 남으므로 오른쪽으로 민다 */
+.cal-row>.cal-btn:last-child{margin-left:auto}
 .cal-row{flex:none}

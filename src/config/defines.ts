@@ -1,5 +1,7 @@
 import type {CommandArgs} from '../api/types.ts';
-import type {WellState} from '../utils/plate.ts';
+
+/** 트레이 셀 한 칸의 표시 상태. */
+export type WellState = 'ok' | 'empty' | 'busy' | 'done' | 'bad';
 
 export type TabKey =
   | 'overview'
@@ -49,6 +51,27 @@ export const ROW_HEIGHT = 44;
 
 /** 촬영 이력 표 한 행 높이(px). */
 export const RUN_ROW_HEIGHT = 54;
+
+/**
+ * 최대 배양 기간(일). 피드백 4.3 — 확정 균 작업은 일수 제한이 무의미하지만
+ * 시스템상 무제한은 허용하지 않고 상한을 42일로 둔다.
+ * server/controller.mjs 의 routine 검증과 값을 맞춰야 한다.
+ */
+export const MAX_INCUBATION_DAYS = 42;
+
+/**
+ * 경과 시간을 "일 + 시간" 혼합으로 바꾸는 기준(시간). 피드백 5.1 —
+ * 조기 양성이 3일 차에 나오므로 시간 단위가 기본이고, 42일까지 가면 자릿수가 커진다.
+ * 확인 필요 7번(표기 단위 확정)이 열려 있어 잠정값이다.
+ */
+export const ELAPSED_MIXED_AFTER_HOURS = 48;
+
+/**
+ * 인큐베이터 온도가 목표에서 이만큼(℃) 벗어나면 "이상"으로 본다.
+ * 피드백 2.2 의 "이상 시에만 노출" 판정에 쓴다.
+ * 확인 필요 5번(정상 범위·알림 기준값·지속 시간)이 열려 있어 잠정값이다.
+ */
+export const TEMP_TOLERANCE_C = 1;
 
 /** 관리자 권한 자동 해제까지의 시간(초). server/controller.mjs 의 5분과 맞춰야 한다. */
 export const ADMIN_IDLE_LIMIT_SEC = 300;

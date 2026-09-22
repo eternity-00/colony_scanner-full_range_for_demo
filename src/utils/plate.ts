@@ -1,7 +1,5 @@
 import type {AppState, Device, Plate, Run} from '../api/types.ts';
-
-/** 트레이 셀 한 칸의 표시 상태. */
-export type WellState = 'ok' | 'empty' | 'busy' | 'done' | 'bad';
+import {TEMP_TOLERANCE_C, type WellState} from '../config/defines.ts';
 
 /** 슬롯 번호(1~24) → 단/열. 8단이 맨 위. */
 export const coord = (n: number) => ({tier: 8 - Math.floor((n - 1) / 3), col: ((n - 1) % 3) + 1});
@@ -66,3 +64,7 @@ export const shots = (r: Run): string[] =>
 
 export const imgSrc = (file: string) =>
   file.startsWith('http') ? file : `/api/images/${file}`;
+
+/** 인큐베이터 온도가 목표 범위를 벗어났는지. 피드백 2.2 의 "이상 시에만 노출" 판정. */
+export const tempAbnormal = (d: Device) =>
+  d.connected && Math.abs(d.temperature - d.targetTemperature) > TEMP_TOLERANCE_C;

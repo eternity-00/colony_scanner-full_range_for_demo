@@ -3,6 +3,12 @@ import {mkdirSync,readFileSync,writeFileSync,renameSync,existsSync,unlinkSync} f
 import {join} from 'node:path';
 import {randomUUID} from 'node:crypto';
 import {VirtualDeviceAdapter,DeviceError} from './virtual-device.mjs';
+// 최대 배양 기간(일). 피드백 4.3 — 시스템상 무제한은 허용하지 않고 상한을 42일로 둔다.
+// src/config/defines.ts 의 MAX_INCUBATION_DAYS 와 값을 맞춰야 한다.
+const MAX_INCUBATION_DAYS=42;
+// 피드백 2.1 — 장비 설정 변경 권한은 관리자에게만. 화면에서 감추는 것과 별개로 여기서 막는다.
+// 2.2 표가 관리자 전용으로 적은 항목: 온도 임계값 · 최대 배양 기간 · 촬영/광학 파라미터.
+const ADMIN_ONLY=['routine','environment','calibrate'];
 const busy=d=>d.job&&['running','paused'].includes(d.job.status);
 const validInt=(x,min,max)=>Number.isInteger(x)&&x>=min&&x<=max;
 const assert=(ok,code,message,status=409)=>{if(!ok)throw new DeviceError(code,message,status);};
@@ -49,6 +55,7 @@ export class Controller extends EventEmitter {
   const previous=this.db.receipts.find(r=>r.requestId===requestId);
   if(previous){assert(previous.fingerprint===fingerprint,'REQUEST_ID_REUSED','다른 명령에 같은 requestId를 사용할 수 없습니다.',409);return {...previous.result,replayed:true};}
   assert(args&&typeof args==='object'&&!Array.isArray(args),'INVALID_ARGS','args 객체가 필요합니다.',400);
+  assert(!ADMIN_ONLY.includes(command)||this.session.role==='admin','FORBIDDEN','관리자 권한이 필요합니다.',403);
   this.io('TX',command,deviceId,requestId,safeArgs);
   try{
    let result={};
@@ -72,7 +79,7 @@ export class Controller extends EventEmitter {
     if(command==='platePause'){assert(typeof args.paused==='boolean','INVALID_VALUE','paused는 boolean이어야 합니다.',400);p.paused=args.paused;}
     if(command==='retry'){assert(d.connected&&d.pcConnected,'PC_OFFLINE','장비 및 PC 전송 연결이 필요합니다.');let count=0;p.runs.forEach(r=>{if(r.imageState==='held'&&!r.transferred){r.transferred=true;count++;}});result={count};this.log('INFO',`${p.id} · ${count}장 PC 재전송 완료`);}
    }else if(command==='routine'){
-    assert(validInt(args.cycleHours,1,48)&&validInt(args.days,1,90)&&validInt(args.delay,0,720)&&args.delay%15===0,'INVALID_ROUTINE','주기 1~48시간, 배양 1~90일, 지연 0~720분(15분 단위)을 입력하세요.',400);
+    assert(validInt(args.cycleHours,1,48)&&validInt(args.days,1,MAX_INCUBATION_DAYS)&&validInt(args.delay,0,720)&&args.delay%15===0,'INVALID_ROUTINE',`주기 1~48시간, 배양 1~${MAX_INCUBATION_DAYS}일, 지연 0~720분(15분 단위)을 입력하세요.`,400);
     this.db.routine={cycleHours:args.cycleHours,days:args.days,delay:args.delay};this.log('INFO','공통 루틴 저장 · 전체 일정 재산정');
    }else if(command==='autoRun'){
     assert(typeof args.enabled==='boolean','INVALID_VALUE','enabled는 boolean이어야 합니다.',400);this.db.autoRun=args.enabled;this.log('INFO',`자동 촬영 ${args.enabled?'활성화':'비활성화'}`);

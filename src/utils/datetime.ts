@@ -1,3 +1,5 @@
+import {ELAPSED_MIXED_AFTER_HOURS} from '../config/defines.ts';
+
 const pad2 = (n: number) => String(n).padStart(2, '0');
 
 /** 2026-09-22 */
@@ -31,6 +33,16 @@ export const countdown = (ms: number) => {
 export const dateInput = (t: number) => {
   const d = new Date(t - new Date(t).getTimezoneOffset() * 60000);
   return d.toISOString().slice(0, 16);
+};
+
+/**
+ * 투입 후 경과 시간. 피드백 5.1 — 시간 단위가 기본이고,
+ * 길어지면 "12일 4시간" 처럼 일+시간 혼합으로 바꾼다.
+ */
+export const elapsedLabel = (from: number, now: number) => {
+  const hours = Math.max(0, Math.floor((now - from) / 3600000));
+  if (hours < ELAPSED_MIXED_AFTER_HOURS) return `${hours}시간`;
+  return `${Math.floor(hours / 24)}일 ${hours % 24}시간`;
 };
 
 /** 값이 없으면 —, 있으면 날짜+시각. */
