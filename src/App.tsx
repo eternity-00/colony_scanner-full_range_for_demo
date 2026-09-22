@@ -15,6 +15,7 @@ import {MenuDrawer} from './layout/MenuDrawer.tsx';
 import {Modal} from './shared/Modal.tsx';
 import {ShotViewer, type ShotTarget} from './shared/ShotViewer.tsx';
 import {platesFor} from './utils/plate.ts';
+import {useLayoutWidth} from './utils/viewport.ts';
 
 interface Notice {
   bad: boolean;
@@ -49,6 +50,7 @@ export default function App() {
   const [operator, setOperator] = useState(
     () => localStorage.getItem('colony-operator') || '김분석',
   );
+  const layoutWidth = useLayoutWidth();
 
   // 최초 상태를 한 번 읽고, 이후에는 SSE 로 받는다.
   useEffect(() => {
@@ -175,7 +177,7 @@ export default function App() {
 
   if (!state) {
     return (
-      <div className="boot">
+      <div className="boot" data-w={layoutWidth}>
         <h1>COLONY SCANNER</h1>
         <p>장비 제어 서버에 연결 중…</p>
         {notice && <p>{notice.text}</p>}
@@ -229,7 +231,7 @@ export default function App() {
   const expiring = state.session.role === 'admin' && state.session.idleFor >= ADMIN_IDLE_WARN_MS;
 
   return (
-    <div className="app">
+    <div className="app" data-w={layoutWidth}>
       <Header
         state={state}
         tab={tab}

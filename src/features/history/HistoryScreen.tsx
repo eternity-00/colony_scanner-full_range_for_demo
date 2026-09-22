@@ -1,10 +1,11 @@
 import {useEffect, useRef, useState} from 'react';
 import type {AppState, Plate} from '../../api/types.ts';
-import {ROW_HEIGHT} from '../../config/defines.ts';
+import {ROW_HEIGHT_REM} from '../../config/defines.ts';
 import {Badge} from '../../shared/Badge.tsx';
 import {fmt} from '../../utils/datetime.ts';
 import {download} from '../../utils/download.ts';
 import {coord, nextAt, pending, pos, totalRuns} from '../../utils/plate.ts';
+import {rootFontPx} from '../../utils/viewport.ts';
 
 interface Props {
   state: AppState;
@@ -44,7 +45,8 @@ export function HistoryScreen({state, openDetail, openPlateViewer}: Props) {
     if (!el) return;
     const calc = () => {
       const head = el.querySelector('thead')?.offsetHeight || 38;
-      setPer(Math.max(3, Math.min(40, Math.floor((el.clientHeight - head) / ROW_HEIGHT))));
+      const rowPx = ROW_HEIGHT_REM * rootFontPx();
+      setPer(Math.max(3, Math.min(40, Math.floor((el.clientHeight - head) / rowPx))));
     };
     calc();
     const ro = new ResizeObserver(calc);
@@ -137,7 +139,7 @@ export function HistoryScreen({state, openDetail, openPlateViewer}: Props) {
         </button>
         <button
           className="ghost-btn"
-          onClick={() => download('colony-history.csv', '﻿' + csv, 'text/csv')}
+          onClick={() => download('colony-history.csv', '\ufeff' + csv, 'text/csv')}
         >
           CSV 내보내기
         </button>

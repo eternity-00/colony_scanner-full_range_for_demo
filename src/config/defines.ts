@@ -46,11 +46,14 @@ export const WELLS = 6;
 /** 스캐너 1대당 슬롯 수 (8단 × 3열). */
 export const SLOTS_PER_DEVICE = 24;
 
-/** 이력 표 한 행 높이(px). 화면 높이에 맞춰 페이지당 행 수를 계산하는 데 쓴다. */
-export const ROW_HEIGHT = 44;
+/**
+ * 이력 표 한 행 높이(rem). 화면 높이에 맞춰 페이지당 행 수를 계산하는 데 쓴다.
+ * CSS 가 rem 이므로 실제 픽셀은 rootFontPx() 를 곱해서 구한다.
+ */
+export const ROW_HEIGHT_REM = 2.75;
 
-/** 촬영 이력 표 한 행 높이(px). */
-export const RUN_ROW_HEIGHT = 54;
+/** 촬영 이력 표 한 행 높이(rem). */
+export const RUN_ROW_HEIGHT_REM = 3.375;
 
 /**
  * 최대 배양 기간(일). 피드백 4.3 — 확정 균 작업은 일수 제한이 무의미하지만

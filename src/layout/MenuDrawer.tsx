@@ -18,15 +18,17 @@ export function MenuDrawer({open, tab, onSelect, onExit, onClose}: Props) {
           ×
         </button>
       </div>
-      {TABS.map(([key, ko, en]) => (
-        <button key={key} className={tab === key ? 'active' : ''} onClick={() => onSelect(key)}>
-          <i className="di">
-            <TabIcon tab={key} />
-          </i>
-          <b>{ko}</b>
-          <small>{en}</small>
-        </button>
-      ))}
+      <div className="drawer-list">
+        {TABS.map(([key, ko, en]) => (
+          <button key={key} className={tab === key ? 'active' : ''} onClick={() => onSelect(key)}>
+            <i className="di">
+              <TabIcon tab={key} />
+            </i>
+            <b>{ko}</b>
+            <small>{en}</small>
+          </button>
+        ))}
+      </div>
       <div className="drawer-foot">
         <button className="exit-btn" onClick={onExit}>
           <svg

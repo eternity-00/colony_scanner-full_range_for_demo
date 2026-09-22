@@ -4,6 +4,9 @@ set -u
 cd "$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
 export COLONY_KIOSK=1
 export STAGE_MS=3500   # 촬영 단계 진행 속도(ms/단계)
+# UI 배율 — 패널의 화소 밀도(PPI)에 맞춰 물리적 크기를 맞춘다. 해상도가 아니라 PPI 기준이다.
+#   10.1" 1024×600 → 1.0   10.1" 1280×800 → 1.3   10.1" 1920×1200 → 1.9   7" 1024×600 → 1.4
+UI_SCALE="${UI_SCALE:-1.0}"
 export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
 export WAYLAND_DISPLAY="${WAYLAND_DISPLAY:-wayland-0}"
 BIN=$(command -v chromium || command -v chromium-browser || true)
@@ -26,7 +29,7 @@ until curl -fsS http://127.0.0.1:8787/api/health >/dev/null 2>&1; do
 curl -fsS -X POST http://127.0.0.1:8790/api/device/input -H "content-type: application/json" -d '{"id":4,"requestId":"demoseedfault01","patch":{"fault":"HEATER"}}' >/dev/null 2>&1 || true
 "$BIN" --kiosk --ozone-platform=wayland --no-first-run --password-store=basic \
   --disable-session-crashed-bubble --disable-infobars \
-  --user-data-dir="$profile" http://127.0.0.1:8787 >browser.log 2>&1 &
+  --user-data-dir="$profile" "http://127.0.0.1:8787/?scale=$UI_SCALE" >browser.log 2>&1 &
 # 크롬이 실제로 뜰 때까지 대기(최대 10초)
 for _ in $(seq 1 33); do pgrep -f "user-data-dir=$profile" >/dev/null && break; sleep 0.3; done
 # 브라우저가 살아있고 서버도 살아있는 동안 유지 (종료 버튼이 브라우저를 닫으면 루프 종료 → cleanup)

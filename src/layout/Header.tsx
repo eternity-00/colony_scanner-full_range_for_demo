@@ -75,7 +75,9 @@ export function Header({state, tab, operator, onRole, onMenu}: Props) {
         </span>
         <button className={`role-chip ${state.session.role}`} onClick={onRole}>
           <i>{operator.slice(0, 1)}</i>
-          {operator} · {state.session.role === 'admin' ? '관리자' : '분석자'}
+          <span className="who">
+            {operator} · {state.session.role === 'admin' ? '관리자' : '분석자'}
+          </span>
         </button>
       </div>
     </header>

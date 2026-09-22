@@ -1,9 +1,10 @@
 import {useEffect, useRef, useState} from 'react';
 import type {ImageState, Plate, Run} from '../../api/types.ts';
-import {RUN_ROW_HEIGHT, WELLS} from '../../config/defines.ts';
+import {RUN_ROW_HEIGHT_REM, WELLS} from '../../config/defines.ts';
 import {Badge} from '../../shared/Badge.tsx';
 import {fmt} from '../../utils/datetime.ts';
 import {imgSrc, shots} from '../../utils/plate.ts';
+import {rootFontPx} from '../../utils/viewport.ts';
 
 interface Props {
   plate: Plate;
@@ -34,7 +35,8 @@ export function RunsTable({plate, onView, fill = false}: Props) {
     if (!el) return;
     const calc = () => {
       const head = el.querySelector('thead')?.offsetHeight || 38;
-      setPer(Math.max(2, Math.min(20, Math.floor((el.clientHeight - head) / RUN_ROW_HEIGHT))));
+      const rowPx = RUN_ROW_HEIGHT_REM * rootFontPx();
+      setPer(Math.max(2, Math.min(20, Math.floor((el.clientHeight - head) / rowPx))));
     };
     calc();
     const ro = new ResizeObserver(calc);
