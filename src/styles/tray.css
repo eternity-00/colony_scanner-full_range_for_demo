@@ -1,0 +1,46 @@
+/* 트레이 수납도 — 8단 × 3열 셀과 Well 상태 범례 */
+
+.tray-box{flex:1;background:transparent;border:0;padding:6px 0;display:flex;align-items:stretch}
+.tray{display:grid;gap:6px;width:100%}
+.tray-row{display:grid;grid-template-columns:31px repeat(3,minmax(0,1fr));align-items:center;gap:6px}
+.tier{text-align:right;color:#667085;font-size:12px}
+.cell{height:42px;min-height:42px;padding:1px 2px;border-radius:var(--rr);background:#eaf7ee;color:#12692a;border:1px solid #cfe9d7;border-left:4px solid #16a34a;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.12}
+.tray.compact{gap:5px}
+.tray.compact .tray-row{grid-template-columns:22px repeat(3,minmax(0,1fr));gap:5px}
+.tray.compact .cell{height:auto;min-height:30px;font-size:15px;font-weight:800;letter-spacing:-.3px}
+.tray.compact .cell small{display:block;font-size:10px;font-weight:700;letter-spacing:-.2px;margin-top:1px}
+.tray.compact .cell:disabled{opacity:1;cursor:default}
+.tray-box .tray{height:100%;grid-auto-rows:minmax(0,1fr)}
+.tray-box .tray-row{align-items:stretch}
+.tray.compact .tier{font-size:11px}
+
+.cell{border-radius:var(--rr);background:#eef2fe;color:#1d3a8a;border:1px solid #cfdcfb;font-weight:700;gap:0}
+.tray.compact .cell{font-size:13.5px;font-weight:700;letter-spacing:-.2px}
+
+/* Well 상태 5종 */
+.cell{background:#d5f0dc;border:1px solid #6fbd8d;color:#125e2e;font-weight:800}
+.cell.w-empty{background:#dfe4ea;border-color:#b9c2cf;color:#5b6675}
+/* 상태색: 단색 고정 + 은은한 펄스 (글자색 안 바뀜) */
+.cell.w-busy{background:#2a4bc7;border-color:#1e3aa0;color:#fff;animation:w-pulse 1.4s ease-in-out infinite;z-index:1}
+.cell.w-done{background:#15803d;border-color:#0f6330;color:#fff;animation:w-pulse 2.2s ease-in-out infinite}
+.cell.w-bad{background:#dc2626;border-color:#b31b1b;color:#fff;animation:w-bad-pulse 0.7s ease-in-out infinite}
+@keyframes w-pulse{0%,100%{filter:brightness(1) saturate(1)}50%{filter:brightness(1.4) saturate(1.25)}}
+@keyframes w-bad-pulse{0%,100%{filter:brightness(1) saturate(1)}50%{filter:brightness(1.55) saturate(1.35)}}
+@media(prefers-reduced-motion:reduce){.cell.w-busy,.cell.w-done,.cell.w-bad{animation:none}}
+
+/* 상태 범례 (우상단, 작게) */
+.overview-head{display:flex;justify-content:flex-end;padding:0 2px}
+.legend{display:flex;align-items:center;gap:14px;font-size:11.5px;color:#667085;font-weight:600}
+.legend span{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.legend i{width:11px;height:11px;border-radius:var(--rr);flex:none;background:#d5f0dc;border:1px solid #6fbd8d}
+.legend i.w-empty{background:#dfe4ea;border-color:#b9c2cf}
+.legend i.w-busy{background:#2a4bc7;border-color:#1e3aa0}
+.legend i.w-done{background:#15803d;border-color:#0f6330}
+.legend i.w-bad{background:#dc2626;border-color:#b31b1b}
+
+/* 선택 표현 */
+.cell.selected,.cell.selected:hover:not(:disabled){position:relative;z-index:3;font-weight:800;box-shadow:0 0 0 2px #fff,0 0 0 5px #2a4bc7,0 8px 18px rgba(42,75,199,.32);transform:translateY(-2px);transition:transform .12s,box-shadow .12s}
+.cell.selected::after{content:'';position:absolute;top:6px;right:6px;width:16px;height:16px;border-radius:50%;background:#2a4bc7;box-shadow:0 0 0 2px #fff;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:center}
+
+.tray.compact .cell:not(:disabled){cursor:pointer}
+.tray.compact .cell:not(:disabled):hover{filter:brightness(1.06);outline:2px solid #2a4bc766;outline-offset:-2px}

@@ -1,0 +1,68 @@
+import type {AppState, Device, Plate, Run} from '../api/types.ts';
+
+/** 트레이 셀 한 칸의 표시 상태. */
+export type WellState = 'ok' | 'empty' | 'busy' | 'done' | 'bad';
+
+/** 슬롯 번호(1~24) → 단/열. 8단이 맨 위. */
+export const coord = (n: number) => ({tier: 8 - Math.floor((n - 1) / 3), col: ((n - 1) % 3) + 1});
+
+/** 슬롯 번호 → "3단 2열" */
+export const pos = (n: number) => {
+  const {tier, col} = coord(n);
+  return `${tier}단 ${col}열`;
+};
+
+/** 아직 반출되지 않은 플레이트. */
+export const active = (s: AppState) => s.plates.filter(p => !p.removedAt);
+
+export const platesFor = (s: AppState, deviceId: number) =>
+  active(s).filter(p => p.deviceId === deviceId);
+
+/** PC로 아직 보내지 못한 회차 수. */
+export const pending = (p: Plate) =>
+  p.runs.filter(r => r.imageState !== 'failed' && !r.transferred).length;
+
+/** 루틴 설정 기준 총 촬영 회차. */
+export const totalRuns = (s: AppState) => Math.floor((s.routine.days * 24) / s.routine.cycleHours);
+
+/** 다음 촬영 예정 시각. */
+export const nextAt = (s: AppState, p: Plate) =>
+  p.registeredAt +
+  (p.runs.length + 1) * s.routine.cycleHours * 3600000 +
+  s.routine.delay * 60000;
+
+/** 지금 촬영해야 하는 플레이트인지. */
+export const dueNow = (s: AppState, p: Plate) =>
+  !p.paused && p.runs.length < totalRuns(s) && nextAt(s, p) <= s.serverTime;
+
+export const wellState = (s: AppState, p: Plate | undefined, d: Device | undefined): WellState => {
+  if (!p) return 'empty';
+  if (d?.job?.status === 'running' && d.job.plateId === p.id) return 'busy';
+  if (p.runs.at(-1)?.imageState === 'failed' || pending(p) >= 2) return 'bad';
+  if (p.runs.length >= totalRuns(s)) return 'done';
+  return 'ok';
+};
+
+export const isBusy = (d: Device) => !!d.job && ['running', 'paused'].includes(d.job.status);
+
+/** 카드 테두리·배지 색. */
+export const tone = (d: Device): 'bad' | 'good' | 'warn' | 'info' => {
+  if (!d.connected || d.fault || d.doorOpen) return 'bad';
+  if (d.job?.status === 'running') return 'good';
+  if (d.job?.status === 'paused') return 'warn';
+  return 'info';
+};
+
+export const status = (d: Device) => {
+  if (!d.connected || d.fault || d.doorOpen) return '점검 필요';
+  if (d.job?.status === 'running') return '촬영 중';
+  if (d.job?.status === 'paused') return '일시정지';
+  return '촬영 대기';
+};
+
+/** 회차가 보유한 영상 파일 목록. 레거시 단일 영상도 배열로 맞춰준다. */
+export const shots = (r: Run): string[] =>
+  r.images?.length ? r.images : r.image ? [r.image] : [];
+
+export const imgSrc = (file: string) =>
+  file.startsWith('http') ? file : `/api/images/${file}`;

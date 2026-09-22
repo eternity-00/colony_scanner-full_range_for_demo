@@ -1,0 +1,15 @@
+/*
+ * 카드 · 모달 머리글 구분선 — 전 화면 공통이며 마지막 말이어야 한다.
+ *
+ * 화면별 파일에 이것과 specificity 가 같은 규칙이 있어서
+ * (예: settings.css 의 `.settings-shell section>p.muted`)
+ * 반드시 모든 화면 파일보다 뒤에서 import 한다.
+ */
+
+.card>.row.between:first-child,.card>h2:first-child:not(:has(+p)),.card>h3:first-child:not(:has(+p)){margin:-13px -13px 13px;padding:12px 13px 11px;background:#f6f8fd;border-bottom:1px solid #e8ecf3;border-radius:var(--rr) var(--rr) 0 0}
+.card>h2:first-child:has(+p),.card>h3:first-child:has(+p){margin:-13px -13px 0;padding:12px 13px 3px;background:#f6f8fd;border-radius:var(--rr) var(--rr) 0 0}
+.card>h2:first-child+p,.card>h3:first-child+p{margin:0 -13px 13px;padding:0 13px 11px;background:#f6f8fd;border-bottom:1px solid #e8ecf3}
+.job>.row.between:first-child{margin:-11px -13px 11px}
+.card.stack>.row.between:first-child,.card.stack>h2:first-child:not(:has(+p)),.card.stack>h3:first-child:not(:has(+p)),.card.stack>h2:first-child+p,.card.stack>h3:first-child+p{margin-bottom:0}
+.card.dark>*{border-color:#33427a!important}
+.modal>h2{margin:-24px -24px 16px;padding:18px 24px 14px;background:#f6f8fd;border-bottom:1px solid #e8ecf3;border-radius:var(--rr) var(--rr) 0 0}

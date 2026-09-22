@@ -1,0 +1,41 @@
+/* 장비 화면 — 활성 오류 · 모듈 카드 · 캘리브레이션 바 */
+
+.active-error{border-color:#fda29b;background:#fef6f5}
+.active-error div{display:flex;gap:14px;margin-top:8px}
+.active-error span{color:#912018}
+
+/* 넘침 방지 */
+.device-grid .card{min-height:0}
+
+/* 본문 높이 안에서 내부 스크롤 */
+.device-grid{flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:12px;min-height:0}
+.device-grid .card{min-height:0;overflow:auto;display:flex;flex-direction:column}
+.device-grid .card .dev-actions{margin-top:auto;padding-top:6px}
+.device-page{display:flex;flex-direction:column;gap:12px;height:100%;min-height:0}
+.device-page>.log{flex:1;min-height:0;display:flex;flex-direction:column}
+.device-page>.log .table-wrap{flex:1;min-height:0;max-height:none}
+
+/* 장비 카드 액션 버튼 */
+.dev-actions{display:flex;flex-direction:column;gap:6px;margin-top:2px}
+.da{display:flex;align-items:center;gap:9px;width:100%;min-height:42px;padding:0 13px;border:1px solid var(--line);border-radius:var(--rr);background:#fff;color:#344054;font-size:14px;font-weight:700;text-align:left}
+.da svg{width:18px;height:18px;flex:none}
+.da.home{border-color:#c9d6f0;color:#2a4bc7;background:#f4f7fe}
+.da.home:hover{background:#e9f0fd}
+.da.reset{border-color:#cfe0da;color:#0f7b52;background:#f2faf6}
+.da.reset:hover{background:#e6f5ee}
+.da.clear{border-color:#f3c3bd;color:#b42318;background:#fef5f4}
+.da.clear:hover:not(:disabled){background:#fde9e7}
+.da.clear:disabled{background:#f5f6f8;border-color:#e7ebf3;color:#aab2bf}
+
+/* 캘리브레이션 바 (하단) */
+.cal-row{display:flex;align-items:stretch;gap:12px}
+.cal-label{display:flex;flex-direction:column;gap:2px;justify-content:center;flex:none;min-width:150px}
+.cal-label h2{margin:0;font-size:16px}
+.cal-label small{color:#98a2b3;font-size:12px}
+.cal-row select{min-width:180px;height:auto;flex:none}
+.cal-run{flex:1;min-height:50px;font-size:16px;font-weight:800}
+.cal-btn{flex:none;min-height:50px;padding:0 18px;font-size:15px;font-weight:800;border-radius:var(--rr);display:inline-flex;align-items:center;gap:8px;justify-content:center}
+.cal-btn svg{width:18px;height:18px}
+.cal-btn.ghost{border:1px solid var(--line);background:#fff;color:#344054}
+.cal-btn.ghost:hover{background:#f4f6fb;border-color:#c9d4ea}
+.cal-row{flex:none}

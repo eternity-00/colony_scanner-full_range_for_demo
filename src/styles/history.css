@@ -1,0 +1,17 @@
+/* 이력 화면 — 필터 바 + 표 */
+
+.filters{display:flex;gap:12px}
+.filters input:first-child{flex:1}
+.filters label{display:flex;align-items:center;gap:6px}
+
+.hist-page{display:flex;flex-direction:column;gap:12px;height:100%;min-height:0}
+.hist-table{flex:1;min-height:0;display:flex;flex-direction:column;gap:0}
+.hist-table .table-wrap{flex:1;min-height:0;max-height:none;overflow:hidden}
+.hist-table .table-wrap table.fillrows{height:100%}
+.hist-table tbody tr{height:auto}
+.hist-table tbody td{height:44px;padding-top:0;padding-bottom:0}
+.hist-table tbody td button{min-height:30px;padding:4px 12px;font-size:12px}
+.hist-table tbody td .badge{white-space:nowrap}
+
+.filters .ghost-btn{border:1px solid var(--line);background:#fff;color:#344054;font-weight:700}
+.filters .ghost-btn:hover{background:#f4f6fb;border-color:#c9d4ea}

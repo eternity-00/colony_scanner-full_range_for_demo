@@ -1,0 +1,46 @@
+/* 현황 화면 — 스캐너 4대 카드 */
+
+.overview{height:100%;display:flex;flex-direction:column;gap:10px}
+.scanner-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;flex:1}
+.scanner{display:flex;flex-direction:column;gap:11px}
+.scanner.bad,.scanner.off{border-color:#fda29b}
+.metric{display:flex;align-items:baseline;gap:5px}
+.metric b{font-size:30px}
+.metric em{margin-left:auto;color:#b54708;font-style:normal;font-size:12px}
+
+@media(max-width:1239px){
+ .scanner-grid{gap:10px}
+}
+
+.scanner{gap:0;padding:0;overflow:hidden;border-width:1.5px}
+.scanner.good{border-width:2.5px;border-color:#9bddbd;animation:scan-glow 2.8s ease-in-out infinite}
+@keyframes scan-glow{0%,100%{border-color:#b6e6cf;box-shadow:0 0 0 0 rgba(47,158,95,0)}50%{border-color:#7fcda5;box-shadow:0 0 0 3px rgba(47,158,95,.08),0 0 12px rgba(47,158,95,.14)}}
+.scanner.bad{border-width:2.5px;border-color:#e5484d;animation:scan-bad 1.6s ease-in-out infinite}
+@keyframes scan-bad{0%,100%{border-color:#f0908f;box-shadow:0 0 0 0 rgba(229,72,77,0)}50%{border-color:#e5484d;box-shadow:0 0 0 3px rgba(229,72,77,.18),0 0 12px rgba(229,72,77,.22)}}
+.scanner.warn{border-width:2.5px;border-color:#eaa64f}
+.card-head{display:flex;justify-content:space-between;align-items:center;padding:13px 16px 11px;background:#f6f8fd;border-bottom:1px solid #e8ecf3}
+.scanner.good .card-head{background:#eefaf2;border-bottom-color:#cdead9}
+.scanner.bad .card-head{background:#fdf4f3;border-bottom-color:#f6dbd8}
+.scanner.warn .card-head{background:#fdf8ef;border-bottom-color:#f2e3c6}
+.card-foot{background:#fbfcfe}
+.card-head h3{font-size:17px;font-weight:800;letter-spacing:-.3px;color:#101828}
+.scanner .badge{border:0;border-radius:var(--rr);padding:5px 11px;font-size:12.5px}
+.scanner.good .badge{background:#dcffe9;color:#10624a}
+.scanner.info .badge{background:#e0eaff;color:#1d3a8a}
+.scanner.bad .badge{background:#fee4e2;color:#9d322d}
+.scanner.warn .badge{background:#fef0c7;color:#93370d}
+.metric{padding:11px 16px 10px;align-items:baseline}
+.metric b{font-size:32px;font-weight:800;letter-spacing:-1.2px;color:#101828}
+.metric span{color:#667085;font-size:13px;font-weight:600}
+.metric em{margin-left:auto;color:#c2410c;font-style:normal;font-size:13px;font-weight:700}
+.tray-box{margin:0 16px;background:transparent;border:0;padding:6px 0}
+.card-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 14px 13px;border-top:1px solid #e8ecf3;margin-top:10px}
+.foot-btns{display:flex;gap:6px;flex:1;min-width:0}
+.card-foot small{display:block;color:#98a2b3;font-size:11.5px;font-weight:600;margin-bottom:2px}
+.card-foot b{font-size:19px;font-weight:800;letter-spacing:-.4px;color:#101828}
+.card-foot b.go{color:#10624a}
+.card-foot b.stop{color:#9d322d}
+.card-foot button{flex:1;min-width:0;min-height:44px;padding:6px 8px;font-size:15px;font-weight:800;border-radius:var(--rr);white-space:nowrap}
+.card-foot button.accent{background:var(--blue);border-color:var(--blue);color:#fff}
+.card-foot button.accent:hover:not(:disabled){background:#2340b0;border-color:#2340b0}
+.card-foot button.accent:disabled{background:#eef0f5;border-color:#e0e5ec;color:#98a2b3}

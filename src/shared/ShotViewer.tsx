@@ -1,0 +1,70 @@
+import type {Plate, Run} from '../api/types.ts';
+import {WELLS} from '../config/defines.ts';
+import {fmt} from '../utils/datetime.ts';
+import {imgSrc, pos, shots} from '../utils/plate.ts';
+import {Badge} from './Badge.tsx';
+import {Modal} from './Modal.tsx';
+
+export interface ShotTarget {
+  plate: Plate;
+  /** 회차를 지정하지 않으면 머리글만 보여준다(반출된 플레이트). */
+  run?: Run;
+  /** 목록에서 눌러 들어온 Well 을 강조한다. */
+  wellIndex?: number;
+}
+
+interface Props {
+  target: ShotTarget;
+  onClose: () => void;
+}
+
+/** 한 회차의 Well 6장을 펼쳐 보는 모달. */
+export function ShotViewer({target, onClose}: Props) {
+  const {plate, run, wellIndex} = target;
+  const images = run ? shots(run) : [];
+
+  return (
+    <Modal
+      wide
+      bare
+      title={`${plate.id} · ${pos(plate.slot)}${run ? ` · ${run.n}회차` : ''}`}
+      onClose={onClose}
+    >
+      <div className="shot-meta">
+        <span className="sm-pos">{pos(plate.slot)}</span>
+        {run && (
+          <>
+            <span className="sm-time">{fmt(run.at)}</span>
+            <Badge type={run.transferred ? 'good' : 'warn'}>
+              {run.transferred ? '전송 완료' : '미전송'}
+            </Badge>
+          </>
+        )}
+        <span className="sm-count">
+          Well 1–{WELLS} · {WELLS}장
+        </span>
+      </div>
+      {run && (
+        <div className="well-set">
+          {Array.from({length: WELLS}, (_, i) => {
+            const file = images[i];
+            return (
+              <figure
+                key={i}
+                className={`well-card ${wellIndex === i ? 'sel' : ''} ${file ? '' : 'miss'}`}
+              >
+                {file ? (
+                  <img src={imgSrc(file)} alt={`Well ${i + 1}`} />
+                ) : (
+                  <span className="wc-miss">미촬영</span>
+                )}
+                <b className="wc-no">{i + 1}</b>
+                <figcaption>Well {i + 1}</figcaption>
+              </figure>
+            );
+          })}
+        </div>
+      )}
+    </Modal>
+  );
+}
