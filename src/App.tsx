@@ -1,6 +1,6 @@
 import {useEffect, useRef, useState, type ReactNode} from 'react';
 import {command, getState, subscribe} from './api/client.ts';
-import type {AppState, CommandArgs, CommandError, ConnectionStatus, Plate} from './api/types.ts';
+import type {AppState, CommandArgs, CommandError, Plate} from './api/types.ts';
 import {ADMIN_IDLE_LIMIT_SEC, ADMIN_IDLE_WARN_MS, type TabKey} from './config/defines.ts';
 import {RoleDialog} from './features/auth/RoleDialog.tsx';
 import {CaptureScreen} from './features/capture/CaptureScreen.tsx';
@@ -36,7 +36,6 @@ const DEMO_CAPTURE_MS = 18000;
 
 export default function App() {
   const [state, setState] = useState<AppState | null>(null);
-  const [, setConnection] = useState<ConnectionStatus>('loading');
   const [tab, setTab] = useState<TabKey>('overview');
   const [detail, setDetail] = useState({deviceId: 1, slot: 1});
   const [notice, setNotice] = useState<Notice | null>(null);
@@ -57,10 +56,7 @@ export default function App() {
     getState()
       .then(s => live && setState(s))
       .catch((e: Error) => setNotice({bad: true, text: e.message}));
-    const stop = subscribe(
-      s => live && setState(s),
-      status => setConnection(status),
-    );
+    const stop = subscribe(s => live && setState(s));
     return () => {
       live = false;
       stop();

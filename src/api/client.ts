@@ -1,4 +1,4 @@
-import type {AppState, CommandArgs, CommandError, ConnectionStatus} from './types.ts';
+import type {AppState, CommandArgs, CommandError} from './types.ts';
 
 const id = () => crypto.randomUUID().replaceAll('-', '');
 
@@ -24,13 +24,8 @@ export async function command(
   return data;
 }
 
-export function subscribe(
-  onState: (state: AppState) => void,
-  onStatus: (status: ConnectionStatus) => void,
-): () => void {
+export function subscribe(onState: (state: AppState) => void): () => void {
   const stream = new EventSource('/api/events');
   stream.addEventListener('state', event => onState(JSON.parse(event.data) as AppState));
-  stream.onopen = () => onStatus('live');
-  stream.onerror = () => onStatus('reconnecting');
   return () => stream.close();
 }

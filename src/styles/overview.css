@@ -3,11 +3,7 @@
 .overview{height:100%;display:flex;flex-direction:column;gap:10px}
 .scanner-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;flex:1}
 .scanner{display:flex;flex-direction:column;gap:11px}
-.scanner.bad,.scanner.off{border-color:#fda29b}
-.metric{display:flex;align-items:baseline;gap:5px}
-.metric b{font-size:30px}
-.metric em{margin-left:auto;color:#b54708;font-style:normal;font-size:12px}
-
+.scanner.bad{border-color:#fda29b}
 @media(max-width:1239px){
  .scanner-grid{gap:10px}
 }
@@ -28,12 +24,7 @@
 .scanner.good .badge{background:#dcffe9;color:#10624a}
 .scanner.info .badge{background:#e0eaff;color:#1d3a8a}
 .scanner.bad .badge{background:#fee4e2;color:#9d322d}
-.scanner.warn .badge{background:#fef0c7;color:#93370d}
-.metric{padding:11px 16px 10px;align-items:baseline}
-.metric b{font-size:32px;font-weight:800;letter-spacing:-1.2px;color:#101828}
-.metric span{color:#667085;font-size:13px;font-weight:600}
-.metric em{margin-left:auto;color:#c2410c;font-style:normal;font-size:13px;font-weight:700}
-.tray-box{margin:0 16px;background:transparent;border:0;padding:6px 0}
+.scanner.warn .badge{background:#fef0c7;color:#93370d}.tray-box{margin:0 16px;background:transparent;border:0;padding:6px 0}
 .card-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 14px 13px;border-top:1px solid #e8ecf3;margin-top:10px}
 .foot-btns{display:flex;gap:6px;flex:1;min-width:0}
 .card-foot small{display:block;color:#98a2b3;font-size:11.5px;font-weight:600;margin-bottom:2px}

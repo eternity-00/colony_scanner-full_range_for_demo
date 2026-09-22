@@ -1,6 +1,6 @@
 import type {ReactNode} from 'react';
 
-export type BadgeTone = 'info' | 'good' | 'warn' | 'bad' | 'off' | 'virtual';
+export type BadgeTone = 'info' | 'good' | 'warn' | 'bad';
 
 interface Props {
   children: ReactNode;

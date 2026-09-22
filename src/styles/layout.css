@@ -7,7 +7,6 @@
 .head-status,.row,.actions{display:flex;align-items:center;gap:10px}
 .head-status{font-size:13px}
 .clock{display:inline-flex;align-items:baseline;gap:9px;color:#eef2fb;font-family:ui-monospace,monospace;font-size:15px;font-weight:600;letter-spacing:-.2px;padding:0 4px}
-.clock i{font-style:normal;font-size:12px;font-weight:400;color:#93a3c8;letter-spacing:0}
 .app>main{flex:1;min-height:0;padding:16px 20px;overflow:auto}
 
 /* 좁은 화면 대응 — 아래 "목업 기준" 블록이 gap 을 다시 8px 로 되돌린다 (원본 순서 유지) */
@@ -58,7 +57,6 @@
 .brand small{font-size:14px;color:#aabac7;font-weight:500}
 .head-status{gap:8px}
 .hstat{display:inline-flex;align-items:center;padding:7px 13px;border-radius:var(--rr);background:#24315d;border:1px solid #46599a;color:#e8edf9;font-size:13px;font-weight:700}
-.hstat i{font-style:normal;font-size:13px;line-height:1;margin-right:7px}
 .hstat.bad{background:#4a2020;border-color:#8a4a4a;color:#f8b4b4}
 .clock{display:inline-flex;align-items:center;color:#aabac7;font-size:13px;font-weight:500;font-family:inherit;letter-spacing:0;padding:0 6px}
 .role-chip{height:40px;min-width:0;display:inline-flex;flex-direction:row;align-items:center;gap:9px;padding:0 15px 0 7px;border:0;border-radius:99px;background:#24315d;color:#fff;font-size:13px;font-weight:700}

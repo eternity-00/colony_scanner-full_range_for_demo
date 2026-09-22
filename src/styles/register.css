@@ -3,7 +3,7 @@
 .device-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .device-tabs button{display:flex;flex-direction:column}
 .device-tabs .selected{background:#eef2fe;border-color:var(--blue);color:var(--blue)}
-.register-layout aside label,.settings-grid label{display:flex;flex-direction:column;gap:6px;font-weight:650}
+.register-layout aside label{display:flex;flex-direction:column;gap:6px;font-weight:650}
 
 .card.dark{background:#1b2a5e;border-color:#1b2a5e}
 .card.dark small{color:#a9bde0;font-size:12px;font-weight:600;letter-spacing:.3px}
@@ -37,6 +37,3 @@
   grid-auto-rows:minmax(0,1fr);gap:7px;background:#f6f8fc;border:1px solid #e7ebf3;border-radius:var(--rr);padding:10px}
 .register-layout>section .tray .tray-row{align-items:stretch;gap:7px;grid-template-columns:34px repeat(3,minmax(0,1fr))}
 .register-layout .registration .cell{height:auto;min-height:0;font-size:16px;font-weight:800}
-
-.reg-cta{display:flex;flex-direction:column;gap:8px}
-.cta-reason{margin:0;text-align:center;font-size:12.5px;font-weight:700;color:#b42318;background:#fef3f2;border:1px solid #fbd5d0;border-radius:var(--rr);padding:8px 10px;line-height:1.35}

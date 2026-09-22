@@ -1,26 +1,7 @@
 /* 촬영 화면 — 진행 카드 · 단계 표시 · 촬영 큐 드로어 */
 
-.running-layout{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px}
-.queue{align-self:start;display:flex;flex-direction:column;gap:8px}
-.queue>button{display:flex;flex-direction:column;align-items:flex-start}
-.camera-preview{height:190px;border-radius:var(--rr);background:#0b1020;color:#dbe5ff;display:grid;grid-template-columns:1fr 110px 1fr;align-items:center;padding:18px}
-.camera-preview>small{text-align:right}
-
 .job h2{font-size:15px;font-weight:800;color:#101828;letter-spacing:-.2px}
 .cam-shot img{width:100%;height:100%;object-fit:contain;display:block}
-.cam-meta{width:136px;flex:none;display:flex;flex-direction:column;justify-content:center;gap:7px;background:#f6f8fc;border:1px solid #e7ebf3;border-radius:var(--rr);padding:9px 10px}
-.cm-lead{display:flex;flex-direction:column;gap:3px;padding-bottom:8px;border-bottom:1px solid #e3e8f0}
-.cm-lead small{font-size:10px;font-weight:800;letter-spacing:.5px;color:#667085}
-.cm-lead b{font-size:21px;font-weight:800;color:#101828;line-height:1}
-.cm-lead em{font-style:normal;font-size:13px;font-weight:700;color:#8a95a8}
-.cm-row{display:flex;align-items:center;justify-content:space-between;gap:6px;min-height:20px}
-.cm-row>span{font-size:11px;font-weight:700;color:#667085}
-.cm-row b{font-size:13px;font-weight:800;color:#101828}
-.cm-row b em{font-style:normal;font-size:10px;font-weight:700;color:#98a2b3}
-.cm-row i{font-style:normal;font-size:10px;font-weight:800;letter-spacing:.3px;padding:2px 7px;border-radius:var(--rr);border:1px solid}
-.cm-row i.on{background:#d5f0dc;border-color:#6fbd8d;color:#125e2e}
-.cm-row i.off{background:#eef0f5;border-color:#dfe3ea;color:#7b8794}
-
 .stages{display:flex;align-items:flex-start;gap:0}
 .stages div{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;position:relative;font-size:10px;color:#98a2b3;font-weight:700;text-align:center;line-height:1.2}
 .stages div:before{content:'';position:absolute;top:5px;left:-50%;width:100%;height:2px;background:#e7ebf3}
@@ -54,7 +35,6 @@
 .cam-shot{aspect-ratio:4/3;max-width:100%;max-height:100%;height:100%;background:#0b1220;border-radius:var(--rr);display:grid;place-items:center;position:relative;overflow:hidden}
 .cam-shot.live:before{content:'LIVE';position:absolute;left:8px;top:7px;z-index:1;font-size:9px;font-weight:800;letter-spacing:1px;color:#fff;background:#e5484d;padding:2px 6px;border-radius:2px}
 .cam-shot.off span{color:#56637d;font-size:12px;font-weight:700;letter-spacing:.5px}
-.queue{align-self:stretch;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:6px}
 .job .actions{margin-top:0;gap:6px;justify-content:flex-start;flex-wrap:nowrap}
 .job .actions button{min-height:48px;padding:8px 10px;font-size:14px;font-weight:800;flex:1;white-space:nowrap}
 

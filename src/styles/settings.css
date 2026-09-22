@@ -1,6 +1,5 @@
 /* 설정 화면 — 좌측 메뉴 + 항목 행 */
 
-.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:950px;margin:auto}
 .settings-shell{display:grid;grid-template-columns:220px minmax(0,760px);gap:16px;justify-content:center}
 .settings-nav{display:flex;flex-direction:column;gap:6px;align-self:start}
 .settings-nav button{text-align:left;border-color:transparent}

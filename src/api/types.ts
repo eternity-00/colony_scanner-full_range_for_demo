@@ -123,8 +123,6 @@ export interface AppState {
   storage: string;
 }
 
-export type ConnectionStatus = 'loading' | 'live' | 'reconnecting';
-
 /** 명령 인자. 명령마다 모양이 달라 서버에서 assert() 로 검증한다. */
 export type CommandArgs = Record<string, unknown>;
 
