@@ -25,7 +25,10 @@ export class Controller extends EventEmitter {
  constructor({dataDir,stageMs=1600,tickMs=250,autoTick=true,adapter}={}){
   super();this.dataDir=dataDir;mkdirSync(join(dataDir,'images'),{recursive:true});this.stateFile=join(dataDir,'state.json');this.revision=0;this.adminPin=process.env.ADMIN_PIN||'0000';this.session={role:'analyst',failed:0,lockUntil:0,idleAt:null};
   if(existsSync(this.stateFile)){this.db=JSON.parse(readFileSync(this.stateFile,'utf8'));assert(this.db.version===1,'BAD_STATE','지원하지 않는 데이터 파일입니다.',500);}
-  else {const plates=[];[18,24,15,6].forEach((count,i)=>{for(let slot=1;slot<=count;slot++)plates.push({id:`DEMO-${i+1}-${String(slot).padStart(2,'0')}`,deviceId:i+1,slot,registeredAt:Date.now()-(slot*30+180)*60000,removedAt:null,paused:false,runs:[]});});this.db={version:1,plates,routine:{cycleHours:12,days:42,delay:0},autoRun:false,logs:[],io:[],receipts:[],devices:[]};}
+  // 씨딩된 플레이트의 투입 시각. 예전에는 3.5~15시간 전으로 잡았는데, 12시간 주기에서는
+  // 그중 일부가 기동하자마자 "이미 촬영 시각이 지난" 상태가 되어 한꺼번에 몰려 찍혔다.
+  // 슬롯당 1분씩만 어긋나게 해서 일정이 겹치지 않으면서도 어떤 주기에서든 밀리지 않게 한다.
+  else {const plates=[];[18,24,15,6].forEach((count,i)=>{for(let slot=1;slot<=count;slot++)plates.push({id:`DEMO-${i+1}-${String(slot).padStart(2,'0')}`,deviceId:i+1,slot,registeredAt:Date.now()-slot*60000,removedAt:null,paused:false,runs:[]});});this.db={version:1,plates,routine:{cycleHours:12,days:42,delay:0},autoRun:false,logs:[],io:[],receipts:[],devices:[]};}
   for(const p of this.db.plates)for(const r of p.runs){if(typeof r.image==='string'&&r.image.endsWith('.svg')){r.image=null;r.imageState='expired';}
    if(r.imageState==='held'&&!r.images?.length){const b=(Number(String(r.image||'').match(/\d+/)?.[0])||r.n)-1;r.images=Array.from({length:6},(_,i)=>`well-${((b+i)%9)+1}.png`);r.image=null;}}
   this.adapter=adapter||new VirtualDeviceAdapter({stageMs,config:this.db.devices});
