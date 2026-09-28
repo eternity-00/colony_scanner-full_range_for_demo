@@ -1,4 +1,4 @@
-import {tabsFor, type TabKey} from '../config/defines.ts';
+import {APP_VERSION, tabsFor, type TabKey} from '../config/defines.ts';
 import {TabIcon} from '../shared/TabIcon.tsx';
 
 interface Props {
@@ -8,6 +8,13 @@ interface Props {
   onSelect: (tab: TabKey) => void;
   onExit: () => void;
   onClose: () => void;
+}
+
+/** 빌드 시각을 MM-DD HH:MM 으로. 같은 날 여러 번 올리므로 시각까지 필요하다. */
+function buildStamp() {
+  const d = new Date(__BUILD_AT__);
+  const p2 = (n: number) => String(n).padStart(2, '0');
+  return `${p2(d.getMonth() + 1)}-${p2(d.getDate())} ${p2(d.getHours())}:${p2(d.getMinutes())}`;
 }
 
 export function MenuDrawer({open, tab, isAdmin, onSelect, onExit, onClose}: Props) {
@@ -45,6 +52,11 @@ export function MenuDrawer({open, tab, isAdmin, onSelect, onExit, onClose}: Prop
           </svg>
           가상 머신 종료
         </button>
+        {/* 파이에 여러 버전이 나란히 있어 어느 것이 도는지 화면으로 알 수 있어야 한다. */}
+        <span className="drawer-ver">
+          {APP_VERSION}
+          <em>{buildStamp()}</em>
+        </span>
       </div>
     </nav>
   );

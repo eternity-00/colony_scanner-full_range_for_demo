@@ -76,8 +76,12 @@
 .app[data-w="sm"] .clock{display:none}
 
 /* 드로어 하단 종료 버튼 */
-.drawer-foot{margin-top:auto;padding-top:0.75rem;border-top:1px solid var(--g3)}
-.exit-btn{display:flex;align-items:center;justify-content:center;gap:0.625rem;width:100%;min-height:3.25rem;border:1px solid var(--line);border-radius:var(--rr);background:#fff;color:#ca263f;font-size:0.9375rem;font-weight:800}
+.drawer-foot{margin-top:auto;padding-top:0.75rem;border-top:1px solid var(--g3);display:flex;align-items:center;gap:0.625rem}
+/* 종료 버튼 옆의 버전 — 어느 배포가 도는지 알려주는 것이라 읽히기만 하면 된다. */
+.drawer-ver{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:1px;line-height:1.15;white-space:nowrap}
+.drawer-ver{font-size:0.9375rem;font-weight:800;letter-spacing:-.01em;color:var(--gt)}
+.drawer-ver em{font-style:normal;font-size:0.6875rem;font-weight:600;color:var(--gt);font-variant-numeric:tabular-nums}
+.exit-btn{display:flex;align-items:center;justify-content:center;gap:0.625rem;flex:1;min-width:0;min-height:3.25rem;border:1px solid var(--line);border-radius:var(--rr);background:#fff;color:#ca263f;font-size:0.9375rem;font-weight:800}
 .exit-btn svg{width:1.25rem;height:1.25rem}
 .exit-btn:hover{background:#f2f1f3;border-color:#9ba2ac}
 

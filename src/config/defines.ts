@@ -64,6 +64,12 @@ export const ADMIN_ACTION: Record<string, string> = {
   environment: '온도 · CO₂ 변경',
 };
 
+/**
+ * 화면에 표시할 UI 버전. 파이에 react-demo-v3·v4 가 나란히 있어서
+ * 어느 것이 도는지 구분할 수단이 필요하다. 배포 디렉터리 이름과 맞춘다.
+ */
+export const APP_VERSION = 'v4';
+
 /** 장비 오류 코드의 한글 이름. 사용자에게 "무엇이 고장났는지"를 말해주기 위한 것이다. */
 export const FAULT_LABEL: Record<string, string> = {
   Z_LIMIT: 'Z축 한계 오류',
