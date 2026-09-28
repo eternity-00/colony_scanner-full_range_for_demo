@@ -65,4 +65,12 @@
 .cell.selected::after{content:'';position:absolute;top:0.25rem;right:0.25rem;width:0.9375rem;height:0.9375rem;border-radius:50%;background:var(--blue7);box-shadow:0 0 0 2px #fff;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:center}
 
 .tray.compact .cell:not(:disabled){cursor:pointer}
-.tray.compact .cell:not(:disabled):hover{border-color:#9ba2ac}
+
+/*
+ * 마우스가 있는 화면에서만 hover 를 준다.
+ * 터치 패널에는 포인터가 떠날 일이 없어서, 한 번 누른 자리에 hover 가 그대로
+ * 남는다. 화면을 옮겨도 그 자리에 새로 그려진 버튼이 눌린 것처럼 옅게 떠 있었다.
+ */
+@media (hover:hover) and (pointer:fine){
+ .tray.compact .cell:not(:disabled):hover{border-color:#9ba2ac}
+}

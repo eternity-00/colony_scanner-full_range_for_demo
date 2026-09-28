@@ -19,11 +19,8 @@
 .da{display:flex;align-items:center;gap:0.5625rem;width:100%;min-height:2.625rem;padding:0 0.8125rem;border:1px solid var(--line);border-radius:var(--rr);background:#fff;color:var(--gt);font-size:0.875rem;font-weight:700;text-align:left}
 .da svg{width:1.125rem;height:1.125rem;flex:none}
 .da.home{color:var(--blue)}
-.da.home:hover{background:#f2f1f3;border-color:#9ba2ac}
 .da.reset{color:#147d40}
-.da.reset:hover{background:#f2f1f3;border-color:#9ba2ac}
 .da.clear{color:#ca263f}
-.da.clear:hover:not(:disabled){background:#f2f1f3;border-color:#9ba2ac}
 .da.clear:disabled{background:#f2f1f3;border-color:var(--line);color:#9ea4ad}
 
 /* 캘리브레이션 바 (하단) */
@@ -36,7 +33,18 @@
 .cal-btn{flex:none;min-height:3.125rem;padding:0 1.125rem;font-size:0.9375rem;font-weight:800;border-radius:var(--rr);display:inline-flex;align-items:center;gap:0.5rem;justify-content:center}
 .cal-btn svg{width:1.125rem;height:1.125rem}
 .cal-btn.ghost{border:1px solid var(--line);background:#fff;color:var(--gt)}
-.cal-btn.ghost:hover{background:#f2f1f3;border-color:#9ba2ac}
 /* 분석자 모드에서는 캘리브레이션 컨트롤이 빠져 버튼만 남으므로 오른쪽으로 민다 */
 .cal-row>.cal-btn:last-child{margin-left:auto}
 .cal-row{flex:none}
+
+/*
+ * 마우스가 있는 화면에서만 hover 를 준다.
+ * 터치 패널에는 포인터가 떠날 일이 없어서, 한 번 누른 자리에 hover 가 그대로
+ * 남는다. 화면을 옮겨도 그 자리에 새로 그려진 버튼이 눌린 것처럼 옅게 떠 있었다.
+ */
+@media (hover:hover) and (pointer:fine){
+ .da.home:hover{background:#f2f1f3;border-color:#9ba2ac}
+ .da.reset:hover{background:#f2f1f3;border-color:#9ba2ac}
+ .da.clear:hover:not(:disabled){background:#f2f1f3;border-color:#9ba2ac}
+ .cal-btn.ghost:hover{background:#f2f1f3;border-color:#9ba2ac}
+}

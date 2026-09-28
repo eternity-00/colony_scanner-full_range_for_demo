@@ -51,7 +51,6 @@
 
 .pager{display:flex;align-items:center;justify-content:flex-end;gap:0.5rem;padding-top:0.75rem}
 .pager button{min-height:2.5rem;padding:0.4375rem 1.375rem;font-size:0.9375rem;font-weight:800;border:1px solid var(--blue);color:var(--blue);background:#fff;border-radius:var(--rr)}
-.pager button:hover:not(:disabled){background:var(--blue);color:#fff}
 .pager button:disabled{border-color:var(--line);color:#9ea4ad;background:#f2f1f3}
 .pager span{font-weight:700;color:var(--gt)}
 .pager span{margin-right:auto}
@@ -69,7 +68,6 @@
 .modal.wide{width:53.75rem;max-width:94vw;height:86vh;max-height:86vh;display:flex;flex-direction:column;overflow:hidden;padding:0}
 .modal.wide>h2{position:sticky;top:0;z-index:1;margin:0;padding:1.25rem 4rem 1rem 1.5rem;background:#fff;border-bottom:1px solid var(--g3);border-radius:var(--rr) var(--rr) 0 0;flex:none}
 .modal.wide>.modal-x{position:absolute;top:0.875rem;right:1rem;z-index:5;width:2.5rem;height:2.5rem;border-radius:var(--rr);background:#fff;border:1px solid var(--line);color:var(--gt);font-size:1.5rem;line-height:1;display:grid;place-items:center}
-.modal.wide>.modal-x:hover{background:#f2f1f3;border-color:#9ba2ac;color:var(--blue)}
 .modal.wide>.shot-meta{flex:none;margin:1rem 1.5rem 0}
 .modal.wide>.well-set{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain;padding:0.875rem 1.5rem 1.25rem;margin:0;align-content:start}
 .shot-meta{display:flex;align-items:center;gap:0.625rem;flex-wrap:wrap;margin:2px 0 0.875rem;padding-bottom:0.875rem;border-bottom:1px solid #eceef1}
@@ -95,7 +93,6 @@
 .pindots.error i{border-color:#e53946}
 .keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:0.625rem;margin:0.875rem 0}
 .keypad button{min-height:3.75rem;font-size:1.5rem;font-weight:800;border:1px solid var(--line);border-radius:var(--rr);background:#fff;color:var(--gt)}
-.keypad button:hover{background:#f2f1f3;border-color:#9ba2ac}
 .keypad button:active{background:#eceef1}
 .keypad .kp-clear,.keypad .kp-back{font-size:1rem;font-weight:700;color:var(--gt)}
 .pin-go{width:100%;min-height:3.25rem;font-size:1rem;margin-top:0.25rem}
@@ -126,5 +123,16 @@
 .pad-presets button{flex:1;min-height:2.75rem;display:flex;align-items:baseline;justify-content:center;gap:2px;
   border:1px solid var(--line);border-radius:var(--rr);background:#fff;color:var(--gt);font-size:1.0625rem;font-weight:800}
 .pad-presets button em{font-style:normal;font-size:0.6875rem;font-weight:700}
-.pad-presets button:hover{background:#f2f1f3;border-color:#9ba2ac}
 .pad-presets button.on{background:var(--blue);border-color:var(--blue);color:#fff}
+
+/*
+ * 마우스가 있는 화면에서만 hover 를 준다.
+ * 터치 패널에는 포인터가 떠날 일이 없어서, 한 번 누른 자리에 hover 가 그대로
+ * 남는다. 화면을 옮겨도 그 자리에 새로 그려진 버튼이 눌린 것처럼 옅게 떠 있었다.
+ */
+@media (hover:hover) and (pointer:fine){
+ .pager button:hover:not(:disabled){background:var(--blue);color:#fff}
+ .modal.wide>.modal-x:hover{background:#f2f1f3;border-color:#9ba2ac;color:var(--blue)}
+ .keypad button:hover{background:#f2f1f3;border-color:#9ba2ac}
+ .pad-presets button:hover{background:#f2f1f3;border-color:#9ba2ac}
+}

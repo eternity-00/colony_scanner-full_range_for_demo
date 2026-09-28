@@ -12,4 +12,12 @@
 .hist-table tbody td .badge{white-space:nowrap}
 
 .filters .ghost-btn{border:1px solid var(--line);background:#fff;color:var(--gt);font-weight:700}
-.filters .ghost-btn:hover{background:#f2f1f3;border-color:#9ba2ac}
+
+/*
+ * 마우스가 있는 화면에서만 hover 를 준다.
+ * 터치 패널에는 포인터가 떠날 일이 없어서, 한 번 누른 자리에 hover 가 그대로
+ * 남는다. 화면을 옮겨도 그 자리에 새로 그려진 버튼이 눌린 것처럼 옅게 떠 있었다.
+ */
+@media (hover:hover) and (pointer:fine){
+ .filters .ghost-btn:hover{background:#f2f1f3;border-color:#9ba2ac}
+}

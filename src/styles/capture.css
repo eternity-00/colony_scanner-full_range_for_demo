@@ -101,9 +101,17 @@
 .queue-drawer .drawer-head{border-bottom:1px solid var(--line);margin-bottom:0.5rem}
 .queue-drawer .drawer-x{color:var(--gt)}
 .qrow{display:flex;align-items:center;gap:0.75rem;width:100%;min-height:3.5rem;padding:0 0.75rem;border:1px solid var(--line);border-radius:var(--rr);background:#fff;text-align:left}
-.qrow:hover{background:#f2f1f3;border-color:#9ba2ac}
 .qrow .qn{width:1.75rem;height:1.75rem;flex:none;border-radius:2px;background:var(--blue);color:#fff;font-size:0.8125rem;font-weight:800;display:grid;place-items:center}
 .qrow .qmain{display:flex;flex-direction:column;gap:2px;min-width:0}
 .qrow .qmain b{font-size:0.9375rem;font-weight:800;color:var(--gt)}
 .qrow .qmain small{font-size:0.75rem;color:var(--gt);font-weight:600}
 .queue-empty{padding:1rem 0.25rem}
+
+/*
+ * 마우스가 있는 화면에서만 hover 를 준다.
+ * 터치 패널에는 포인터가 떠날 일이 없어서, 한 번 누른 자리에 hover 가 그대로
+ * 남는다. 화면을 옮겨도 그 자리에 새로 그려진 버튼이 눌린 것처럼 옅게 떠 있었다.
+ */
+@media (hover:hover) and (pointer:fine){
+ .qrow:hover{background:#f2f1f3;border-color:#9ba2ac}
+}
