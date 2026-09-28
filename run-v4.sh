@@ -35,17 +35,21 @@ wait_for() {
   done
 }
 
+# 순서가 중요하다. 제어 서버가 엔진보다 먼저 올라오면 엔진을 못 찾아
+# 4대를 ENGINE_OFFLINE(=점검 필요)로 잡고, 엔진이 붙을 때까지 그 상태가 화면에 보인다.
+# 엔진을 먼저 띄우고 응답을 확인한 뒤 제어 서버를 시작한다.
 started=''
 if ! curl -fsS http://127.0.0.1:8790/api/health >/dev/null 2>&1; then
   nohup node simulator-app/engine.mjs >engine.log 2>&1 & started="$started $!"
 fi
+wait_for http://127.0.0.1:8790/api/health
+
 if ! curl -fsS http://127.0.0.1:8792 >/dev/null 2>&1; then
   nohup node simulator-app/server.mjs >simulator.log 2>&1 & started="$started $!"
 fi
 if ! curl -fsS http://127.0.0.1:8787/api/health >/dev/null 2>&1; then
   nohup node server/index.mjs >server.log 2>&1 & started="$started $!"
 fi
-wait_for http://127.0.0.1:8790/api/health
 wait_for http://127.0.0.1:8792
 wait_for http://127.0.0.1:8787/api/health
 

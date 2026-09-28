@@ -25,8 +25,6 @@ trap cleanup EXIT INT TERM
 n=0
 until curl -fsS http://127.0.0.1:8787/api/health >/dev/null 2>&1; do
   n=$((n+1)); [ "$n" -ge 120 ] && { echo '서버 시작 실패'; exit 1; }; sleep 0.1; done
-# DEMO_SEED: 장비 점검필요 케이스 주입 (SCANNER 4 히팅 오류)
-curl -fsS -X POST http://127.0.0.1:8790/api/device/input -H "content-type: application/json" -d '{"id":4,"requestId":"demoseedfault01","patch":{"fault":"HEATER"}}' >/dev/null 2>&1 || true
 "$BIN" --kiosk --ozone-platform=wayland --no-first-run --password-store=basic \
   --disable-session-crashed-bubble --disable-infobars \
   --user-data-dir="$profile" "http://127.0.0.1:8787/?scale=$UI_SCALE" >browser.log 2>&1 &
