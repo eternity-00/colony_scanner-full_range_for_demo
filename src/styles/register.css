@@ -3,6 +3,8 @@
 .device-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:0.5rem}
 .device-tabs button{display:flex;flex-direction:column}
 .device-tabs .selected{background:var(--blue);border-color:var(--blue);color:#fff}
+/* small 은 전역에서 회색이라, 파란 면 위에서 그대로 두면 읽히지 않는다. */
+.device-tabs .selected small{color:#fff}
 .register-layout aside label{display:flex;flex-direction:column;gap:0.375rem;font-weight:650}
 
 /* 선택된 수납 위치 — 중립 슬레이트. 초록은 이 화면에서 '이미 찬 칸'을 뜻하고
