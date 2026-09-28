@@ -194,7 +194,6 @@ export function SettingsScreen({state, send, operator, setOperator, onRole}: Pro
             </div>
           ))}
         </div>
-        <p className="pad-tip">숫자를 누르면 키패드가 열립니다.</p>
         <div className="calc">
           <span>현재 설정 기준</span>
           <b>
