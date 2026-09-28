@@ -1,7 +1,6 @@
 import {useState} from 'react';
 import type {AppState} from '../../api/types.ts';
 import type {SendCommand} from '../../config/defines.ts';
-import {AdminCall} from '../../shared/AdminCall.tsx';
 import {fmt} from '../../utils/datetime.ts';
 import {active, dueNow, nextAt, pos, tone, totalRuns} from '../../utils/plate.ts';
 import {JobCard} from './JobCard.tsx';
@@ -37,7 +36,6 @@ export function CaptureScreen({state, send, openDetail}: Props) {
 
   return (
     <div className="run-page">
-      <AdminCall state={state} devices={shown} />
       <div className="run-bar">
         <div className="run-tabs">
           {devices.map(d => (
