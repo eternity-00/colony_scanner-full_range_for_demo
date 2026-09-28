@@ -20,9 +20,11 @@ interface Filters {
   tier: number;
   col: number;
   transfer: 'all' | 'done' | 'pending';
+  /** 이력은 플레이트 대장이라 등록만 된 것도 한 줄을 차지한다. 그걸 걸러내는 칸. */
+  shot: 'all' | 'shot' | 'none';
 }
 
-const NO_FILTER: Filters = {days: 0, device: 0, tier: 0, col: 0, transfer: 'all'};
+const NO_FILTER: Filters = {days: 0, device: 0, tier: 0, col: 0, transfer: 'all', shot: 'all'};
 
 export function HistoryScreen({state, openDetail, openPlateViewer}: Props) {
   const [draft, setDraft] = useState<Filters>(NO_FILTER);
@@ -69,6 +71,7 @@ export function HistoryScreen({state, openDetail, openPlateViewer}: Props) {
       if (applied.days && p.registeredAt < Date.now() - applied.days * 86400000) return false;
       if (applied.transfer !== 'all' && (applied.transfer === 'pending') !== !!pending(p))
         return false;
+      if (applied.shot !== 'all' && (applied.shot === 'shot') !== p.runs.length > 0) return false;
       if (applied.tier && coord(p.slot).tier !== applied.tier) return false;
       if (applied.col && coord(p.slot).col !== applied.col) return false;
       return true;
@@ -125,6 +128,11 @@ export function HistoryScreen({state, openDetail, openPlateViewer}: Props) {
               {c}열
             </option>
           ))}
+        </select>
+        <select value={draft.shot} onChange={e => pick('shot', e.target.value as Filters['shot'])}>
+          <option value="all">촬영 전체</option>
+          <option value="shot">촬영 시작</option>
+          <option value="none">촬영 전</option>
         </select>
         <select
           value={draft.transfer}
