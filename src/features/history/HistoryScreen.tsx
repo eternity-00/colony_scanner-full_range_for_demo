@@ -174,9 +174,17 @@ export function HistoryScreen({state, openDetail, openPlateViewer}: Props) {
                   <td>{p.removedAt ? '—' : fmt(nextAt(state, p))}</td>
                   <td>{p.runs.filter(r => r.imageState === 'held').length}</td>
                   <td>
-                    <Badge type={pending(p) ? 'warn' : 'good'}>
-                      {pending(p) ? `미전송 ${pending(p)}` : '완료'}
-                    </Badge>
+                    {/*
+                      * 아직 한 번도 안 찍은 플레이트는 보낼 것이 없어서 미전송 0 이 된다.
+                      * 그걸 「완료」라고 적으면 전송이 끝난 것처럼 읽힌다.
+                      */}
+                    {p.runs.length === 0 ? (
+                      <Badge>촬영 전</Badge>
+                    ) : (
+                      <Badge type={pending(p) ? 'warn' : 'good'}>
+                        {pending(p) ? `미전송 ${pending(p)}` : '완료'}
+                      </Badge>
+                    )}
                   </td>
                   <td>
                     <button
