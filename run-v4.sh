@@ -59,6 +59,10 @@ trap cleanup EXIT INT TERM
 
 profile=$(mktemp -d /tmp/colony-v4-chromium.XXXXXX)
 trap 'cleanup; rm -rf -- "$profile"' EXIT INT TERM
-exec "$BIN" --kiosk --no-first-run --password-store=basic \
+# 파이 데스크톱은 labwc(Wayland)다. ozone 플랫폼을 안 주면 크로뮴이 X11 로 뜨려다
+# "Missing X server or $DISPLAY" 로 죽는다. 데스크톱 아이콘으로 눌러도 마찬가지다.
+OZONE=""
+[ -n "${WAYLAND_DISPLAY:-}" ] && OZONE="--ozone-platform=wayland"
+exec "$BIN" --kiosk $OZONE --no-first-run --password-store=basic \
   --disable-session-crashed-bubble --disable-infobars \
   --user-data-dir="$profile" "http://127.0.0.1:8787/?scale=$UI_SCALE"
