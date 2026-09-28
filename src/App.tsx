@@ -1,6 +1,6 @@
-import {useEffect, useRef, useState, type ReactNode} from 'react';
+import {useEffect, useState, type ReactNode} from 'react';
 import {command, getState, subscribe} from './api/client.ts';
-import type {AppState, CommandArgs, CommandError, Device, Plate} from './api/types.ts';
+import type {AppState, CommandArgs, CommandError, Plate} from './api/types.ts';
 import {
   ADMIN_ACTION,
   ADMIN_IDLE_LIMIT_SEC,
@@ -17,11 +17,9 @@ import {OverviewScreen} from './features/overview/OverviewScreen.tsx';
 import {RegisterScreen} from './features/register/RegisterScreen.tsx';
 import {SettingsScreen} from './features/settings/SettingsScreen.tsx';
 import {Header} from './layout/Header.tsx';
-import {AdminCall} from './shared/AdminCall.tsx';
 import {MenuDrawer} from './layout/MenuDrawer.tsx';
 import {Modal} from './shared/Modal.tsx';
 import {ShotViewer, type ShotTarget} from './shared/ShotViewer.tsx';
-import {faultLabel} from './utils/plate.ts';
 import {useLayoutWidth} from './utils/viewport.ts';
 
 interface Notice {
@@ -49,9 +47,6 @@ export default function App() {
   const [roleDialog, setRoleDialog] = useState(false);
   // 관리자 권한이 없어 막힌 동작. PIN 이 맞으면 retry 로 그대로 이어서 보낸다.
   const [gate, setGate] = useState<{reason: string; retry: () => void} | null>(null);
-  // 고장 안내 팝업. 이미 알린 고장은 notified 에 담아 다시 띄우지 않는다.
-  const [faultAlert, setFaultAlert] = useState<Device[] | null>(null);
-  const notified = useRef<string[]>([]);
   const [registerAt, setRegisterAt] = useState<{deviceId: number; slot?: number}>({deviceId: 1});
   const [menuOpen, setMenuOpen] = useState(false);
   const [exitAsk, setExitAsk] = useState(false);
@@ -90,20 +85,6 @@ export default function App() {
       document.removeEventListener('keydown', touch);
     };
   }, []);
-
-  /*
-   * 상태는 0.25초마다 갱신되므로 "지금 고장이 있으면 띄운다"로 하면 팝업이 계속 뜬다.
-   * 이미 알린 고장을 기억해 두고 새로 생긴 것이 있을 때만 띄운다.
-   * 고쳐졌다가 다시 나면 목록에서 빠졌다 들어오므로 그때는 다시 뜬다.
-   */
-  useEffect(() => {
-    if (!state || state.session.role === 'admin') return;
-    const faulted = state.devices.filter(d => faultLabel(d));
-    const keys = faulted.map(d => `${d.id}:${faultLabel(d)}`);
-    const fresh = keys.some(k => !notified.current.includes(k));
-    notified.current = keys;
-    if (fresh) setFaultAlert(faulted);
-  }, [state]);
 
   const openDetail = (deviceId: number, slot = 1) => {
     setDetail({deviceId, slot});
@@ -294,8 +275,6 @@ export default function App() {
       {roleDialog && (
         <RoleDialog state={state} send={execute} onClose={() => setRoleDialog(false)} />
       )}
-
-      {faultAlert && <AdminCall devices={faultAlert} onClose={() => setFaultAlert(null)} />}
 
       {gate && (
         <RoleDialog

@@ -1,6 +1,7 @@
 import {useState} from 'react';
 import type {AppState} from '../../api/types.ts';
 import {WELL_LABEL} from '../../config/defines.ts';
+import {AdminCall} from '../../shared/AdminCall.tsx';
 import {Badge} from '../../shared/Badge.tsx';
 import {Modal} from '../../shared/Modal.tsx';
 import {Tray} from '../../shared/Tray.tsx';
@@ -33,6 +34,7 @@ export function OverviewScreen({state, openDetail, openRegister}: Props) {
   return (
     <div className="overview">
       <StatBar state={state} />
+      <AdminCall state={state} devices={state.devices} />
       <div className="scanner-grid">
         {state.devices.map(d => {
           const plates = platesFor(state, d.id);
