@@ -14,7 +14,7 @@
   background:#fff;border:1px solid #ccd2d9;color:var(--gt);
   display:flex;flex-direction:row;align-items:center;justify-content:center;gap:0.4375rem;
   font-size:0.78125rem;font-weight:700;letter-spacing:-.02em;line-height:1.12;white-space:nowrap}
-.cell::before{content:'';width:0.9375rem;height:0.9375rem;flex:none;border-radius:50%;
+.cell::before{content:'';width:1.125rem;height:1.125rem;flex:none;border-radius:50%;
   background:#2f9e5f;border:2px solid #2f9e5f}
 
 .tray.compact{gap:0.3125rem}
