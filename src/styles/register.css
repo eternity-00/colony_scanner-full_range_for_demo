@@ -10,10 +10,11 @@
   font-weight:500;color:var(--gt);margin-top:1px}
 
 /* 선택된 수납 위치 — 중립 슬레이트. 초록은 이 화면에서 '이미 찬 칸'을 뜻하고
-   파랑은 아래 실행 버튼이 쓰므로, 의미가 겹치지 않는 색을 쓴다. */
-.card.dark{background:#5c636e;border-color:#5c636e}
-.card.dark small{color:#dcdfe3;font-size:0.75rem;font-weight:600;letter-spacing:.3px}
-.card.dark h2{color:#fff;font-size:1.1875rem;font-weight:800;margin-top:0.25rem;letter-spacing:-.3px}
+   파랑은 아래 실행 버튼이 쓰므로, 의미가 겹치지 않는 색을 쓴다.
+   흰 글씨를 얹는 면이라 더 밝히지는 않는다 — #6b7380 에서 대비가 4.8:1 이다. */
+.card.dark{background:#6b7380;border-color:#6b7380}
+.card.dark small{color:#e4e7ea;font-size:0.8125rem;font-weight:600;letter-spacing:.3px}
+.card.dark h2{color:#fff;font-size:1.375rem;font-weight:800;margin-top:0.25rem;letter-spacing:-.3px}
 .register-layout .device-tabs button{min-height:3.125rem}
 /* 등록 트레이도 현황과 같은 상태색 */
 .tray.registration .cell{opacity:1}
