@@ -43,27 +43,24 @@ export function JobCard({device: d, state, send, openDetail}: Props) {
           </div>
         </div>
         {/*
-          * 사용자에게는 카메라와 단계 진행만 남긴다. 장비를 움직이는 세 버튼은
-          * 잠그지 않고 감춘다 — 버튼 열이 사라지면 카메라가 그만큼 넓어지고,
-          * 이 화면에서 사용자가 할 일은 어차피 보는 것뿐이다.
+          * 일시정지·재개는 정상 운영이라 사용자도 쓴다.
+          * 비상 정지는 고장 상황의 조치라 관리자에게만 보인다.
           */}
         <div className="actions right">
+          <button disabled={!running} onClick={() => send('pause', d.id)}>
+            일시정지
+          </button>
+          <button disabled={d.job?.status !== 'paused'} onClick={() => send('resume', d.id)}>
+            재개
+          </button>
           {isAdmin && (
-            <>
-              <button disabled={!running} onClick={() => send('pause', d.id)}>
-                일시정지
-              </button>
-              <button disabled={d.job?.status !== 'paused'} onClick={() => send('resume', d.id)}>
-                재개
-              </button>
-              <button
-                className="danger"
-                disabled={!['running', 'paused'].includes(d.job?.status ?? '')}
-                onClick={() => send('stop', d.id, {}, null, true)}
-              >
-                비상 정지
-              </button>
-            </>
+            <button
+              className="danger"
+              disabled={!['running', 'paused'].includes(d.job?.status ?? '')}
+              onClick={() => send('stop', d.id, {}, null, true)}
+            >
+              비상 정지
+            </button>
           )}
           <button
             onClick={() => {

@@ -1,5 +1,5 @@
 import type {AppState, Device, Plate, Run} from '../api/types.ts';
-import {TEMP_TOLERANCE_C, type WellState} from '../config/defines.ts';
+import {FAULT_LABEL, TEMP_TOLERANCE_C, type WellState} from '../config/defines.ts';
 
 /** 슬롯 번호(1~24) → 단/열. 8단이 맨 위. */
 export const coord = (n: number) => ({tier: 8 - Math.floor((n - 1) / 3), col: ((n - 1) % 3) + 1});
@@ -42,6 +42,17 @@ export const wellState = (s: AppState, p: Plate | undefined, d: Device | undefin
 };
 
 export const isBusy = (d: Device) => !!d.job && ['running', 'paused'].includes(d.job.status);
+
+/**
+ * 지금 이 장비가 겪고 있는 문제. 정상이면 null.
+ * tone()·status() 가 「점검 필요」로 판정하는 것과 같은 조건을 쓴다.
+ */
+export const faultLabel = (d: Device): string | null => {
+  if (!d.connected) return FAULT_LABEL.DISCONNECTED;
+  if (d.fault) return FAULT_LABEL[d.fault] ?? d.fault;
+  if (d.doorOpen) return FAULT_LABEL.DOOR_OPEN;
+  return null;
+};
 
 /** 카드 테두리·배지 색. */
 export const tone = (d: Device): 'bad' | 'good' | 'warn' | 'info' => {

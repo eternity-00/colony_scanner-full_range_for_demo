@@ -64,6 +64,17 @@ export const ADMIN_ACTION: Record<string, string> = {
   environment: '온도 · CO₂ 변경',
 };
 
+/** 장비 오류 코드의 한글 이름. 사용자에게 "무엇이 고장났는지"를 말해주기 위한 것이다. */
+export const FAULT_LABEL: Record<string, string> = {
+  Z_LIMIT: 'Z축 한계 오류',
+  HEATER: '히터 오류',
+  ESTOP: '비상 정지됨',
+  DISCONNECTED: '연결 끊김',
+  DOOR_OPEN: '도어 열림',
+  CAMERA_TIMEOUT: '카메라 응답 없음',
+  ENGINE_OFFLINE: '장비 엔진 연결 끊김',
+};
+
 /** 역할에 따라 볼 수 있는 탭. */
 export const tabsFor = (isAdmin: boolean) =>
   TABS.filter(([, , , adminOnly]) => isAdmin || !adminOnly);

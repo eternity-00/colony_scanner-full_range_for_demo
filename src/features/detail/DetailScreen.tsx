@@ -1,5 +1,6 @@
 import type {AppState, Plate, Run} from '../../api/types.ts';
 import type {SendCommand, TabKey} from '../../config/defines.ts';
+import {AdminCall} from '../../shared/AdminCall.tsx';
 import {Badge} from '../../shared/Badge.tsx';
 import {Tray} from '../../shared/Tray.tsx';
 import {elapsedLabel, fmt} from '../../utils/datetime.ts';
@@ -57,6 +58,7 @@ export function DetailScreen({
       </section>
 
       <div className="stack">
+        <AdminCall state={state} devices={[device]} />
         <section className="card stack">
           <div className="row between">
             <div className="titleline">
