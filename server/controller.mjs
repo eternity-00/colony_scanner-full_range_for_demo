@@ -25,10 +25,10 @@ export class Controller extends EventEmitter {
  constructor({dataDir,stageMs=1600,tickMs=250,autoTick=true,adapter}={}){
   super();this.dataDir=dataDir;mkdirSync(join(dataDir,'images'),{recursive:true});this.stateFile=join(dataDir,'state.json');this.revision=0;this.adminPin=process.env.ADMIN_PIN||'0000';this.session={role:'analyst',failed:0,lockUntil:0,idleAt:null};
   if(existsSync(this.stateFile)){this.db=JSON.parse(readFileSync(this.stateFile,'utf8'));assert(this.db.version===1,'BAD_STATE','지원하지 않는 데이터 파일입니다.',500);}
-  // 씨딩된 플레이트의 투입 시각. 예전에는 3.5~15시간 전으로 잡았는데, 12시간 주기에서는
-  // 그중 일부가 기동하자마자 "이미 촬영 시각이 지난" 상태가 되어 한꺼번에 몰려 찍혔다.
-  // 슬롯당 1분씩만 어긋나게 해서 일정이 겹치지 않으면서도 어떤 주기에서든 밀리지 않게 한다.
-  else {const plates=[];[18,24,15,6].forEach((count,i)=>{for(let slot=1;slot<=count;slot++)plates.push({id:`DEMO-${i+1}-${String(slot).padStart(2,'0')}`,deviceId:i+1,slot,registeredAt:Date.now()-slot*60000,removedAt:null,paused:false,runs:[]});});this.db={version:1,plates,routine:{cycleHours:12,days:42,delay:0},autoRun:false,logs:[],io:[],receipts:[],devices:[]};}
+  // 플레이트는 씨딩하지 않는다. 장비는 빈 트레이로 시작하고, 사용자가 등록한 것만
+  // 검사 루틴을 따라 촬영된다. 예전에는 데모용으로 63매를 미리 넣어 두었는데,
+  // 그것들이 화면을 다 채우고 회차도 제각각이라 실제 동작을 가리고 있었다.
+  else {this.db={version:1,plates:[],routine:{cycleHours:12,days:42,delay:0},autoRun:false,logs:[],io:[],receipts:[],devices:[]};}
   for(const p of this.db.plates)for(const r of p.runs){if(typeof r.image==='string'&&r.image.endsWith('.svg')){r.image=null;r.imageState='expired';}
    if(r.imageState==='held'&&!r.images?.length){const b=(Number(String(r.image||'').match(/\d+/)?.[0])||r.n)-1;r.images=Array.from({length:6},(_,i)=>`well-${((b+i)%9)+1}.png`);r.image=null;}}
   this.adapter=adapter||new VirtualDeviceAdapter({stageMs,config:this.db.devices});
@@ -42,7 +42,8 @@ export class Controller extends EventEmitter {
  persist(){this.db.devices=this.adapter.snapshot();const tmp=this.stateFile+'.tmp';writeFileSync(tmp,JSON.stringify(this.db));renameSync(tmp,this.stateFile);}
  publish(){this.revision++;this.emit('state',this.snapshot());}
  tick(ms){this.adapter.tick?.(ms);if(this.session.role==='admin'&&Date.now()-this.session.idleAt>=300000){this.session={role:'analyst',failed:0,lockUntil:0,idleAt:null};this.log('INFO','관리자 권한 자동 해제');}if(this.db.autoRun)this.schedule();this.publish();}
- nextAt(p){return p.registeredAt+(p.runs.length+1)*this.db.routine.cycleHours*3600000+this.db.routine.delay*60000;}
+ // 지연은 투입~1회차, 주기는 회차~회차. 지연 0분이면 투입 즉시 1회차를 찍는다.
+ nextAt(p){return p.registeredAt+this.db.routine.delay*60000+p.runs.length*this.db.routine.cycleHours*3600000;}
  async schedule(){if(this.scheduling)return;this.scheduling=true;try{for(const d of this.adapter.devices){if(!d.connected||d.doorOpen||d.fault||busy(d))continue;const p=this.db.plates.find(p=>p.deviceId===d.id&&!p.removedAt&&!p.paused&&p.runs.length<Math.floor(this.db.routine.days*24/this.db.routine.cycleHours)&&this.nextAt(p)<=Date.now());if(p)await this.execute({requestId:randomUUID(),command:'capture',deviceId:d.id,args:{plateId:p.id}},'scheduler');}}catch(error){this.log('WARN',`자동 촬영 시작 실패 · ${error.message}`);}finally{this.scheduling=false;}}
  imageSet(){this.imgSeq=(this.imgSeq||0)+1;return Array.from({length:6},(_,i)=>`well-${((this.imgSeq+i)%9)+1}.png`);}
  onEvent(e){

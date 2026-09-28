@@ -44,11 +44,17 @@ export function OverviewScreen({state, openDetail, openRegister}: Props) {
             .sort((a, b) => a - b)[0];
           const running = d.job?.status === 'running';
           const stopped = !d.connected || d.fault || d.doorOpen || d.job?.status === 'paused';
+          // 플레이트가 없으면 찍을 것도 없다. 예전에는 「지금+주기」를 보여 줬는데
+          // 빈 트레이에 다음 촬영 시각이 떠 있는 게 더 이상했다.
           const nextLabel = running
             ? '진행 중'
             : stopped
               ? '정지'
-              : hm(next || Date.now() + state.routine.cycleHours * 3600000);
+              : next === undefined
+                ? '—'
+                : next <= state.serverTime
+                  ? '지금'
+                  : hm(next);
 
           return (
             <section className={`card scanner ${tone(d)}`} key={d.id}>

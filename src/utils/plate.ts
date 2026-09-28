@@ -23,11 +23,12 @@ export const pending = (p: Plate) =>
 /** 루틴 설정 기준 총 촬영 회차. */
 export const totalRuns = (s: AppState) => Math.floor((s.routine.days * 24) / s.routine.cycleHours);
 
-/** 다음 촬영 예정 시각. */
+/**
+ * 다음 촬영 예정 시각. 「주기 시작 지연」이 투입 시각과 1회차 사이의 간격이고,
+ * 주기는 회차와 회차 사이의 간격이다. 지연이 0분이면 투입 즉시 1회차를 찍는다.
+ */
 export const nextAt = (s: AppState, p: Plate) =>
-  p.registeredAt +
-  (p.runs.length + 1) * s.routine.cycleHours * 3600000 +
-  s.routine.delay * 60000;
+  p.registeredAt + s.routine.delay * 60000 + p.runs.length * s.routine.cycleHours * 3600000;
 
 /** 지금 촬영해야 하는 플레이트인지. */
 export const dueNow = (s: AppState, p: Plate) =>
