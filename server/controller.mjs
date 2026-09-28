@@ -11,9 +11,13 @@ const MAX_INCUBATION_DAYS=42;
 // 가르는 기준은 "정상 운영이냐, 고장 대응이냐"다.
 // 플레이트를 넣고 찍고 결과를 받는 일(capture/pause/resume/retry/register/remove)은
 // 사용자의 정상 업무이므로 열어둔다.
-// 장비가 고장났을 때의 조치(stop/home/reset/clearError/calibrate)와 앞으로의 모든
-// 촬영에 영향을 주는 설정(routine/environment/autoRun)은 관리자만 할 수 있다.
-const ADMIN_ONLY=['stop','home','reset','clearError','autoRun','calibrate','routine','environment'];
+// 장비가 고장났을 때의 조치(stop/home/reset/clearError/calibrate)와 장비 하드웨어
+// 설정(environment/autoRun)은 관리자만 할 수 있다.
+//
+// routine(촬영 주기·배양 기간)은 장비 설정이 아니라 실험 조건이라 사용자에게 연다.
+// 다만 루틴은 장비에 하나뿐이라 한 사람이 바꾸면 이미 배양 중인 다른 플레이트의
+// 일정까지 전부 재산정된다 — 그 부작용을 감수한 결정이다(설정 화면이 경고한다).
+const ADMIN_ONLY=['stop','home','reset','clearError','autoRun','calibrate','environment'];
 const busy=d=>d.job&&['running','paused'].includes(d.job.status);
 const validInt=(x,min,max)=>Number.isInteger(x)&&x>=min&&x<=max;
 const assert=(ok,code,message,status=409)=>{if(!ok)throw new DeviceError(code,message,status);};

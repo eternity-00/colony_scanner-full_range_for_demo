@@ -33,3 +33,8 @@
 .field .fv{justify-self:end}
 
 .fi.plain input{text-align:left;border-right:1px solid var(--line);border-radius:var(--rr);font-weight:600;font-size:0.875rem}
+
+/* 바꾸면 남의 것까지 바뀌는 설정에 붙이는 경고. 면을 물들이지 않고 왼쪽 표시만 준다. */
+.warn-note{margin-top:-0.25rem;padding:0.5625rem 0.75rem;font-size:0.78125rem;font-weight:600;color:var(--gt);
+  background:#fff;border:1px solid var(--g3);border-radius:var(--rr);box-shadow:inset 3px 0 0 #c77d0a}
+.warn-note b{font-weight:800}

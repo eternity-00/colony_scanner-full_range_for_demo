@@ -27,7 +27,7 @@ type SectionKey = 'login' | 'routine' | 'environment' | 'network' | 'backup' | '
  */
 const NAV: readonly (readonly [SectionKey, string, boolean])[] = [
   ['login', '로그인 정보', false],
-  ['routine', '검사 루틴', true],
+  ['routine', '검사 루틴', false],
   ['environment', '온도 · CO₂', true],
   ['network', '유선 통신', false],
   ['backup', '로그 · 백업', false],
@@ -124,7 +124,15 @@ export function SettingsScreen({state, send, operator, setOperator, onRole}: Pro
     routine: (
       <section className="card stack">
         <h2>검사 루틴 — 장비 전체 공통</h2>
-        <p className="muted">변경 시 진행 중 배양 일정이 재산정됩니다.</p>
+        {/*
+          * 루틴은 플레이트마다 따로 갖지 않고 장비에 하나뿐이다. 사용자가 새 플레이트를
+          * 위해 주기를 바꾸면 이미 배양 중인 플레이트의 일정까지 같이 바뀌므로,
+          * 고칠 수 있게 열어둔 대신 무엇이 함께 바뀌는지 분명히 적는다.
+          */}
+        <p className="warn-note">
+          이 값은 <b>장비의 모든 플레이트에 함께 적용</b>됩니다. 바꾸면 지금 배양 중인
+          플레이트의 남은 촬영 일정까지 다시 계산됩니다.
+        </p>
         <div className="fields">
           {ROUTINE_FIELDS.map(([key, label, unit, min, max, desc]) => (
             <label className="field" key={key}>
