@@ -30,7 +30,6 @@ export function DetailScreen({
   const device = state.devices.find(d => d.id === deviceId);
   if (!device) return null;
 
-  const isAdmin = state.session.role === 'admin';
 
   const plate = state.plates.find(p => p.deviceId === deviceId && p.slot === slot && !p.removedAt);
   const done = plate ? plate.runs.length >= totalRuns(state) : false;
@@ -111,15 +110,13 @@ export function DetailScreen({
               </div>
 
               {/*
-                * 장비를 움직이는 버튼은 감추지 않고 잠근다. 눌러보고 알게 하는 편이
-                * "관리자를 불러야 하는 일"임을 알려준다. 플레이트 촬영 일시정지와
-                * 반출은 기록만 바꾸므로 사용자에게 열어둔다.
+                * 장비를 움직이는 버튼도 눌리게 둔다. 서버가 막고 App 이 그걸 받아
+                * "관리자 확인" 팝업을 띄우므로, 무엇을 하려다 막혔는지 알 수 있다.
                 */}
               <div className="actbar">
                 <button
                   className="primary"
-                  disabled={!isAdmin || ['running', 'paused'].includes(device.job?.status ?? '')}
-                  title={isAdmin ? undefined : '관리자 권한이 필요합니다'}
+                  disabled={['running', 'paused'].includes(device.job?.status ?? '')}
                   onClick={() => send('capture', device.id, {plateId: plate.id}, 'running')}
                 >
                   촬영 시작
@@ -132,8 +129,7 @@ export function DetailScreen({
                   {plate.paused ? '일정 재개' : '촬영 일시정지'}
                 </button>
                 <button
-                  disabled={!isAdmin || !pending(plate) || !device.pcConnected}
-                  title={isAdmin ? undefined : '관리자 권한이 필요합니다'}
+                  disabled={!pending(plate) || !device.pcConnected}
                   onClick={() => send('retry', device.id, {plateId: plate.id})}
                 >
                   재전송

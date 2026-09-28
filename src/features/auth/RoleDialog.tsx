@@ -7,12 +7,16 @@ interface Props {
   state: AppState;
   send: SendCommand;
   onClose: () => void;
+  /** 막힌 동작 이름. 주면 "관리자 확인" 팝업으로 열린다. */
+  reason?: string;
+  /** PIN 이 맞은 뒤 이어서 할 일. 막혔던 동작을 그대로 다시 보낸다. */
+  onAuthed?: () => void;
 }
 
 const PIN_LENGTH = 4;
 const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
-export function RoleDialog({state, send, onClose}: Props) {
+export function RoleDialog({state, send, onClose, reason, onAuthed}: Props) {
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
 
@@ -25,6 +29,7 @@ export function RoleDialog({state, send, onClose}: Props) {
     try {
       await send('role.login', 0, {pin});
       onClose();
+      onAuthed?.();
     } catch (e) {
       setPin('');
       setError(e instanceof Error ? e.message : '알 수 없는 오류입니다.');
@@ -32,8 +37,8 @@ export function RoleDialog({state, send, onClose}: Props) {
   };
 
   return (
-    <Modal title="권한 전환" onClose={onClose}>
-      {state.session.role === 'admin' ? (
+    <Modal title={reason ? '관리자 확인이 필요합니다' : '권한 전환'} onClose={onClose}>
+      {state.session.role === 'admin' && !reason ? (
         <>
           <p>관리자 권한이 열려 있습니다.</p>
           <button
@@ -47,7 +52,14 @@ export function RoleDialog({state, send, onClose}: Props) {
         </>
       ) : (
         <>
-          <p>관리자 전환을 위해 {PIN_LENGTH}자리 PIN을 입력하세요.</p>
+          {reason ? (
+            <p>
+              <b>{reason}</b>은(는) 장비를 움직이는 동작이라 관리자 권한이 필요합니다. PIN{' '}
+              {PIN_LENGTH}자리를 입력하면 이어서 진행합니다.
+            </p>
+          ) : (
+            <p>관리자 전환을 위해 {PIN_LENGTH}자리 PIN을 입력하세요.</p>
+          )}
           <div className={`pindots ${error ? 'error' : ''}`}>
             {Array.from({length: PIN_LENGTH}, (_, i) => (
               <i key={i} className={pin.length > i ? 'on' : ''} />
@@ -79,7 +91,7 @@ export function RoleDialog({state, send, onClose}: Props) {
             disabled={pin.length !== PIN_LENGTH || state.session.lockedFor > 0}
             onClick={login}
           >
-            관리자 전환
+            {reason ? '확인하고 계속' : '관리자 전환'}
           </button>
         </>
       )}

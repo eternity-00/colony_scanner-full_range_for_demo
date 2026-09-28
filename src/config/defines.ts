@@ -27,20 +27,42 @@ export type SendCommand = (
 /**
  * 드로어 메뉴 순서: [키, 한글, 영문, 관리자 전용]
  *
- * 촬영·장비 화면은 버튼을 빼고 나면 거의 빈 화면이 되고, 그 내용은 현황 카드의
- * 「촬영 중」·「점검 필요」 배지가 이미 보여준다. 그래서 통째로 감춘다.
- * 나머지는 사용자에게 보여주되 장비를 움직이는 버튼만 잠근다 —
- * 상태를 못 보면 관리자를 불러야 할지 판단할 수 없기 때문이다.
+ * 장비 화면만 통째로 감춘다. 버튼(원점 복귀·모듈 초기화·오류 해제·캘리브레이션)을
+ * 빼고 나면 모듈 상태 목록만 남고, 그건 현황 카드의 「점검 필요」 배지가 이미 보여준다.
+ *
+ * 촬영 화면은 감추지 않는다. 버튼을 빼도 카메라 영상과 단계 진행이 남고,
+ * 그건 사용자가 "내 플레이트가 지금 찍히고 있나"를 아는 유일한 화면이다.
+ * 나머지도 같은 이유로 보여주되 장비를 움직이는 버튼만 막는다.
  */
 export const TABS: readonly (readonly [TabKey, string, string, boolean])[] = [
   ['overview', '현황', 'Overview', false],
   ['detail', '상세', 'Detail', false],
   ['register', '등록', 'Register', false],
-  ['running', '촬영', 'Capture', true],
+  ['running', '촬영', 'Capture', false],
   ['history', '이력', 'History', false],
   ['device', '장비', 'Device', true],
   ['settings', '사용자 설정', 'Settings', false],
 ];
+
+/**
+ * 관리자 권한이 필요한 동작의 한글 이름. 서버가 FORBIDDEN 을 돌려줬을 때
+ * "무엇을 하려다 막혔는지"를 팝업에 적기 위한 것이다.
+ * server/controller.mjs 의 ADMIN_ONLY 와 같은 목록이어야 한다.
+ */
+export const ADMIN_ACTION: Record<string, string> = {
+  capture: '촬영 시작',
+  pause: '촬영 일시정지',
+  resume: '촬영 재개',
+  stop: '비상 정지',
+  home: '원점 복귀',
+  reset: '모듈 초기화',
+  clearError: '오류 해제',
+  retry: '재전송',
+  autoRun: '자동 촬영 설정',
+  calibrate: '캘리브레이션',
+  routine: '검사 루틴 변경',
+  environment: '온도 · CO₂ 변경',
+};
 
 /** 역할에 따라 볼 수 있는 탭. */
 export const tabsFor = (isAdmin: boolean) =>

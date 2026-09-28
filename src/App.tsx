@@ -2,6 +2,7 @@ import {useEffect, useState, type ReactNode} from 'react';
 import {command, getState, subscribe} from './api/client.ts';
 import type {AppState, CommandArgs, CommandError, Plate} from './api/types.ts';
 import {
+  ADMIN_ACTION,
   ADMIN_IDLE_LIMIT_SEC,
   ADMIN_IDLE_WARN_MS,
   tabsFor,
@@ -44,6 +45,8 @@ export default function App() {
   const [confirmModal, setConfirmModal] = useState<ConfirmModal | null>(null);
   const [viewer, setViewer] = useState<ShotTarget | null>(null);
   const [roleDialog, setRoleDialog] = useState(false);
+  // 관리자 권한이 없어 막힌 동작. PIN 이 맞으면 retry 로 그대로 이어서 보낸다.
+  const [gate, setGate] = useState<{reason: string; retry: () => void} | null>(null);
   const [registerDevice, setRegisterDevice] = useState(1);
   const [menuOpen, setMenuOpen] = useState(false);
   const [exitAsk, setExitAsk] = useState(false);
@@ -129,6 +132,12 @@ export default function App() {
         return result;
       } catch (e) {
         const error = e as CommandError;
+        // 서버가 권한으로 막은 것이면 오류 토스트 대신 확인 팝업을 띄운다.
+        // 화면에서 버튼을 잠그는 것과 달리, 어느 경로로 들어와도 여기서 걸린다.
+        if (error.code === 'FORBIDDEN' && cmd !== 'role.login') {
+          setGate({reason: ADMIN_ACTION[cmd] || '이 동작', retry: () => void run()});
+          return null;
+        }
         setNotice({bad: true, text: `${error.code || 'ERROR'} · ${error.message}`});
         if (cmd === 'role.login') throw e;
         return null;
@@ -259,6 +268,16 @@ export default function App() {
 
       {roleDialog && (
         <RoleDialog state={state} send={execute} onClose={() => setRoleDialog(false)} />
+      )}
+
+      {gate && (
+        <RoleDialog
+          state={state}
+          send={execute}
+          reason={gate.reason}
+          onAuthed={gate.retry}
+          onClose={() => setGate(null)}
+        />
       )}
 
       {exitAsk && (
