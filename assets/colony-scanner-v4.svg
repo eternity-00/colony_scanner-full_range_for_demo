@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <!--
+    v4 아이콘. v3 와 같은 6-well 플레이트 모티브를 쓰되 바탕을 짙은 남색으로
+    바꿔 바탕화면에서 두 버전을 한눈에 구분한다. 권한 분리가 v4 의 주제이므로
+    자물쇠 대신 색으로만 구분한다 — 아이콘에 기능 설명을 넣지 않는다.
+  -->
+  <rect width="128" height="128" rx="6" fill="#112453"/>
+  <g fill="#ffffff">
+    <circle cx="32" cy="44" r="14"/>
+    <circle cx="64" cy="44" r="14"/>
+    <circle cx="96" cy="44" r="14"/>
+    <circle cx="32" cy="84" r="14"/>
+    <circle cx="64" cy="84" r="14"/>
+  </g>
+  <circle cx="96" cy="84" r="14" fill="#e8971a"/>
+</svg>
