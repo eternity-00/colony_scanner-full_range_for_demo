@@ -1,7 +1,12 @@
 import {useEffect, useState, type ReactNode} from 'react';
 import {command, getState, subscribe} from './api/client.ts';
 import type {AppState, CommandArgs, CommandError, Plate} from './api/types.ts';
-import {ADMIN_IDLE_LIMIT_SEC, ADMIN_IDLE_WARN_MS, type TabKey} from './config/defines.ts';
+import {
+  ADMIN_IDLE_LIMIT_SEC,
+  ADMIN_IDLE_WARN_MS,
+  tabsFor,
+  type TabKey,
+} from './config/defines.ts';
 import {RoleDialog} from './features/auth/RoleDialog.tsx';
 import {CaptureScreen} from './features/capture/CaptureScreen.tsx';
 import {DetailScreen} from './features/detail/DetailScreen.tsx';
@@ -197,24 +202,29 @@ export default function App() {
     ),
   };
 
+  const isAdmin = state.session.role === 'admin';
+  // 관리자 권한이 5분 무조작으로 풀리면, 보고 있던 관리자 화면에서도 빠져나온다.
+  const visible = tabsFor(isAdmin).some(([key]) => key === tab) ? tab : 'overview';
+
   const idleLeft = Math.max(0, ADMIN_IDLE_LIMIT_SEC - Math.floor(state.session.idleFor / 1000));
-  const expiring = state.session.role === 'admin' && state.session.idleFor >= ADMIN_IDLE_WARN_MS;
+  const expiring = isAdmin && state.session.idleFor >= ADMIN_IDLE_WARN_MS;
 
   return (
     <div className="app" data-w={layoutWidth}>
       <Header
         state={state}
-        tab={tab}
+        tab={visible}
         operator={operator}
         onRole={() => setRoleDialog(true)}
         onMenu={() => setMenuOpen(true)}
       />
-      <main>{screens[tab]}</main>
+      <main>{screens[visible]}</main>
 
       {menuOpen && <div className="drawer-scrim" onClick={() => setMenuOpen(false)} />}
       <MenuDrawer
         open={menuOpen}
-        tab={tab}
+        tab={visible}
+        isAdmin={isAdmin}
         onSelect={key => {
           setTab(key);
           setMenuOpen(false);

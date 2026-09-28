@@ -8,7 +8,12 @@ import {VirtualDeviceAdapter,DeviceError} from './virtual-device.mjs';
 const MAX_INCUBATION_DAYS=42;
 // 피드백 2.1 — 장비 설정 변경 권한은 관리자에게만. 화면에서 감추는 것과 별개로 여기서 막는다.
 // 2.2 표가 관리자 전용으로 적은 항목: 온도 임계값 · 최대 배양 기간 · 촬영/광학 파라미터.
-const ADMIN_ONLY=['routine','environment','calibrate'];
+// 사용자(분석자)는 장비를 움직이는 어떤 동작도 할 수 없다.
+// 기준은 하나 — 그 명령을 내리면 스캐너가 실제로 움직이는가(모터·카메라·히터).
+// routine/environment 는 스캐너를 바로 움직이진 않지만 앞으로의 모든 촬영 일정과
+// 배양 조건을 바꾸는 설정이라 같이 둔다.
+// 등록·반출·플레이트 촬영 중단은 기록만 바꾸므로 사용자에게 열어둔다.
+const ADMIN_ONLY=['capture','pause','resume','stop','home','reset','clearError','retry','autoRun','calibrate','routine','environment'];
 const busy=d=>d.job&&['running','paused'].includes(d.job.status);
 const validInt=(x,min,max)=>Number.isInteger(x)&&x>=min&&x<=max;
 const assert=(ok,code,message,status=409)=>{if(!ok)throw new DeviceError(code,message,status);};

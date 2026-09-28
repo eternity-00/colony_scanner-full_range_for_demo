@@ -1,15 +1,16 @@
-import {TABS, type TabKey} from '../config/defines.ts';
+import {tabsFor, type TabKey} from '../config/defines.ts';
 import {TabIcon} from '../shared/TabIcon.tsx';
 
 interface Props {
   open: boolean;
   tab: TabKey;
+  isAdmin: boolean;
   onSelect: (tab: TabKey) => void;
   onExit: () => void;
   onClose: () => void;
 }
 
-export function MenuDrawer({open, tab, onSelect, onExit, onClose}: Props) {
+export function MenuDrawer({open, tab, isAdmin, onSelect, onExit, onClose}: Props) {
   return (
     <nav className={`drawer ${open ? 'open' : ''}`}>
       <div className="drawer-head">
@@ -19,7 +20,7 @@ export function MenuDrawer({open, tab, onSelect, onExit, onClose}: Props) {
         </button>
       </div>
       <div className="drawer-list">
-        {TABS.map(([key, ko, en]) => (
+        {tabsFor(isAdmin).map(([key, ko, en]) => (
           <button key={key} className={tab === key ? 'active' : ''} onClick={() => onSelect(key)}>
             <i className="di">
               <TabIcon tab={key} />

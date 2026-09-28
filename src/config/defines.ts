@@ -24,16 +24,27 @@ export type SendCommand = (
   confirm?: boolean,
 ) => Promise<unknown>;
 
-/** 드로어 메뉴 순서: [키, 한글, 영문] */
-export const TABS: readonly (readonly [TabKey, string, string])[] = [
-  ['overview', '현황', 'Overview'],
-  ['detail', '상세', 'Detail'],
-  ['register', '등록', 'Register'],
-  ['running', '촬영', 'Capture'],
-  ['history', '이력', 'History'],
-  ['device', '장비', 'Device'],
-  ['settings', '사용자 설정', 'Settings'],
+/**
+ * 드로어 메뉴 순서: [키, 한글, 영문, 관리자 전용]
+ *
+ * 촬영·장비 화면은 버튼을 빼고 나면 거의 빈 화면이 되고, 그 내용은 현황 카드의
+ * 「촬영 중」·「점검 필요」 배지가 이미 보여준다. 그래서 통째로 감춘다.
+ * 나머지는 사용자에게 보여주되 장비를 움직이는 버튼만 잠근다 —
+ * 상태를 못 보면 관리자를 불러야 할지 판단할 수 없기 때문이다.
+ */
+export const TABS: readonly (readonly [TabKey, string, string, boolean])[] = [
+  ['overview', '현황', 'Overview', false],
+  ['detail', '상세', 'Detail', false],
+  ['register', '등록', 'Register', false],
+  ['running', '촬영', 'Capture', true],
+  ['history', '이력', 'History', false],
+  ['device', '장비', 'Device', true],
+  ['settings', '사용자 설정', 'Settings', false],
 ];
+
+/** 역할에 따라 볼 수 있는 탭. */
+export const tabsFor = (isAdmin: boolean) =>
+  TABS.filter(([, , , adminOnly]) => isAdmin || !adminOnly);
 
 /** 촬영 작업의 6단계. 그 외 명령(home/calibrate/reset)은 3단계. */
 export const STAGES = ['이송', '물기 제거', '촬영', '수납 복귀', '전송', 'PC 저장'];
