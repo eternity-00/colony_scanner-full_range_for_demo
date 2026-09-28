@@ -25,7 +25,8 @@
 .modal-bg{background:#0d1637b3}
 .modal:not(.wide){border-top:3px solid var(--blue)}
 .modal:not(.wide) .actions{margin:1.25rem -1.5rem -1.5rem;padding:0.9375rem 1.5rem;
-  background:#f8f9fb;border-top:1px solid var(--g3);border-radius:0 0 var(--rr) var(--rr)}
+  justify-content:center;background:#f8f9fb;border-top:1px solid var(--g3);
+  border-radius:0 0 var(--rr) var(--rr)}
 /* 닫기 ×는 머리글 띠 위에 얹히므로 면을 가지고 있어야 눌리는 것으로 보인다. */
 .modal:not(.wide)>.modal-x{top:0.8125rem;right:0.8125rem;width:2.375rem;height:2.375rem;
   display:grid;place-items:center;border:1px solid var(--line);border-radius:var(--rr);
