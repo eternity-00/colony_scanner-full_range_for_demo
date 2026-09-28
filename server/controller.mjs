@@ -88,8 +88,11 @@ export class Controller extends EventEmitter {
    }else if(command==='register'){
     const d=this.adapter.get(deviceId);assert(d.connected&&!d.fault&&!d.doorOpen,'UNAVAILABLE','연결·오류·도어 상태를 확인하세요.');assert(!busy(d),'DEVICE_BUSY','작업 중에는 등록할 수 없습니다.');assert(validInt(args.slot,1,24),'INVALID_SLOT','슬롯은 1~24여야 합니다.',400);
     assert(!this.db.plates.some(p=>p.deviceId===deviceId&&p.slot===args.slot&&!p.removedAt),'SLOT_OCCUPIED','이미 수납된 슬롯입니다.');
-    assert(Number.isFinite(args.registeredAt)&&args.registeredAt>0&&args.registeredAt<=Date.now()+60000,'INVALID_TIME','유효한 과거 또는 현재 투입 시각이 필요합니다.',400);
-    const p={id:`PL-${randomUUID().slice(0,8).toUpperCase()}`,deviceId,slot:args.slot,registeredAt:args.registeredAt,removedAt:null,paused:false,runs:[]};this.db.plates.push(p);result={plateId:p.id};this.log('INFO',`${p.id} · SCANNER ${deviceId} · 슬롯 ${args.slot} 등록`);
+    // 투입 시각은 서버가 찍는다. 화면에서 고를 수 있게 두면 촬영 일정 전체를
+    // 앞뒤로 옮길 수 있는데, 그건 기록이 아니라 조작이다. 클라이언트가 보낸
+    // 값이 있어도 쓰지 않는다 — 화면에서 감추는 것만으로는 막은 게 아니다.
+    const registeredAt=Date.now();
+    const p={id:`PL-${randomUUID().slice(0,8).toUpperCase()}`,deviceId,slot:args.slot,registeredAt,removedAt:null,paused:false,runs:[]};this.db.plates.push(p);result={plateId:p.id};this.log('INFO',`${p.id} · SCANNER ${deviceId} · 슬롯 ${args.slot} 등록`);
    }else if(['remove','platePause','retry','capture'].includes(command)){
     const p=this.db.plates.find(p=>p.id===args.plateId);assert(p&&!p.removedAt,'PLATE_NOT_FOUND','수납 중인 플레이트를 찾을 수 없습니다.',404);assert(p.deviceId===deviceId,'DEVICE_MISMATCH','플레이트와 스캐너가 일치하지 않습니다.',400);const d=this.adapter.get(deviceId);
     if(command==='capture')await this.adapter.command(deviceId,'capture',{plateId:p.id,slot:p.slot},requestId);

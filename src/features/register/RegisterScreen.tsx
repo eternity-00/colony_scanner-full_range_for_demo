@@ -4,7 +4,7 @@ import {SLOTS_PER_DEVICE, type SendCommand, type TabKey} from '../../config/defi
 import {WellLegend} from '../../shared/Legend.tsx';
 import {Modal} from '../../shared/Modal.tsx';
 import {Tray} from '../../shared/Tray.tsx';
-import {dateInput, kdt} from '../../utils/datetime.ts';
+import {kdt} from '../../utils/datetime.ts';
 import {isBusy, platesFor, pos, status, totalRuns} from '../../utils/plate.ts';
 
 interface Props {
@@ -32,7 +32,6 @@ export function RegisterScreen({state, send, setTab, device = 1, slot: picked}: 
 
   // 현황에서 누른 칸이 있으면 그 칸으로 시작한다. 그새 찼으면 첫 빈 칸으로 떨어진다.
   const [slot, setSlot] = useState(() => (picked && free.includes(picked) ? picked : free[0] || 0));
-  const [when, setWhen] = useState(() => dateInput(Date.now()));
   const [done, setDone] = useState<Done | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [blockOpen, setBlockOpen] = useState(false);
@@ -59,19 +58,17 @@ export function RegisterScreen({state, send, setTab, device = 1, slot: picked}: 
           ? '촬영 작업 중입니다. 완료 후 등록하세요.'
           : !slot
             ? '빈 슬롯이 없습니다. 다른 스캐너를 선택하세요.'
-            : !when
-              ? '투입 시각을 선택하세요.'
-              : '';
+            : '';
 
-  const firstShotAt = (base: number) =>
-    base + state.routine.cycleHours * 3600000 + state.routine.delay * 60000;
+  // 지연은 투입~1회차 간격이다. 지연이 0분이면 등록하는 순간이 곧 첫 촬영이다.
+  const firstShotAt = (base: number) => base + state.routine.delay * 60000;
 
   const register = async () => {
     setSubmitting(true);
     const place = `${d.name} · ${pos(slot)}`;
-    const registeredAt = new Date(when).getTime();
-    const result = await send('register', deviceId, {slot, registeredAt});
-    if (result) setDone({place, first: firstShotAt(registeredAt)});
+    // 투입 시각은 서버가 찍는다. 화면은 무엇이 기록될지 미리 보여줄 뿐이다.
+    const result = await send('register', deviceId, {slot});
+    if (result) setDone({place, first: firstShotAt(Date.now())});
     else setSubmitting(false);
   };
 
@@ -120,20 +117,13 @@ export function RegisterScreen({state, send, setTab, device = 1, slot: picked}: 
             </section>
 
             <section className="card stack">
-              <label>
-                투입 시각
-                <div className="dtview">
-                  <b>{when ? kdt(new Date(when).getTime()) : '—'}</b>
-                  <button onClick={() => setWhen(dateInput(Date.now()))}>지금</button>
-                </div>
-                <input
-                  className="dtpick"
-                  type="datetime-local"
-                  value={when}
-                  onChange={e => setWhen(e.target.value)}
-                />
-              </label>
+              {/*
+                * 투입 시각은 고르는 것이 아니라 등록한 순간으로 찍힌다.
+                * 고를 수 있게 두면 촬영 일정 전체를 앞뒤로 옮길 수 있다.
+                */}
               <dl>
+                <dt>투입 시각</dt>
+                <dd>{kdt(state.serverTime)}<em>등록하는 순간으로 기록됩니다</em></dd>
                 <dt>검사 루틴</dt>
                 <dd>
                   {state.routine.cycleHours}시간 · {state.routine.days}일
@@ -141,7 +131,7 @@ export function RegisterScreen({state, send, setTab, device = 1, slot: picked}: 
                 <dt>총 촬영</dt>
                 <dd>{totalRuns(state)}회</dd>
                 <dt>첫 촬영</dt>
-                <dd>{when ? kdt(firstShotAt(new Date(when).getTime())) : '—'}</dd>
+                <dd>{kdt(firstShotAt(state.serverTime))}</dd>
               </dl>
               <button className="link" onClick={() => setTab('settings')}>
                 설정에서 변경 →
