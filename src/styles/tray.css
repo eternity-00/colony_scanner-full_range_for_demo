@@ -17,10 +17,10 @@
   background:#2f9e5f;border:2px solid #2f9e5f}
 
 .tray.compact{gap:0.3125rem}
-.tray.compact .tray-row{grid-template-columns:1.375rem repeat(3,minmax(0,1fr));gap:0.3125rem}
+.tray.compact .tray-row{grid-template-columns:1.5rem repeat(3,minmax(0,1fr));gap:0.3125rem}
 .tray.compact .cell{height:auto;min-height:1.875rem}
 .tray.compact .cell:disabled{opacity:1;cursor:default}
-.tray.compact .tier{font-size:0.625rem}
+.tray.compact .tier{font-size:0.6875rem}
 .tray-box .tray{height:100%;grid-auto-rows:minmax(0,1fr)}
 .tray-box .tray-row{align-items:stretch}
 
