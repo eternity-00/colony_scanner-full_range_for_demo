@@ -61,3 +61,20 @@
 .plate-info{grid-template-columns:5.5rem 1fr;gap:0.5rem 1rem;font-size:0.875rem}
 .plate-info dt{color:var(--gt);font-weight:600}
 .plate-info dd{color:var(--gt);font-weight:700;font-variant-numeric:tabular-nums}
+
+/*
+ * 빈 칸을 눌렀을 때의 등록 확인 팝업.
+ * 어느 칸을 눌렀는지 글로만 적어 두면 트레이에서 눈으로 찾던 것과 이어지지 않는다.
+ * 왼쪽에 그 칸을 같은 모양(점선 테두리 · 빈 원)으로 다시 그린다.
+ */
+.pick-box{display:flex;align-items:center;gap:0.875rem;padding:0.875rem 1rem;
+  background:#f8f9fb;border:1px solid var(--g3);border-radius:var(--rr)}
+.pick-cell{width:3.25rem;height:2.5rem;flex:none;display:grid;place-items:center;
+  background:#fff;border:1px dashed #d8dce1;border-radius:var(--rr)}
+.pick-cell::before{content:'';width:1.125rem;height:1.125rem;border-radius:50%;
+  background:#fff;border:2px solid #dcdfe3}
+.pick-box b{display:block;font-size:1.0625rem;font-weight:800;letter-spacing:-.2px;color:var(--gt)}
+.pick-box span{display:block;font-size:0.8125rem;color:var(--gt);margin-top:2px}
+.pick-ask{margin:1rem 0 0;font-size:0.9375rem;font-weight:650;color:var(--gt)}
+.pick-info{margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid #eceef1;
+  grid-template-columns:5.5rem 1fr;gap:0.375rem 0.625rem;font-size:0.84375rem}

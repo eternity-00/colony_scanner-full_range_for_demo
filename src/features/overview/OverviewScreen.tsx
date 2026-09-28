@@ -84,7 +84,7 @@ export function OverviewScreen({state, openDetail, openRegister}: Props) {
 
       {emptyPick && (
         <Modal
-          title={`SCANNER ${emptyPick.deviceId} · ${pos(emptyPick.slot)}`}
+          title="빈 슬롯 등록"
           confirmLabel="등록"
           onConfirm={() => {
             const target = emptyPick;
@@ -93,7 +93,31 @@ export function OverviewScreen({state, openDetail, openRegister}: Props) {
           }}
           onClose={() => setEmptyPick(null)}
         >
-          <p>빈 슬롯입니다. 이 위치에 플레이트를 등록하시겠습니까?</p>
+          {/* 누른 칸을 트레이에서 보던 모양 그대로 다시 보여 준다. */}
+          <div className="pick-box">
+            <i className="pick-cell" aria-hidden />
+            <div>
+              <b>
+                SCANNER {emptyPick.deviceId} · {pos(emptyPick.slot)}
+              </b>
+              <span>현재 비어 있습니다</span>
+            </div>
+          </div>
+          <p className="pick-ask">이 위치에 플레이트를 등록하시겠습니까?</p>
+          <dl className="pick-info">
+            <dt>검사 루틴</dt>
+            <dd>
+              {state.routine.cycleHours}시간 · {state.routine.days}일
+            </dd>
+            <dt>첫 촬영</dt>
+            <dd>
+              {!state.autoRun
+                ? '자동 촬영이 꺼져 있습니다'
+                : state.routine.delay
+                  ? `등록 ${state.routine.delay}분 뒤`
+                  : '등록 직후'}
+            </dd>
+          </dl>
         </Modal>
       )}
 
