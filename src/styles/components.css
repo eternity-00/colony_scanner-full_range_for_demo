@@ -113,3 +113,18 @@
 .ac-body{display:flex;flex-direction:column;gap:2px;min-width:0}
 .ac-body b{font-size:0.875rem;font-weight:800;letter-spacing:-.01em;color:var(--gt)}
 .ac-body span{font-size:0.78125rem;font-weight:600;color:var(--gt)}
+
+/* 숫자 키패드 팝업 — PIN 키패드(.keypad)를 그대로 쓰고 표시부만 더한다. */
+.padview{display:flex;align-items:baseline;justify-content:center;gap:0.375rem;margin:0.25rem 0 0;
+  padding:0.75rem 1rem;background:#f8f9fb;border:1px solid var(--g3);border-radius:var(--rr)}
+.padview b{font-size:2.25rem;font-weight:800;letter-spacing:-.03em;color:var(--blue);font-variant-numeric:tabular-nums}
+.padview i{font-style:normal;font-size:0.9375rem;font-weight:700;color:var(--gt)}
+.padview.error b{color:#ca263f}
+.pad-hint{margin:0.375rem 0 0;font-size:0.78125rem;font-weight:600;color:var(--gt);text-align:center}
+.pad-hint.bad{color:#ca263f}
+.pad-presets{display:flex;gap:0.5rem;margin-top:0.625rem}
+.pad-presets button{flex:1;min-height:2.75rem;display:flex;align-items:baseline;justify-content:center;gap:2px;
+  border:1px solid var(--line);border-radius:var(--rr);background:#fff;color:var(--gt);font-size:1.0625rem;font-weight:800}
+.pad-presets button em{font-style:normal;font-size:0.6875rem;font-weight:700}
+.pad-presets button:hover{background:#f2f1f3;border-color:#9ba2ac}
+.pad-presets button.on{background:var(--blue);border-color:var(--blue);color:#fff}

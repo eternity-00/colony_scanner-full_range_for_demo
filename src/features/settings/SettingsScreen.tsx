@@ -7,6 +7,8 @@ import {
   type SendCommand,
 } from '../../config/defines.ts';
 import {Badge} from '../../shared/Badge.tsx';
+import {Modal} from '../../shared/Modal.tsx';
+import {NumberPad} from '../../shared/NumberPad.tsx';
 import {Toggle} from '../../shared/Toggle.tsx';
 import {download} from '../../utils/download.ts';
 
@@ -34,28 +36,66 @@ const NAV: readonly (readonly [SectionKey, string, boolean])[] = [
   ['info', '장비 정보', false],
 ];
 
-/** [키, 라벨, 단위, 최소, 최대, 설명] */
-const ROUTINE_FIELDS: readonly (readonly [keyof Routine, string, string, number, number, string])[] =
-  [
-    ['cycleHours', '촬영 주기', '시간', 1, 48, '플레이트 1매를 다시 촬영하기까지의 간격'],
-    [
-      'days',
-      '총 배양 기간',
-      '일',
-      1,
-      MAX_INCUBATION_DAYS,
-      `배양을 유지할 전체 기간 · 최대 ${MAX_INCUBATION_DAYS}일`,
-    ],
-    ['delay', '주기 시작 지연', '분', 0, 720, '투입 시각 이후 첫 촬영까지 미루는 시간'],
-  ];
+interface RoutineField {
+  key: keyof Routine;
+  label: string;
+  unit: string;
+  min: number;
+  max: number;
+  /** −/+ 한 번에 움직이는 폭이자, 허용되는 배수. */
+  step: number;
+  desc: string;
+  /** 키패드에서 한 번에 고를 수 있는 값. */
+  presets: readonly number[];
+}
+
+const ROUTINE_FIELDS: readonly RoutineField[] = [
+  {
+    key: 'cycleHours',
+    label: '촬영 주기',
+    unit: '시간',
+    min: 1,
+    max: 48,
+    step: 1,
+    desc: '플레이트 1매를 다시 촬영하기까지의 간격',
+    presets: [6, 12, 24],
+  },
+  {
+    key: 'days',
+    label: '총 배양 기간',
+    unit: '일',
+    min: 1,
+    max: MAX_INCUBATION_DAYS,
+    step: 1,
+    desc: `배양을 유지할 전체 기간 · 최대 ${MAX_INCUBATION_DAYS}일`,
+    presets: [7, 14, 28, 42],
+  },
+  {
+    key: 'delay',
+    label: '주기 시작 지연',
+    unit: '분',
+    min: 0,
+    max: 720,
+    step: 15,
+    desc: '투입 시각 이후 첫 촬영까지 미루는 시간 · 0분이면 투입 즉시',
+    presets: [0, 30, 60, 120],
+  },
+];
 
 export function SettingsScreen({state, send, operator, setOperator, onRole}: Props) {
   const [section, setSection] = useState<SectionKey>('login');
   const [routine, setRoutine] = useState<Routine>(state.routine);
+  /** 키패드를 열어 둔 항목. null 이면 닫혀 있다. */
+  const [pad, setPad] = useState<RoutineField | null>(null);
+  const [askSave, setAskSave] = useState(false);
   const [env, setEnv] = useState({
     temperature: state.devices[0]?.targetTemperature || 37,
     co2: state.devices[0]?.targetCo2 || 5,
   });
+
+  /** 범위를 벗어나지 않게 step 만큼 옮긴다. */
+  const bump = (f: RoutineField, by: number) =>
+    setRoutine(r => ({...r, [f.key]: Math.min(f.max, Math.max(f.min, r[f.key] + by))}));
 
   const isAdmin = state.session.role === 'admin';
   const nav = NAV.filter(([, , adminOnly]) => isAdmin || !adminOnly);
@@ -124,36 +164,37 @@ export function SettingsScreen({state, send, operator, setOperator, onRole}: Pro
     routine: (
       <section className="card stack">
         <h2>검사 루틴 — 장비 전체 공통</h2>
-        {/*
-          * 루틴은 플레이트마다 따로 갖지 않고 장비에 하나뿐이다. 사용자가 새 플레이트를
-          * 위해 주기를 바꾸면 이미 배양 중인 플레이트의 일정까지 같이 바뀌므로,
-          * 고칠 수 있게 열어둔 대신 무엇이 함께 바뀌는지 분명히 적는다.
-          */}
-        <p className="warn-note">
-          이 값은 <b>장비의 모든 플레이트에 함께 적용</b>됩니다. 바꾸면 지금 배양 중인
-          플레이트의 남은 촬영 일정까지 다시 계산됩니다.
-        </p>
         <div className="fields">
-          {ROUTINE_FIELDS.map(([key, label, unit, min, max, desc]) => (
-            <label className="field" key={key}>
+          {ROUTINE_FIELDS.map(f => (
+            <div className="field step" key={f.key}>
               <span className="fl">
-                {label}
-                <em>{desc}</em>
+                {f.label}
+                <em>{f.desc}</em>
               </span>
-              <span className="fi">
-                <input
-                  type="number"
-                  min={min}
-                  max={max}
-                  step={key === 'delay' ? 15 : 1}
-                  value={routine[key]}
-                  onChange={e => setRoutine({...routine, [key]: Number(e.target.value)})}
-                />
-                <i>{unit}</i>
+              <span className="stepper">
+                <button
+                  onClick={() => bump(f, -f.step)}
+                  disabled={routine[f.key] <= f.min}
+                  aria-label={`${f.label} 줄이기`}
+                >
+                  −
+                </button>
+                <button className="st-val" onClick={() => setPad(f)}>
+                  <b>{routine[f.key]}</b>
+                  <i>{f.unit}</i>
+                </button>
+                <button
+                  onClick={() => bump(f, f.step)}
+                  disabled={routine[f.key] >= f.max}
+                  aria-label={`${f.label} 늘리기`}
+                >
+                  +
+                </button>
               </span>
-            </label>
+            </div>
           ))}
         </div>
+        <p className="pad-tip">숫자를 누르면 키패드가 열립니다.</p>
         <div className="calc">
           <span>현재 설정 기준</span>
           <b>
@@ -161,13 +202,7 @@ export function SettingsScreen({state, send, operator, setOperator, onRole}: Pro
             <em>회 촬영</em>
           </b>
         </div>
-        <button
-          className="primary"
-          onClick={() =>
-            window.confirm('전체 플레이트의 촬영 일정을 재산정하고 저장하시겠습니까?') &&
-            send('routine', 0, {...routine})
-          }
-        >
+        <button className="primary" onClick={() => setAskSave(true)}>
           루틴 저장
         </button>
         <Toggle
@@ -299,6 +334,43 @@ export function SettingsScreen({state, send, operator, setOperator, onRole}: Pro
         ))}
       </aside>
       {sections[active]}
+      {pad && (
+        <NumberPad
+          title={pad.label}
+          unit={pad.unit}
+          value={routine[pad.key]}
+          min={pad.min}
+          max={pad.max}
+          step={pad.step}
+          presets={pad.presets}
+          onClose={() => setPad(null)}
+          onConfirm={v => {
+            setRoutine(r => ({...r, [pad.key]: v}));
+            setPad(null);
+          }}
+        />
+      )}
+      {askSave && (
+        <Modal
+          title="검사 루틴 저장"
+          confirmLabel="확인"
+          onClose={() => setAskSave(false)}
+          onConfirm={() => {
+            setAskSave(false);
+            // 성공하면 현황으로 돌아간다. 권한에 막히면 send 가 여기서 멈춘다.
+            void send('routine', 0, {...routine}, 'overview');
+          }}
+        >
+          <p>
+            이 값은 <b>장비의 모든 플레이트에 함께 적용</b>됩니다. 바꾸면 지금 배양 중인
+            플레이트의 남은 촬영 일정까지 다시 계산됩니다.
+          </p>
+          <p className="muted">
+            주기 {routine.cycleHours}시간 · 배양 {routine.days}일 · 지연 {routine.delay}분 · 총{' '}
+            {Math.floor((routine.days * 24) / routine.cycleHours)}회 촬영
+          </p>
+        </Modal>
+      )}
     </div>
   );
 }
