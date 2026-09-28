@@ -46,15 +46,21 @@ export function OverviewScreen({state, openDetail, openRegister}: Props) {
           const stopped = !d.connected || d.fault || d.doorOpen || d.job?.status === 'paused';
           // 플레이트가 없으면 찍을 것도 없다. 예전에는 「지금+주기」를 보여 줬는데
           // 빈 트레이에 다음 촬영 시각이 떠 있는 게 더 이상했다.
+          //
+          // 시각이 지났는데 자동 촬영이 꺼져 있으면 「지금」이라고 해선 안 된다.
+          // 아무 일도 일어나지 않는데 곧 찍을 것처럼 보이고, 화면 어디에도
+          // 왜 안 찍는지가 없었다. 스케줄러가 멈춰 있다는 것을 여기서 말한다.
           const nextLabel = running
             ? '진행 중'
             : stopped
               ? '정지'
               : next === undefined
                 ? '—'
-                : next <= state.serverTime
-                  ? '지금'
-                  : hm(next);
+                : next > state.serverTime
+                  ? hm(next)
+                  : state.autoRun
+                    ? '지금'
+                    : '자동 꺼짐';
 
           return (
             <section className={`card scanner ${tone(d)}`} key={d.id}>
@@ -62,7 +68,9 @@ export function OverviewScreen({state, openDetail, openRegister}: Props) {
                 <h3>{d.name}</h3>
                 <span className="head-next">
                   <small>NEXT</small>
-                  <b className={running ? 'go' : stopped ? 'stop' : ''}>{nextLabel}</b>
+                  <b className={running ? 'go' : stopped || nextLabel === '자동 꺼짐' ? 'stop' : ''}>
+                    {nextLabel}
+                  </b>
                 </span>
                 <Badge type={tone(d)}>{status(d)}</Badge>
               </div>
