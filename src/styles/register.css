@@ -2,27 +2,29 @@
 
 .device-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:0.5rem}
 .device-tabs button{display:flex;flex-direction:column}
-.device-tabs .selected{background:#eef2fe;border-color:var(--blue);color:var(--blue)}
+.device-tabs .selected{background:var(--blue);border-color:var(--blue);color:#fff}
 .register-layout aside label{display:flex;flex-direction:column;gap:0.375rem;font-weight:650}
 
-.card.dark{background:#1b2a5e;border-color:#1b2a5e}
-.card.dark small{color:#a9bde0;font-size:0.75rem;font-weight:600;letter-spacing:.3px}
+/* 선택된 수납 위치 — 중립 슬레이트. 초록은 이 화면에서 '이미 찬 칸'을 뜻하고
+   파랑은 아래 실행 버튼이 쓰므로, 의미가 겹치지 않는 색을 쓴다. */
+.card.dark{background:#5c636e;border-color:#5c636e}
+.card.dark small{color:#dcdfe3;font-size:0.75rem;font-weight:600;letter-spacing:.3px}
 .card.dark h2{color:#fff;font-size:1.1875rem;font-weight:800;margin-top:0.25rem;letter-spacing:-.3px}
 .dtview{display:flex;align-items:center;gap:0.5rem}
-.dtview b{flex:1;font-size:1.0625rem;font-weight:800;letter-spacing:-.2px;color:#101828;background:#f6f8fc;border:1px solid #dce1ec;border-radius:var(--rr);padding:0.5625rem 0.8125rem}
-.dtpick{width:100%;margin-top:0.375rem;font-size:0.75rem;color:#667085}
+.dtview b{flex:1;font-size:1.0625rem;font-weight:800;letter-spacing:-.2px;color:var(--gt);background:#fff;border:1px solid var(--line);border-radius:var(--rr);padding:0.5625rem 0.8125rem}
+.dtpick{width:100%;margin-top:0.375rem;font-size:0.75rem;color:var(--gt)}
 .register-layout .device-tabs button{min-height:3.125rem}
 /* 등록 트레이도 현황과 같은 상태색 */
 .tray.registration .cell{opacity:1}
 .tray.registration .cell:disabled{opacity:1;cursor:not-allowed}
 
 /* 등록 완료 모달 */
-.done-box{display:flex;align-items:center;gap:0.8125rem;padding:0.9375rem 1rem;background:#f4f8ff;border:1px solid #d5e2fb;border-radius:var(--rr)}
-.done-box i{width:2.125rem;height:2.125rem;flex:none;border-radius:50%;background:#2a4bc7;position:relative}
+.done-box{display:flex;align-items:center;gap:0.8125rem;padding:0.9375rem 1rem;background:#fff;border:1px solid var(--g3);border-radius:var(--rr)}
+.done-box i{width:2.125rem;height:2.125rem;flex:none;border-radius:50%;background:#147d40;position:relative}
 .done-box i:after{content:'';position:absolute;left:0.6875rem;top:0.5625rem;width:0.5625rem;height:1rem;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
-.done-box b{display:block;font-size:1.0625rem;font-weight:800;letter-spacing:-.2px;color:#101828}
-.done-box span{display:block;font-size:0.8125rem;color:#667085;margin-top:2px}
-.done-ask{margin:1rem 0 0;font-size:0.84375rem;color:#475467}
+.done-box b{display:block;font-size:1.0625rem;font-weight:800;letter-spacing:-.2px;color:var(--gt)}
+.done-box span{display:block;font-size:0.8125rem;color:var(--gt);margin-top:2px}
+.done-ask{margin:1rem 0 0;font-size:0.84375rem;color:var(--gt)}
 
 .dtview b{font-family:inherit}
 
@@ -35,6 +37,6 @@
 
 /* 등록 트레이 — 현황처럼 네모에 가깝게 채움 */
 .register-layout>section .tray{flex:1;min-height:0;width:100%;max-width:none;
-  grid-auto-rows:minmax(0,1fr);gap:0.4375rem;background:#f6f8fc;border:1px solid #e7ebf3;border-radius:var(--rr);padding:0.625rem}
+  grid-auto-rows:minmax(0,1fr);gap:0.4375rem;background:#fff;border:1px solid var(--g3);border-radius:var(--rr);padding:0.625rem}
 .register-layout>section .tray .tray-row{align-items:stretch;gap:0.4375rem;grid-template-columns:2.125rem repeat(3,minmax(0,1fr))}
 .register-layout .registration .cell{height:auto;min-height:0;font-size:1rem;font-weight:800}

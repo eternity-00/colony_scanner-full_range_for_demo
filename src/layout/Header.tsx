@@ -12,18 +12,20 @@ interface Props {
   onMenu: () => void;
 }
 
-const TITLES = (state: AppState): Record<TabKey, [string, string]> => ({
-  overview: ['COLONY SCANNER', 'INCUBATOR #1'],
-  detail: ['스캐너 상세', '플레이트 단위 촬영 이력'],
-  register: ['플레이트 등록', '수납 위치 · 투입 시각'],
-  running: ['촬영 진행', '외부 장비 엔진 연결'],
-  history: ['이력 · 검색', '촬영 · 전송 기록'],
-  device: ['장비 상태', '모듈 · 통신 · 로그'],
-  settings: [
-    '설정',
-    state.session.role === 'admin' ? '관리자 권한으로 접속됨' : '분석자 권한으로 접속됨',
-  ],
-});
+/**
+ * 상호는 고정하고 오른쪽 부제만 화면에 따라 바꾼다.
+ * 시안(D1)의 현황 화면이 "Colony Scanner | Incubator #1" 이라, 다른 화면은
+ * 그 자리에 화면 이름을 넣어 같은 자리에서 위치를 알 수 있게 한다.
+ */
+const SUBTITLE: Record<TabKey, string> = {
+  overview: 'Incubator #1',
+  detail: '스캐너 상세',
+  register: '플레이트 등록',
+  running: '촬영 진행',
+  history: '이력 · 검색',
+  device: '장비 상태',
+  settings: '설정',
+};
 
 export function Header({state, tab, operator, onRole, onMenu}: Props) {
   const [, tick] = useState(0);
@@ -39,7 +41,6 @@ export function Header({state, tab, operator, onRole, onMenu}: Props) {
   const devices = state.devices;
   const errors = devices.filter(d => d.fault || d.doorOpen).length;
   const linked = devices.filter(d => d.connected).length;
-  const titles = TITLES(state);
 
   // 피드백 2.2 — 인큐베이터 온도 현재값은 관리자에게만 상시 노출하고,
   // 분석자에게는 목표 범위를 벗어났을 때만 보여준다.
@@ -48,16 +49,17 @@ export function Header({state, tab, operator, onRole, onMenu}: Props) {
 
   return (
     <header>
-      <button className="burger" onClick={onMenu} aria-label="메뉴">
+      {/* 시안에는 메뉴 버튼이 없다. 좌측 64px 색면이 실루엣을 만드는 요소이므로
+          그 블록 자체를 메뉴 버튼으로 쓴다 — 터치 타깃이 64px 로 넉넉하다. */}
+      <button className="hd-menu" onClick={onMenu} aria-label="메뉴">
         <span />
         <span />
         <span />
       </button>
-      <div className="brand">
-        <span>{titles[tab]?.[0]}</span>
-        <em />
-        <small>{titles[tab]?.[1]}</small>
-      </div>
+      <span className="wm">
+        Colony<i>Scanner</i>
+      </span>
+      <span className="sub">{SUBTITLE[tab]}</span>
       <div className="head-status">
         {showTemperature && (
           <span className={`hstat ${abnormal ? 'bad' : ''}`}>
@@ -65,10 +67,11 @@ export function Header({state, tab, operator, onRole, onMenu}: Props) {
           </span>
         )}
         <span className="hstat">
-          CO₂ {(devices.reduce((a, d) => a + d.co2, 0) / devices.length).toFixed(1)} %
+          CO₂ <b>{(devices.reduce((a, d) => a + d.co2, 0) / devices.length).toFixed(1)} %</b>
         </span>
         <span className={`hstat ${linked === 4 && !errors ? '' : 'bad'}`}>
-          유선 연결 {linked} / 4
+          <i className="dot" />
+          유선 연결 <b>{linked} / 4</b>
         </span>
         <span className="clock">
           {ymd(now)} {hms(now)}

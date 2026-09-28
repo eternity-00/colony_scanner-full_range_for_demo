@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <!--
+    Colony Scanner v3 아이콘 — 6-well 플레이트(2행 × 3열)가 이 장비가 찍는 대상이다.
+    D1 확정 규칙을 따른다: 옅은 틴트 배경 없음, 모서리는 거의 각지게(rx=6),
+    색면 위 요소는 깊은 톤(#0063b3), 상태를 나타내는 원은 밝은 톤.
+  -->
+  <rect width="128" height="128" rx="6" fill="#0063b3"/>
+  <g fill="#ffffff">
+    <circle cx="32" cy="44" r="14"/>
+    <circle cx="64" cy="44" r="14"/>
+    <circle cx="96" cy="44" r="14"/>
+    <circle cx="32" cy="84" r="14"/>
+    <circle cx="64" cy="84" r="14"/>
+  </g>
+  <!-- 한 칸만 '작업 완료' 색으로 두어 상태판이라는 걸 드러낸다 -->
+  <circle cx="96" cy="84" r="14" fill="#e8971a"/>
+</svg>

@@ -1,11 +1,12 @@
 import {useState} from 'react';
 import type {AppState} from '../../api/types.ts';
+import {WELL_LABEL} from '../../config/defines.ts';
 import {Badge} from '../../shared/Badge.tsx';
-import {WellLegend} from '../../shared/Legend.tsx';
 import {Modal} from '../../shared/Modal.tsx';
 import {Tray} from '../../shared/Tray.tsx';
-import {hm} from '../../utils/datetime.ts';
-import {nextAt, platesFor, status, tone, totalRuns} from '../../utils/plate.ts';
+import {elapsedLabel, hm, kdt} from '../../utils/datetime.ts';
+import {nextAt, platesFor, pos, status, tone, totalRuns, wellState} from '../../utils/plate.ts';
+import {StatBar} from './StatBar.tsx';
 
 interface Props {
   state: AppState;
@@ -13,37 +14,27 @@ interface Props {
   openRegister: (deviceId: number) => void;
 }
 
-/** 칸을 처음 누를 때 한 번만 안내를 띄우고, 이후에는 바로 상세로 보낸다. */
-const HINT_KEY = 'colony-cell-hint';
-
 export function OverviewScreen({state, openDetail, openRegister}: Props) {
-  const [hint, setHint] = useState<{deviceId: number; slot: number} | null>(null);
+  const [picked, setPicked] = useState<{deviceId: number; slot: number} | null>(null);
 
+  /**
+   * 칸을 누르면 — 플레이트가 있으면 요약 팝업, 비어 있으면 바로 등록으로 보낸다.
+   * 빈 칸에서 할 수 있는 일이 등록뿐이라 한 번 더 묻지 않는다.
+   */
   const tap = (deviceId: number, slot: number) => {
-    try {
-      if (localStorage.getItem(HINT_KEY)) return openDetail(deviceId, slot);
-    } catch {
-      /* 사생활 보호 모드 등에서 접근이 막히면 안내를 띄운다. */
-    }
-    setHint({deviceId, slot});
+    const plate = platesFor(state, deviceId).find(p => p.slot === slot);
+    if (plate) setPicked({deviceId, slot});
+    else openRegister(deviceId);
   };
 
-  const goHint = () => {
-    try {
-      localStorage.setItem(HINT_KEY, '1');
-    } catch {
-      /* 저장에 실패해도 이동은 진행한다. */
-    }
-    const h = hint;
-    setHint(null);
-    if (h) openDetail(h.deviceId, h.slot);
-  };
+  const plate = picked
+    ? platesFor(state, picked.deviceId).find(p => p.slot === picked.slot)
+    : undefined;
+  const device = picked ? state.devices.find(d => d.id === picked.deviceId) : undefined;
 
   return (
     <div className="overview">
-      <div className="overview-head">
-        <WellLegend />
-      </div>
+      <StatBar state={state} />
       <div className="scanner-grid">
         {state.devices.map(d => {
           const plates = platesFor(state, d.id);
@@ -63,47 +54,47 @@ export function OverviewScreen({state, openDetail, openRegister}: Props) {
             <section className={`card scanner ${tone(d)}`} key={d.id}>
               <div className="card-head">
                 <h3>{d.name}</h3>
+                <span className="head-next">
+                  <small>NEXT</small>
+                  <b className={running ? 'go' : stopped ? 'stop' : ''}>{nextLabel}</b>
+                </span>
                 <Badge type={tone(d)}>{status(d)}</Badge>
               </div>
               <div className="tray-box">
                 <Tray state={state} deviceId={d.id} compact onSelect={slot => tap(d.id, slot)} />
               </div>
-              <div className="card-foot">
-                <div>
-                  <small>다음 촬영</small>
-                  <b className={running ? 'go' : stopped ? 'stop' : ''}>{nextLabel}</b>
-                </div>
-                <div className="foot-btns">
-                  <button
-                    className="soft"
-                    onClick={() => openDetail(d.id, plates.at(-1)?.slot || 1)}
-                  >
-                    상세
-                  </button>
-                  <button
-                    className="soft accent"
-                    disabled={plates.length >= 24}
-                    onClick={() => openRegister(d.id)}
-                  >
-                    등록
-                  </button>
-                </div>
-              </div>
             </section>
           );
         })}
       </div>
-      {hint && (
+
+      {picked && plate && (
         <Modal
-          title="플레이트 상세"
-          confirmLabel="상세 보기"
-          onConfirm={goHint}
-          onClose={() => setHint(null)}
+          title={`SCANNER ${picked.deviceId} · ${pos(picked.slot)}`}
+          confirmLabel="상세"
+          onConfirm={() => {
+            const target = picked;
+            setPicked(null);
+            openDetail(target.deviceId, target.slot);
+          }}
+          onClose={() => setPicked(null)}
         >
-          <p>
-            선택한 칸의 플레이트 촬영 이력·영상을 상세 화면에서 볼 수 있습니다. 이후에는 칸을 누르면
-            바로 상세로 이동합니다.
-          </p>
+          <dl className="plate-info">
+            <dt>플레이트</dt>
+            <dd>{plate.id}</dd>
+            <dt>상태</dt>
+            <dd>{WELL_LABEL[wellState(state, plate, device)]}</dd>
+            <dt>투입 시각</dt>
+            <dd>{kdt(plate.registeredAt)}</dd>
+            <dt>경과</dt>
+            <dd>{elapsedLabel(plate.registeredAt, state.serverTime)}</dd>
+            <dt>회차</dt>
+            <dd>
+              {plate.runs.length} / {totalRuns(state)}회
+            </dd>
+            <dt>다음 촬영</dt>
+            <dd>{plate.paused ? '일시정지' : kdt(nextAt(state, plate))}</dd>
+          </dl>
         </Modal>
       )}
     </div>

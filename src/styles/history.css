@@ -11,5 +11,5 @@
 .hist-table tbody td button{min-height:1.875rem;padding:0.25rem 0.75rem;font-size:0.75rem}
 .hist-table tbody td .badge{white-space:nowrap}
 
-.filters .ghost-btn{border:1px solid var(--line);background:#fff;color:#344054;font-weight:700}
-.filters .ghost-btn:hover{background:#f4f6fb;border-color:#c9d4ea}
+.filters .ghost-btn{border:1px solid var(--line);background:#fff;color:var(--gt);font-weight:700}
+.filters .ghost-btn:hover{background:#f2f1f3;border-color:#9ba2ac}

@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState, type ReactNode} from 'react';
+import {useEffect, useState, type ReactNode} from 'react';
 import {command, getState, subscribe} from './api/client.ts';
 import type {AppState, CommandArgs, CommandError, Plate} from './api/types.ts';
 import {ADMIN_IDLE_LIMIT_SEC, ADMIN_IDLE_WARN_MS, type TabKey} from './config/defines.ts';
@@ -14,7 +14,6 @@ import {Header} from './layout/Header.tsx';
 import {MenuDrawer} from './layout/MenuDrawer.tsx';
 import {Modal} from './shared/Modal.tsx';
 import {ShotViewer, type ShotTarget} from './shared/ShotViewer.tsx';
-import {platesFor} from './utils/plate.ts';
 import {useLayoutWidth} from './utils/viewport.ts';
 
 interface Notice {
@@ -31,9 +30,6 @@ interface ConfirmModal {
 
 /** 관리자 세션을 살려두기 위해 조작을 서버에 알리는 최소 간격(ms). */
 const TOUCH_INTERVAL_MS = 10000;
-
-/** 데모용 자동 촬영 주입 간격(ms). */
-const DEMO_CAPTURE_MS = 18000;
 
 export default function App() {
   const [state, setState] = useState<AppState | null>(null);
@@ -91,32 +87,6 @@ export default function App() {
     setRegisterDevice(deviceId);
     setTab('register');
   };
-
-  const stateRef = useRef(state);
-  stateRef.current = state;
-
-  // 데모: 쉬고 있는 스캐너에 주기적으로 촬영을 넣어 화면이 멈춰 보이지 않게 한다.
-  useEffect(() => {
-    const t = setInterval(() => {
-      const s = stateRef.current;
-      if (!s) return;
-      const idle = s.devices.filter(
-        d =>
-          d.connected &&
-          !d.fault &&
-          !d.doorOpen &&
-          !['running', 'paused'].includes(d.job?.status ?? ''),
-      );
-      const busy = s.devices.filter(d => ['running', 'paused'].includes(d.job?.status ?? '')).length;
-      if (!idle.length || busy >= 2) return;
-      const d = idle[Math.floor(Math.random() * idle.length)];
-      const plates = platesFor(s, d.id).filter(p => !p.paused);
-      if (!plates.length) return;
-      const p = plates[Math.floor(Math.random() * plates.length)];
-      command('capture', d.id, {plateId: p.id}).catch(() => {});
-    }, DEMO_CAPTURE_MS);
-    return () => clearInterval(t);
-  }, []);
 
   useEffect(() => {
     if (!notice) return;
