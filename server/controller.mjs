@@ -12,12 +12,15 @@ const MAX_INCUBATION_DAYS=42;
 // 플레이트를 넣고 찍고 결과를 받는 일(capture/pause/resume/retry/register/remove)은
 // 사용자의 정상 업무이므로 열어둔다.
 // 장비가 고장났을 때의 조치(stop/home/reset/clearError/calibrate)와 장비 하드웨어
-// 설정(environment/autoRun)은 관리자만 할 수 있다.
+// 설정(environment)은 관리자만 할 수 있다.
 //
 // routine(촬영 주기·배양 기간)은 장비 설정이 아니라 실험 조건이라 사용자에게 연다.
 // 다만 루틴은 장비에 하나뿐이라 한 사람이 바꾸면 이미 배양 중인 다른 플레이트의
 // 일정까지 전부 재산정된다 — 그 부작용을 감수한 결정이다(설정 화면이 경고한다).
-const ADMIN_ONLY=['stop','home','reset','clearError','autoRun','calibrate','environment'];
+// autoRun 도 같은 이유로 연다. 정해진 주기에 맞춰 찍는 것은 이 장비의 정상
+// 동작이지 고장 대응이 아니고, 루틴을 고칠 수 있는 사람이 그 루틴을 돌릴 수
+// 없는 것도 앞뒤가 맞지 않는다.
+const ADMIN_ONLY=['stop','home','reset','clearError','calibrate','environment'];
 const busy=d=>d.job&&['running','paused'].includes(d.job.status);
 const validInt=(x,min,max)=>Number.isInteger(x)&&x>=min&&x<=max;
 const assert=(ok,code,message,status=409)=>{if(!ok)throw new DeviceError(code,message,status);};
@@ -28,7 +31,9 @@ export class Controller extends EventEmitter {
   // 플레이트는 씨딩하지 않는다. 장비는 빈 트레이로 시작하고, 사용자가 등록한 것만
   // 검사 루틴을 따라 촬영된다. 예전에는 데모용으로 63매를 미리 넣어 두었는데,
   // 그것들이 화면을 다 채우고 회차도 제각각이라 실제 동작을 가리고 있었다.
-  else {this.db={version:1,plates:[],routine:{cycleHours:12,days:42,delay:0},autoRun:false,logs:[],io:[],receipts:[],devices:[]};}
+  // autoRun 은 켠 채로 시작한다. 주기가 되면 알아서 찍는 것이 이 장비의 기본
+  // 동작이고, 꺼져 있으면 등록해 두고도 아무 일이 없어 고장으로 보인다.
+  else {this.db={version:1,plates:[],routine:{cycleHours:12,days:42,delay:0},autoRun:true,logs:[],io:[],receipts:[],devices:[]};}
   for(const p of this.db.plates)for(const r of p.runs){if(typeof r.image==='string'&&r.image.endsWith('.svg')){r.image=null;r.imageState='expired';}
    if(r.imageState==='held'&&!r.images?.length){const b=(Number(String(r.image||'').match(/\d+/)?.[0])||r.n)-1;r.images=Array.from({length:6},(_,i)=>`well-${((b+i)%9)+1}.png`);r.image=null;}}
   this.adapter=adapter||new VirtualDeviceAdapter({stageMs,config:this.db.devices});
