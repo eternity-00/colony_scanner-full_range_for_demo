@@ -13,6 +13,8 @@ interface Props {
   setTab: (tab: TabKey) => void;
   /** 현황 화면에서 넘어올 때 미리 고른 스캐너. */
   device?: number;
+  /** 현황에서 빈 칸을 눌러 왔을 때 그 칸. 비어 있지 않으면 첫 빈 칸으로 떨어진다. */
+  slot?: number;
 }
 
 interface Done {
@@ -20,7 +22,7 @@ interface Done {
   first: number;
 }
 
-export function RegisterScreen({state, send, setTab, device = 1}: Props) {
+export function RegisterScreen({state, send, setTab, device = 1, slot: picked}: Props) {
   const [deviceId, setDeviceId] = useState(device);
 
   const free = useMemo(() => {
@@ -28,7 +30,8 @@ export function RegisterScreen({state, send, setTab, device = 1}: Props) {
     return Array.from({length: SLOTS_PER_DEVICE}, (_, i) => i + 1).filter(n => !used.has(n));
   }, [state, deviceId]);
 
-  const [slot, setSlot] = useState(() => free[0] || 0);
+  // 현황에서 누른 칸이 있으면 그 칸으로 시작한다. 그새 찼으면 첫 빈 칸으로 떨어진다.
+  const [slot, setSlot] = useState(() => (picked && free.includes(picked) ? picked : free[0] || 0));
   const [when, setWhen] = useState(() => dateInput(Date.now()));
   const [done, setDone] = useState<Done | null>(null);
   const [submitting, setSubmitting] = useState(false);

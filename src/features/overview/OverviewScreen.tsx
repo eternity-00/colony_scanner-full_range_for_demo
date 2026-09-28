@@ -11,20 +11,18 @@ import {StatBar} from './StatBar.tsx';
 interface Props {
   state: AppState;
   openDetail: (deviceId: number, slot?: number) => void;
-  openRegister: (deviceId: number) => void;
+  openRegister: (deviceId: number, slot?: number) => void;
 }
 
 export function OverviewScreen({state, openDetail, openRegister}: Props) {
   const [picked, setPicked] = useState<{deviceId: number; slot: number} | null>(null);
+  const [emptyPick, setEmptyPick] = useState<{deviceId: number; slot: number} | null>(null);
 
-  /**
-   * 칸을 누르면 — 플레이트가 있으면 요약 팝업, 비어 있으면 바로 등록으로 보낸다.
-   * 빈 칸에서 할 수 있는 일이 등록뿐이라 한 번 더 묻지 않는다.
-   */
+  /** 칸을 누르면 — 플레이트가 있으면 요약 팝업, 비어 있으면 등록 확인 팝업. */
   const tap = (deviceId: number, slot: number) => {
     const plate = platesFor(state, deviceId).find(p => p.slot === slot);
     if (plate) setPicked({deviceId, slot});
-    else openRegister(deviceId);
+    else setEmptyPick({deviceId, slot});
   };
 
   const plate = picked
@@ -67,6 +65,21 @@ export function OverviewScreen({state, openDetail, openRegister}: Props) {
           );
         })}
       </div>
+
+      {emptyPick && (
+        <Modal
+          title={`SCANNER ${emptyPick.deviceId} · ${pos(emptyPick.slot)}`}
+          confirmLabel="등록"
+          onConfirm={() => {
+            const target = emptyPick;
+            setEmptyPick(null);
+            openRegister(target.deviceId, target.slot);
+          }}
+          onClose={() => setEmptyPick(null)}
+        >
+          <p>빈 슬롯입니다. 이 위치에 플레이트를 등록하시겠습니까?</p>
+        </Modal>
+      )}
 
       {picked && plate && (
         <Modal

@@ -52,7 +52,7 @@ export default function App() {
   // 고장 안내 팝업. 이미 알린 고장은 notified 에 담아 다시 띄우지 않는다.
   const [faultAlert, setFaultAlert] = useState<Device[] | null>(null);
   const notified = useRef<string[]>([]);
-  const [registerDevice, setRegisterDevice] = useState(1);
+  const [registerAt, setRegisterAt] = useState<{deviceId: number; slot?: number}>({deviceId: 1});
   const [menuOpen, setMenuOpen] = useState(false);
   const [exitAsk, setExitAsk] = useState(false);
   const [exiting, setExiting] = useState(false);
@@ -110,8 +110,8 @@ export default function App() {
     setTab('detail');
   };
 
-  const openRegister = (deviceId: number) => {
-    setRegisterDevice(deviceId);
+  const openRegister = (deviceId: number, slot?: number) => {
+    setRegisterAt({deviceId, slot});
     setTab('register');
   };
 
@@ -208,7 +208,13 @@ export default function App() {
       />
     ),
     register: (
-      <RegisterScreen state={state} send={execute} setTab={setTab} device={registerDevice} />
+      <RegisterScreen
+        state={state}
+        send={execute}
+        setTab={setTab}
+        device={registerAt.deviceId}
+        slot={registerAt.slot}
+      />
     ),
     running: <CaptureScreen state={state} send={execute} openDetail={openDetail} />,
     history: (
