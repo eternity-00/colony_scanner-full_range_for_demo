@@ -13,3 +13,25 @@
 .card.stack>.row.between:first-child,.card.stack>h2:first-child:not(:has(+p)),.card.stack>h3:first-child:not(:has(+p)),.card.stack>h2:first-child+p,.card.stack>h3:first-child+p{margin-bottom:0}
 .card.dark>*{border-color:#767d88!important}
 .modal>h2{margin:-1.5rem -1.5rem 1rem;padding:1.125rem 1.5rem 0.875rem;background:#fff;border-bottom:1px solid var(--g3);border-radius:var(--rr) var(--rr) 0 0}
+
+/*
+ * 팝업 외형 — 머리글 / 본문 / 버튼 줄의 세 단.
+ *
+ * 흰 종이 한 장에 글과 버튼이 얹혀 있기만 해서, 뒤 화면과 구분되는 것이
+ * 그림자뿐이었다. 위에 파란 띠를 두르고 버튼 줄을 회색 면으로 깔아
+ * 어디가 읽는 곳이고 어디가 누르는 곳인지 면으로 나눈다.
+ * 영상 뷰어(.modal.wide)는 제 레이아웃이 따로 있어 건드리지 않는다.
+ */
+.modal-bg{background:#0d1637b3}
+.modal:not(.wide){border-top:3px solid var(--blue)}
+.modal:not(.wide) .actions{margin:1.25rem -1.5rem -1.5rem;padding:0.9375rem 1.5rem;
+  background:#f8f9fb;border-top:1px solid var(--g3);border-radius:0 0 var(--rr) var(--rr)}
+/* 닫기 ×는 머리글 띠 위에 얹히므로 면을 가지고 있어야 눌리는 것으로 보인다. */
+.modal:not(.wide)>.modal-x{top:0.8125rem;right:0.8125rem;width:2.375rem;height:2.375rem;
+  display:grid;place-items:center;border:1px solid var(--line);border-radius:var(--rr);
+  background:#fff;color:var(--gt);line-height:1}
+
+/* 뜰 때 한 번만 — 어디에서 나타났는지 눈이 따라가게 한다. */
+@keyframes modal-in{from{opacity:0;transform:translateY(0.5rem)}to{opacity:1;transform:none}}
+.modal{animation:modal-in .12s ease-out}
+@media (prefers-reduced-motion:reduce){.modal{animation:none}}
