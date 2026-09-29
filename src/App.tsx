@@ -239,7 +239,12 @@ export default function App() {
         onExit={() => setExitAsk(true)}
       />
       <div className="shell">
-        <Header state={state} tab={visible} onDevice={() => setTab('device')} />
+        <Header
+          state={state}
+          tab={visible}
+          onDevice={() => setTab('device')}
+          onPlate={openDetail}
+        />
         <main>{screens[visible]}</main>
       </div>
 

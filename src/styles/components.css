@@ -171,14 +171,26 @@
 .alert-pop::after{top:calc(-0.5rem + 1px);border-bottom:0.5rem solid #fff}
 .pop-empty{margin:0;font-size:0.84375rem;color:var(--gt)}
 .alert-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column}
-.alert-list li{display:flex;align-items:baseline;justify-content:space-between;gap:0.75rem;
-  padding:0.5625rem 0;border-bottom:1px solid #eaeaea}
-.alert-list li:last-child{border-bottom:0;padding-bottom:0}
+.alert-list li{border-bottom:1px solid #eaeaea}
+.alert-list li:last-child{border-bottom:0}
+/* 줄 전체가 버튼이다 — 손가락이 큰 사람이 글자를 조준하지 않아도 된다. */
+.alert-list button{display:flex;align-items:baseline;justify-content:space-between;gap:0.75rem;
+  width:100%;min-height:0;margin:0 -0.5rem;padding:0.625rem 0.5rem;width:calc(100% + 1rem);
+  border:0;border-radius:var(--rr);background:transparent;text-align:left;cursor:pointer}
+/* 누를 수 없는 줄(분석자에게 장비 오류)도 흐려지면 안 된다 — 읽어야 하는 정보다. */
+.alert-list button:disabled{cursor:default;opacity:1}
 .alert-list b{font-size:0.875rem;font-weight:800;color:var(--ink);white-space:nowrap}
-.alert-list span{font-size:0.8125rem;font-weight:600;color:#c01d27;text-align:right}
+.alert-list span{font-size:0.8125rem;font-weight:700;text-align:right;white-space:nowrap}
+/* 색이 뜻을 나눈다 — 고장·손봐야 할 것은 빨강, 다 찍혀 꺼내면 되는 것은 앰버. */
+.alert-list .device span,.alert-list .plate span{color:#c01d27}
+.alert-list .done span{color:#a8720d}
+.alert-more{padding:0.5625rem 0 0;font-size:0.78125rem;color:var(--gt);text-align:center}
 /* 알림 말풍선의 마무리 — 분석자에게는 다음에 할 일, 관리자에게는 고칠 화면으로. */
 .alert-ask{margin:0.875rem 0 0;padding:0.6875rem 0.75rem;background:#f5f5f5;border-radius:var(--rr);
   box-shadow:inset 3px 0 0 #c01d27}
 .alert-ask b{display:block;font-size:0.84375rem;font-weight:800;color:var(--ink)}
 .alert-ask span{display:block;margin-top:2px;font-size:0.75rem;color:var(--gt)}
 .alert-go{width:100%;margin-top:0.875rem;min-height:2.875rem;font-size:0.875rem;font-weight:700}
+@media (hover:hover) and (pointer:fine){
+ .alert-list button:hover:not(:disabled){background:#f2f2f2}
+}
