@@ -13,6 +13,9 @@ interface Props {
   fill?: boolean;
 }
 
+/** 한 페이지에 두는 최대 줄 수. 남는 높이는 줄 키가 가져간다. */
+const MAX_ROWS = 4;
+
 interface Shot {
   run: Run;
   n: number;
@@ -25,12 +28,15 @@ interface Shot {
 
 export function RunsTable({plate, onView, fill = false}: Props) {
   const [page, setPage] = useState(0);
-  const [per, setPer] = useState(fill ? 6 : 4);
+  const [per, setPer] = useState(MAX_ROWS);
   const wrap = useRef<HTMLDivElement>(null);
 
   // 표 높이가 바뀌면 한 페이지에 들어갈 행 수를 다시 센다.
   // useLayoutEffect 인 이유: useEffect 로 재면 처음 그린 뒤에 줄여서, 넘친 표가
   // 한 번 그려졌다가 접힌다. 느린 화면에서는 그 사이 스크롤바가 떴다 사라진다.
+  //
+  // 위아래로 남는 높이는 줄 수가 아니라 줄 키로 간다(MAX_ROWS). 한 화면에 여섯
+  // 줄이 들어가도 네 줄만 두는 편이 손가락으로 누르기 쉽다.
   useLayoutEffect(() => {
     if (!fill) return;
     const el = wrap.current;
@@ -38,7 +44,7 @@ export function RunsTable({plate, onView, fill = false}: Props) {
     const calc = () => {
       const head = el.querySelector('thead')?.offsetHeight || 38;
       const rowPx = RUN_ROW_HEIGHT_REM * rootFontPx();
-      setPer(Math.max(2, Math.min(20, Math.floor((el.clientHeight - head) / rowPx))));
+      setPer(Math.max(2, Math.min(MAX_ROWS, Math.floor((el.clientHeight - head) / rowPx))));
     };
     calc();
     const ro = new ResizeObserver(calc);
