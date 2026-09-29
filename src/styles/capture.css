@@ -2,6 +2,16 @@
 
 .job h2{font-size:1.125rem;font-weight:800;color:var(--ink);letter-spacing:-.3px}
 .cam-shot img{width:100%;height:100%;object-fit:contain;display:block}
+.stages{display:flex;align-items:flex-start;gap:0}
+.stages div{flex:1;display:flex;flex-direction:column;align-items:center;gap:0.3125rem;position:relative;font-size:0.625rem;color:var(--gt);font-weight:700;text-align:center;line-height:1.2}
+.stages div:before{content:'';position:absolute;top:0.3125rem;left:-50%;width:100%;height:2px;background:#d2d2d2}
+.stages div:first-child:before{display:none}
+.stages i{width:0.75rem;height:0.75rem;border-radius:50%;background:#fff;border:2px solid #d2d2d2;position:relative;z-index:1}
+.stages .done{color:var(--gt)}
+.stages .done i{background:#5aa153;border-color:#5aa153}
+.stages .done:before{background:#5aa153}
+.stages .now{color:var(--gt)}
+.stages .now i{background:var(--dot);border-color:var(--dot)}
 
 /* 화면 안에 꽉 맞춰 스크롤 없음 */
 .run-page{display:flex;flex-direction:column;gap:0.75rem;height:100%;min-height:0}
@@ -26,24 +36,36 @@
 
 /* 두 칩의 높이를 맞춘다. WELL 칩은 안에 큰 숫자가 있어 baseline 정렬로 두면
    상태 배지보다 키가 커진다. 높이를 못박고 가운데로 정렬한다. */
-/* 머리 줄에 얹은 동작 버튼. 사진 자리를 비우려고 올린 것이라 키를 지킨다. */
-.jtags{display:flex;align-items:center;gap:0.4375rem}
-.jbtn{min-height:2.625rem;padding:0 0.9375rem;font-size:0.875rem;font-weight:800;white-space:nowrap;
-  border:1px solid var(--line);border-radius:var(--rr);background:#fff;color:var(--ink)}
-.jbtn:disabled{background:#f2f2f2;color:#9a9a9a}
-.jbtn.danger{color:#c01d27}
-.jtags>.wellbadge,.jtags>.badge{height:2.625rem;padding-top:0;padding-bottom:0}
-.wellbadge{display:inline-flex;align-items:center;gap:0.25rem;font-size:0.84375rem;font-weight:700;color:var(--gt);background:#fff;border:1px solid var(--line);border-radius:2px;padding:0 0.625rem}
+/* 두 칩의 높이를 맞춘다 — WELL 칩 안의 큰 숫자가 baseline 정렬에서 키를 키운다. */
+.jtags{display:flex;align-items:center;gap:0.5rem}
+.jtags>*{height:1.75rem;padding-top:0;padding-bottom:0}
+.wellbadge{display:inline-flex;align-items:center;gap:0.25rem;font-size:0.78125rem;font-weight:700;color:var(--gt);background:#fff;border:1px solid var(--line);border-radius:2px;padding:0 0.625rem}
 .wellbadge b{font-size:1rem;font-weight:800;color:var(--gt);line-height:1}
 
 /* 촬영 카드 재배치: 카메라 좌 · 버튼 우 · 진행바 하단 */
-/* 카메라 줄은 사진만 담는다. 옆에 버튼이 없으니 폭을 다 쓴다. */
-.cam-row{flex:1;min-height:0;display:flex}
+.cam-row{flex:1;min-height:0;display:flex;gap:0.75rem}
 .cam-row .cam-wrap{flex:1;min-height:0}
-/* 좁은 화면에서는 머리 줄의 버튼들이 두 줄로 내려앉게 둔다. */
-.app[data-w="md"] .jtags,.app[data-w="sm"] .jtags{flex-wrap:wrap;justify-content:flex-end}
+.job .actions.right{flex:none;width:9.375rem;display:flex;flex-direction:column;gap:0.5rem;overflow-y:auto}
+/* 오른쪽 세로 버튼들 — 손가락으로 누르는 자리라 키를 넉넉히 준다. */
+.job .actions.right button{flex:none;width:100%;min-height:3.5rem;height:auto;padding:0.625rem 0.5rem;font-size:0.9375rem;font-weight:800;white-space:nowrap}
+/*
+ * 좁은 화면에서는 카메라 옆 세로 버튼 열이 눌릴 수 없을 만큼 납작해진다.
+ * 카메라 아래 가로 한 줄로 내린다.
+ */
+.app[data-w="md"] .cam-row,.app[data-w="sm"] .cam-row{flex-direction:column;gap:0.5rem}
+.app[data-w="md"] .job .actions.right,.app[data-w="sm"] .job .actions.right{
+  width:100%;flex-direction:row;overflow:visible}
+.app[data-w="md"] .job .actions.right button,.app[data-w="sm"] .job .actions.right button{
+  flex:1;min-height:2.75rem}
+.app[data-w="md"] .stages.big,.app[data-w="sm"] .stages.big{padding:0.625rem 0.5rem 0.375rem}
 
 /* 진행 바(스테이지) 크게 */
+/* 단계 줄은 읽기만 하는 띠다. 위아래 여백과 원·글자를 줄여 남는 높이를
+   카메라 화면에 넘긴다 — 여기서 봐야 하는 건 사진이다. */
+.stages.big{flex:none;padding:0.75rem 0.5rem 0.375rem}
+.stages.big div{font-size:0.78125rem;gap:0.4375rem;font-weight:800}
+.stages.big i{width:1.375rem;height:1.375rem;border:3px solid #d2d2d2;transition:background .2s,border-color .2s}
+.stages.big div:before{top:0.59375rem;height:0.25rem;border-radius:2px}
 
 /* 촬영 카드 카메라: 영역 꽉 채움 */
 .cam-row .cam-wrap{padding:0.625rem;background:#eaeaea;border:1px solid var(--g3);display:flex;align-items:center;justify-content:center}
@@ -51,8 +73,13 @@
 .cam-row .cam-shot img{object-fit:cover}
 
 /* 진행 바 애니메이션 (단일 모드) */
+.stages.big .done i{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E") center/13px no-repeat,#5aa153;border-color:#5aa153}
 /* 촬영 중은 조치가 필요 없는 상태라 움직이지 않는다 — 물결·흐르는 그라디언트를 뺐다.
    진행 여부는 지나온 단계가 초록으로 채워지는 것으로 읽는다. */
+.stages.big .now i{background:var(--dot);border-color:var(--dot);box-shadow:none}
+.stages.big .now:before{background:#5aa153}
+.stages.big .now{color:var(--gt)}
+.stages.big .now i{width:1.5rem;height:1.5rem}
 
 /* 4분할: 버튼 열/진행바 컴팩트 + 겹침 방지 */
 
