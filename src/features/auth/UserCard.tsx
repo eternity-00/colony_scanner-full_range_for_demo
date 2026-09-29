@@ -39,7 +39,7 @@ export function UserCard({state, send, operator, onSettings, onUpgrade, onClose}
       {/* 바깥을 누르면 닫힌다. 어둡게 덮지 않으므로 뒤 화면은 그대로 보인다. */}
       <div className="pop-away" role="presentation" onMouseDown={onClose} />
       <section className="user-pop" role="dialog" aria-label="현재 사용자">
-        <div className="user-pop-head">
+        <div className="pop-head">
           <h2>현재 사용자</h2>
           <button className="pop-x" onClick={onClose} aria-label="닫기">
             ×

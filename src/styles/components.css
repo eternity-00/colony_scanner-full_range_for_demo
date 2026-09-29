@@ -152,10 +152,10 @@
   border-top:0.5rem solid transparent;border-bottom:0.5rem solid transparent}
 .user-pop::before{left:-0.5rem;border-right:0.5rem solid var(--g3)}
 .user-pop::after{left:calc(-0.5rem + 1px);border-right:0.5rem solid #fff}
-.user-pop-head{display:flex;align-items:center;justify-content:space-between;
+.pop-head{display:flex;align-items:center;justify-content:space-between;
   margin:0 -1rem 0.875rem;padding:0.75rem 0.75rem 0.6875rem 1rem;background:#f5f5f5;
   border-bottom:1px solid var(--g3);border-radius:var(--rr) var(--rr) 0 0}
-.user-pop-head h2{margin:0;font-size:0.9375rem;font-weight:800;color:var(--ink)}
+.pop-head h2{margin:0;font-size:0.9375rem;font-weight:800;color:var(--ink)}
 .pop-x{width:2rem;height:2rem;min-height:0;padding:0;border:0;border-radius:var(--rr);
   background:transparent;color:var(--gt);font-size:1.375rem;line-height:1}
 .user-card{display:flex;align-items:center;gap:0.875rem}
@@ -166,3 +166,20 @@
 .user-note{margin:0.75rem 0 0;font-size:0.8125rem;color:var(--gt)}
 .user-act{display:flex;gap:0.5rem;margin-top:0.875rem}
 .user-act button{flex:1;min-height:2.875rem;font-size:0.84375rem;font-weight:700}
+
+/* 장비 알림 말풍선 — 헤더의 종 밑에 붙는다. 꼬리는 위를 가리킨다. */
+.bell-wrap{position:relative;display:inline-flex}
+.alert-pop{position:absolute;z-index:49;top:calc(100% + 0.625rem);right:-0.5rem;width:19rem;
+  background:#fff;border:1px solid var(--g3);border-radius:var(--rr);
+  box-shadow:0 12px 32px #00000026;padding:0 1rem 1rem}
+.alert-pop::before,.alert-pop::after{content:'';position:absolute;right:1.5rem;width:0;height:0;
+  border-left:0.5rem solid transparent;border-right:0.5rem solid transparent}
+.alert-pop::before{top:-0.5rem;border-bottom:0.5rem solid var(--g3)}
+.alert-pop::after{top:calc(-0.5rem + 1px);border-bottom:0.5rem solid #fff}
+.pop-empty{margin:0;font-size:0.84375rem;color:var(--gt)}
+.alert-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column}
+.alert-list li{display:flex;align-items:baseline;justify-content:space-between;gap:0.75rem;
+  padding:0.5625rem 0;border-bottom:1px solid #eaeaea}
+.alert-list li:last-child{border-bottom:0;padding-bottom:0}
+.alert-list b{font-size:0.875rem;font-weight:800;color:var(--ink);white-space:nowrap}
+.alert-list span{font-size:0.8125rem;font-weight:600;color:#c01d27;text-align:right}

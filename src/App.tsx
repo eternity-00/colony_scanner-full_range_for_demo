@@ -1,4 +1,4 @@
-import {Fragment, useEffect, useState, type ReactNode} from 'react';
+import {useEffect, useState, type ReactNode} from 'react';
 import {command, getState, subscribe} from './api/client.ts';
 import type {AppState, CommandArgs, CommandError, Plate} from './api/types.ts';
 import {
@@ -22,7 +22,6 @@ import {Rail} from './layout/Rail.tsx';
 import {Modal} from './shared/Modal.tsx';
 import {ShotViewer, type ShotTarget} from './shared/ShotViewer.tsx';
 import {hms, ymd} from './utils/datetime.ts';
-import {faultLabel} from './utils/plate.ts';
 import {useLayoutWidth} from './utils/viewport.ts';
 
 interface Notice {
@@ -52,7 +51,6 @@ export default function App() {
   // 관리자 권한이 없어 막힌 동작. PIN 이 맞으면 retry 로 그대로 이어서 보낸다.
   const [gate, setGate] = useState<{reason: string; retry: () => void} | null>(null);
   const [registerAt, setRegisterAt] = useState<{deviceId: number; slot?: number}>({deviceId: 1});
-  const [alertOpen, setAlertOpen] = useState(false);
   const [exitAsk, setExitAsk] = useState(false);
   const [exiting, setExiting] = useState(false);
   const [operator, setOperator] = useState(
@@ -241,28 +239,9 @@ export default function App() {
         onExit={() => setExitAsk(true)}
       />
       <div className="shell">
-        <Header state={state} tab={visible} onAlert={() => setAlertOpen(true)} />
+        <Header state={state} tab={visible} />
         <main>{screens[visible]}</main>
       </div>
-
-      {alertOpen && (
-        <Modal title="장비 알림" onClose={() => setAlertOpen(false)}>
-          {state.devices.filter(d => faultLabel(d)).length === 0 ? (
-            <p>지금 문제가 있는 장비가 없습니다.</p>
-          ) : (
-            <dl>
-              {state.devices
-                .filter(d => faultLabel(d))
-                .map(d => (
-                  <Fragment key={d.id}>
-                    <dt>{d.name}</dt>
-                    <dd>{faultLabel(d)}</dd>
-                  </Fragment>
-                ))}
-            </dl>
-          )}
-        </Modal>
-      )}
 
       {notice && (
         <button className={`toast ${notice.bad ? 'bad' : ''}`} onClick={() => setNotice(null)}>
