@@ -4,7 +4,7 @@ import {WellLegend} from '../../shared/Legend.tsx';
 import {active, plateBad, pending, totalRuns} from '../../utils/plate.ts';
 
 /** 색면 톤 — 글자·아이콘이 올라가므로 깊은 톤을 쓴다. */
-type Tone = 'wait' | 'slot' | 'run' | 'send' | 'fault';
+type Tone = 'wait' | 'slot' | 'send' | 'fault';
 
 interface Stat {
   key: Tone;
@@ -19,6 +19,10 @@ interface Stat {
  *
  * 시안(D1)에서 세 줄짜리 타일 4개를 한 줄로 줄인 자리다. 타일에 있던 주석
  * ("SCANNER 1 · 4" 등)은 아래 카드의 상태 배지와 Well 원이 이미 말하고 있어 뺐다.
+ *
+ * 네 칸 모두 분석자가 손을 대야 하는 것이다 — 꺼내라 · 넣을 수 있다 · 보내라 ·
+ * 손 봐라. 「촬영 중」은 할 일이 아니라 정보였고 아래 카드 배지 넷이 같은 말을
+ * 하고 있어 뺐다. 장비 고장은 분석자가 할 수 있는 게 없어 알림 종이 맡는다.
  */
 export function StatBar({state}: {state: AppState}) {
   const plates = active(state);
@@ -38,13 +42,6 @@ export function StatBar({state}: {state: AppState}) {
       value: SLOTS_PER_DEVICE * state.devices.length - plates.length,
       unit: '칸',
       path: 'M4 4h16v16H4zM12 8.5v7M8.5 12h7',
-    },
-    {
-      key: 'run',
-      label: '촬영 중',
-      value: state.devices.filter(d => d.job?.status === 'running').length,
-      unit: '대',
-      path: 'M3 7h5V5h8v2h5v12H3zM9.5 10.5h5v5h-5z',
     },
     {
       key: 'send',

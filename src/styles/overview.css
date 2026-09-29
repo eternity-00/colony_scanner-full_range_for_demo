@@ -18,7 +18,6 @@
 .stat-ic svg{width:0.875rem;height:0.875rem}
 .stat-ic.wait{background:#a8720d}
 .stat-ic.slot{background:#5b7285}
-.stat-ic.run{background:var(--blue7)}
 .stat-ic.send{background:#5c636e}
 .stat-ic.fault{background:#c01d27}
 .overview-head .legend{margin-left:auto}
