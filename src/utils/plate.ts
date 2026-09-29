@@ -34,10 +34,19 @@ export const nextAt = (s: AppState, p: Plate) =>
 export const dueNow = (s: AppState, p: Plate) =>
   !p.paused && p.runs.length < totalRuns(s) && nextAt(s, p) <= s.serverTime;
 
+/**
+ * 손이 필요한 플레이트인지. 두 가지를 한 뜻으로 묶는다 —
+ * 마지막 회차 촬영이 실패했거나(다시 찍어야 한다), PC 로 못 보낸 영상이
+ * 2건 이상 쌓였거나(보관 기한 안에 보내야 한다).
+ *
+ * 트레이의 빨간 원과 현황의 「문제 발생」이 같은 값을 써야 하므로 여기 한 곳에 둔다.
+ */
+export const plateBad = (p: Plate) => p.runs.at(-1)?.imageState === 'failed' || pending(p) >= 2;
+
 export const wellState = (s: AppState, p: Plate | undefined, d: Device | undefined): WellState => {
   if (!p) return 'empty';
   if (d?.job?.status === 'running' && d.job.plateId === p.id) return 'busy';
-  if (p.runs.at(-1)?.imageState === 'failed' || pending(p) >= 2) return 'bad';
+  if (plateBad(p)) return 'bad';
   if (p.runs.length >= totalRuns(s)) return 'done';
   return 'ok';
 };

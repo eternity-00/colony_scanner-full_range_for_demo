@@ -1,9 +1,10 @@
 import type {AppState} from '../../api/types.ts';
+import {SLOTS_PER_DEVICE} from '../../config/defines.ts';
 import {WellLegend} from '../../shared/Legend.tsx';
-import {active, pending, totalRuns} from '../../utils/plate.ts';
+import {active, plateBad, pending, totalRuns} from '../../utils/plate.ts';
 
 /** 색면 톤 — 글자·아이콘이 올라가므로 깊은 톤을 쓴다. */
-type Tone = 'wait' | 'run' | 'send' | 'fault';
+type Tone = 'wait' | 'slot' | 'run' | 'send' | 'fault';
 
 interface Stat {
   key: Tone;
@@ -32,6 +33,13 @@ export function StatBar({state}: {state: AppState}) {
       path: 'M12 3v10M8 9l4 4 4-4M4 20h16',
     },
     {
+      key: 'slot',
+      label: '빈 슬롯',
+      value: SLOTS_PER_DEVICE * state.devices.length - plates.length,
+      unit: '칸',
+      path: 'M4 4h16v16H4zM12 8.5v7M8.5 12h7',
+    },
+    {
       key: 'run',
       label: '촬영 중',
       value: state.devices.filter(d => d.job?.status === 'running').length,
@@ -46,10 +54,13 @@ export function StatBar({state}: {state: AppState}) {
       path: 'M12 19V7M6.5 12.5L12 7l5.5 5.5M4 4h16',
     },
     {
+      // 장비가 아니라 플레이트를 센다. 장비 고장은 분석자가 할 수 있는 일이
+      // 없어서 알림 종과 「관리자에게 문의하세요」 배너가 맡는다. 여기 네 칸은
+      // 분석자가 손을 대야 하는 것만 센다.
       key: 'fault',
-      label: '점검 필요',
-      value: state.devices.filter(d => !d.connected || d.fault || d.doorOpen).length,
-      unit: '대',
+      label: '문제 발생',
+      value: plates.filter(plateBad).length,
+      unit: '매',
       path: 'M12 4.5l8.5 15h-17zM12 10v4M12 17h.01',
     },
   ];

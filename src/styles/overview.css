@@ -17,6 +17,7 @@
 .stat-ic{width:1.5rem;height:1.5rem;flex:none;border-radius:2px;display:grid;place-items:center;color:#fff}
 .stat-ic svg{width:0.875rem;height:0.875rem}
 .stat-ic.wait{background:#a8720d}
+.stat-ic.slot{background:#5b7285}
 .stat-ic.run{background:var(--blue7)}
 .stat-ic.send{background:#5c636e}
 .stat-ic.fault{background:#c01d27}
