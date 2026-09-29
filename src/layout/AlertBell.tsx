@@ -123,10 +123,6 @@ export function AlertBell({state, onDevice, onPlate, onNeedAdmin}: Props) {
   const urgent = unread.some(i => i.kind === 'device');
   /** 아직 눌러 보지 않은 줄. 점은 이 기준으로 찍는다. */
   const isNew = (i: Item) => !read.includes(i.id);
-  // 새것을 위로. 「확인했는데 왜 그대로냐」는 느낌은 목록을 지워서가 아니라
-  // 새것과 본 것을 갈라서 푼다 — 여기 있는 건 지나간 사건이 아니라 현재
-  // 상태라, 지우면 고장이 나 있는데 알림창이 비어 보인다.
-  const sorted = [...items.filter(isNew), ...items.filter(i => !isNew(i))];
 
   return (
     <span className="bell-wrap">
@@ -158,7 +154,7 @@ export function AlertBell({state, onDevice, onPlate, onNeedAdmin}: Props) {
               <p className="pop-empty">지금 처리할 일이 없습니다.</p>
             ) : (
               <ul className="alert-list">
-                {sorted.map(i => (
+                {items.map(i => (
                   <li key={i.id} className={`${i.kind} ${isNew(i) ? 'fresh' : ''}`}>
                     <button
                       disabled={!i.go}
