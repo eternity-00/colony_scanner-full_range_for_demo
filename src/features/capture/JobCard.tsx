@@ -23,6 +23,20 @@ export function JobCard({device: d, state, send, openDetail}: Props) {
     <section className="card job">
       <div className="row between">
         <h2>{d.name}</h2>
+        {/* 진행 단계는 머리 줄에 한 줄로 눕힌다. 아래를 비워 사진이 그만큼 커진다. */}
+        <div className="stages line">
+          {stages.map((label, i) => (
+            <div
+              key={label}
+              className={
+                !job ? '' : i < job.step ? 'done' : i === job.step && job.status === 'running' ? 'now' : ''
+              }
+            >
+              <i />
+              <span>{label}</span>
+            </div>
+          ))}
+        </div>
         <div className="jtags">
           <span className="wellbadge">
             {/* 값이 없을 때의 줄표는 짧은 것(–)을 쓴다. 긴 줄표(—)는 좁은 칩 안에서 선처럼 보인다. */}
@@ -79,19 +93,6 @@ export function JobCard({device: d, state, send, openDetail}: Props) {
         </div>
       </div>
 
-      <div className="stages big">
-        {stages.map((label, i) => (
-          <div
-            key={label}
-            className={
-              !job ? '' : i < job.step ? 'done' : i === job.step && job.status === 'running' ? 'now' : ''
-            }
-          >
-            <i />
-            <span>{label}</span>
-          </div>
-        ))}
-      </div>
     </section>
   );
 }
