@@ -170,7 +170,11 @@
 .alert-pop::before{top:-0.5rem;border-bottom:0.5rem solid var(--g3)}
 .alert-pop::after{top:calc(-0.5rem + 1px);border-bottom:0.5rem solid #fff}
 .pop-empty{margin:0;font-size:0.84375rem;color:var(--gt)}
-.alert-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column}
+/* 줄 수가 많아도 다 볼 수 있게 스크롤한다. 접어서 「외 N건」으로 두면 그 안에
+   무엇이 들었는지 알 길이 없다. */
+.alert-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;
+  max-height:23rem;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;
+  overscroll-behavior:contain}
 .alert-list li{border-bottom:1px solid #eaeaea}
 .alert-list li:last-child{border-bottom:0}
 /* 줄 전체가 버튼이다 — 손가락이 큰 사람이 글자를 조준하지 않아도 된다. */
@@ -184,7 +188,6 @@
 /* 색이 뜻을 나눈다 — 고장·손봐야 할 것은 빨강, 다 찍혀 꺼내면 되는 것은 앰버. */
 .alert-list .device span,.alert-list .plate span{color:#c01d27}
 .alert-list .done span{color:#a8720d}
-.alert-more{padding:0.5625rem 0 0;font-size:0.78125rem;color:var(--gt);text-align:center}
 /* 알림 말풍선의 마무리 — 분석자에게는 다음에 할 일, 관리자에게는 고칠 화면으로. */
 .alert-ask{margin:0.875rem 0 0;padding:0.6875rem 0.75rem;background:#f5f5f5;border-radius:var(--rr);
   box-shadow:inset 3px 0 0 #c01d27}

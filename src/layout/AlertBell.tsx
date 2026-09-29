@@ -24,8 +24,20 @@ interface Item {
   go?: () => void;
 }
 
-/** 목록에 한 번에 펼치는 최대 줄 수. 넘치면 「외 N건」으로 접는다. */
-const MAX = 7;
+/**
+ * 읽은 알림의 id. 한 번 펼쳐서 본 것은 배지에서 빼되 목록에는 남긴다 —
+ * 본 것과 처리한 것은 다르다. 같은 일이 사라졌다 다시 생기면 새 알림으로 친다.
+ */
+const SEEN_KEY = 'colony-alerts-seen';
+
+const readSeen = (): string[] => {
+  try {
+    const raw = localStorage.getItem(SEEN_KEY);
+    return raw ? (JSON.parse(raw) as string[]) : [];
+  } catch {
+    return [];
+  }
+};
 
 /**
  * 헤더의 알림 종.
@@ -35,12 +47,16 @@ const MAX = 7;
  * 사라지는 사건(도어를 여닫음, 촬영 한 회가 성공)은 알려도 할 일이 없어 넣지 않는다.
  * 지난 일의 기록은 장비 화면의 이벤트 로그가 맡는다.
  *
+ * 배지는 아직 안 본 건수다. 한 번 펼치면 사라지고, 새 일이 생기면 다시 뜬다.
+ * 목록 자체는 줄지 않는다 — 본 것과 처리한 것은 다르기 때문이다.
+ *
  * 세 가지를 센다 — 장비 오류 · 손봐야 하는 플레이트 · 반출을 기다리는 플레이트.
  * 줄마다 갈 곳이 다르다. 플레이트는 상세로, 장비 오류는 관리자면 장비 화면으로,
  * 분석자면 왜 못 고치는지를 알리는 팝업으로 간다.
  */
 export function AlertBell({state, onDevice, onPlate, onNeedAdmin}: Props) {
   const [open, setOpen] = useState(false);
+  const [seen, setSeen] = useState<string[]>(readSeen);
   const isAdmin = state.session.role === 'admin';
 
   useEffect(() => {
@@ -83,22 +99,41 @@ export function AlertBell({state, onDevice, onPlate, onNeedAdmin}: Props) {
       })),
   ];
 
-  const faulted = items.some(i => i.kind === 'device');
-  const shown = items.slice(0, MAX);
+  const ids = items.map(i => i.id);
+  const key = ids.join('|');
+
+  // 펼치면 지금 목록을 다 본 것으로 친다. 사라진 일은 기록에서도 지워,
+  // 같은 장비가 다시 고장나면 새 알림으로 다시 센다.
+  useEffect(() => {
+    setSeen(prev => {
+      const next = open ? ids : prev.filter(id => ids.includes(id));
+      if (next.length === prev.length && next.every((v, i) => v === prev[i])) return prev;
+      try {
+        localStorage.setItem(SEEN_KEY, JSON.stringify(next));
+      } catch {
+        /* 저장소를 못 써도 이번 세션 동안은 동작한다. */
+      }
+      return next;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key, open]);
+
+  const unread = items.filter(i => !seen.includes(i.id));
+  const urgent = unread.some(i => i.kind === 'device');
 
   return (
     <span className="bell-wrap">
       <button
         className="hd-bell"
         onClick={() => setOpen(v => !v)}
-        aria-label={`알림 ${items.length}건`}
+        aria-label={`알림 ${items.length}건 · 새 알림 ${unread.length}건`}
         aria-expanded={open}
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
           <path d="M5 18h14l-2-3V10a5 5 0 0 0-10 0v5z" />
           <path d="M10 21h4" />
         </svg>
-        {items.length > 0 && <i className={faulted ? 'bad' : ''}>{items.length}</i>}
+        {unread.length > 0 && <i className={urgent ? 'bad' : ''}>{unread.length}</i>}
       </button>
 
       {open && (
@@ -116,7 +151,7 @@ export function AlertBell({state, onDevice, onPlate, onNeedAdmin}: Props) {
               <p className="pop-empty">지금 처리할 일이 없습니다.</p>
             ) : (
               <ul className="alert-list">
-                {shown.map(i => (
+                {items.map(i => (
                   <li key={i.id} className={i.kind}>
                     <button
                       disabled={!i.go}
@@ -130,7 +165,6 @@ export function AlertBell({state, onDevice, onPlate, onNeedAdmin}: Props) {
                     </button>
                   </li>
                 ))}
-                {items.length > MAX && <li className="alert-more">외 {items.length - MAX}건</li>}
               </ul>
             )}
           </section>
