@@ -6,7 +6,7 @@ interface Props {
   state: AppState;
   send: SendCommand;
   operator: string;
-  /** 표시 이름을 바꾸러 설정으로 보낸다. */
+  /** 사용자 설정 화면으로 보낸다. */
   onSettings: () => void;
   /** PIN 을 받아 관리자로 올린다. */
   onUpgrade: () => void;
@@ -61,7 +61,7 @@ export function UserCard({state, send, operator, onSettings, onUpgrade, onClose}
         </p>
 
         <div className="user-act">
-          <button onClick={onSettings}>이름 바꾸기</button>
+          <button onClick={onSettings}>설정</button>
           {isAdmin ? (
             <button
               className="primary"
