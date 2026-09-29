@@ -1,94 +1,85 @@
-import {useEffect, useRef, useState} from 'react';
 import type {AppState} from '../api/types.ts';
-import type {TabKey} from '../config/defines.ts';
+import {TABS, type TabKey} from '../config/defines.ts';
 import {Logo} from '../shared/Logo.tsx';
-import {hms, ymd} from '../utils/datetime.ts';
-import {tempAbnormal} from '../utils/plate.ts';
+import {TabIcon} from '../shared/TabIcon.tsx';
+import {faultLabel, tempAbnormal} from '../utils/plate.ts';
 
 interface Props {
   state: AppState;
   tab: TabKey;
-  operator: string;
-  onRole: () => void;
-  onMenu: () => void;
+  onAlert: () => void;
 }
 
+const NAME = new Map(TABS.map(([key, ko, en]) => [key, {ko, en}]));
+
 /**
- * 상호는 고정하고 오른쪽 부제만 화면에 따라 바꾼다.
- * 시안(D1)의 현황 화면이 "Colony Scanner | Incubator #1" 이라, 다른 화면은
- * 그 자리에 화면 이름을 넣어 같은 자리에서 위치를 알 수 있게 한다.
+ * 헤더 (D2).
+ *
+ * 왼쪽 색면에 지금 보고 있는 화면을 못박고, 그 오른쪽에 작은 라벨 + 큰 값을 한 쌍씩
+ * 늘어놓는다. 칩을 늘어놓는 것보다 읽는 순서가 생긴다.
+ *
+ * 여기에는 **장비 전체에 하나뿐인 값**만 둔다. 배양 진행이나 다음 촬영처럼
+ * 플레이트마다 다른 값은 하나만 골라 적는 순간 나머지를 가리는 거짓말이 된다 —
+ * 그건 스캐너 카드의 NEXT 와 상세 화면이 각자 말한다.
+ *
+ * 시계와 계정은 좌측 레일로 내려갔다.
  */
-const SUBTITLE: Record<TabKey, string> = {
-  overview: 'Incubator #1',
-  detail: '스캐너 상세',
-  register: '플레이트 등록',
-  running: '촬영 진행',
-  history: '이력 · 검색',
-  device: '장비 상태',
-  settings: '설정',
-};
-
-export function Header({state, tab, operator, onRole, onMenu}: Props) {
-  const [, tick] = useState(0);
-  const offset = useRef(0);
-  offset.current = state.serverTime - Date.now();
-
-  useEffect(() => {
-    const t = setInterval(() => tick(x => x + 1), 1000);
-    return () => clearInterval(t);
-  }, []);
-
-  const now = Date.now() + offset.current;
+export function Header({state, tab, onAlert}: Props) {
   const devices = state.devices;
-  const errors = devices.filter(d => d.fault || d.doorOpen).length;
+  const faults = devices.filter(d => faultLabel(d)).length;
   const linked = devices.filter(d => d.connected).length;
-
-  // 피드백 2.2 — 인큐베이터 온도 현재값은 관리자에게만 상시 노출하고,
-  // 분석자에게는 목표 범위를 벗어났을 때만 보여준다.
   const abnormal = devices.some(tempAbnormal);
-  const showTemperature = state.session.role === 'admin' || abnormal;
+  const name = NAME.get(tab);
+
+  const avg = (pick: (d: (typeof devices)[number]) => number) =>
+    (devices.reduce((a, d) => a + pick(d), 0) / (devices.length || 1)).toFixed(1);
 
   return (
     <header>
-      {/* 시안에는 메뉴 버튼이 없다. 좌측 64px 색면이 실루엣을 만드는 요소이므로
-          그 블록 자체를 메뉴 버튼으로 쓴다 — 터치 타깃이 64px 로 넉넉하다. */}
-      <button className="hd-menu" onClick={onMenu} aria-label="메뉴">
-        <span />
-        <span />
-        <span />
-      </button>
-      <span className="wm">
-        <Logo />
-        {/* 글자는 한 덩어리로 묶는다. 풀어두면 .wm 의 flex gap 이 Colony 와
-            Scanner 사이에도 들어가 두 낱말로 갈라진다. */}
-        <b>
-          Colony<i>Scanner</i>
-        </b>
+      <span className="hd-mode">
+        <TabIcon tab={tab} />
+        <span className="hd-mode-t">
+          <b>{name?.ko}</b>
+          <em>{name?.en}</em>
+        </span>
       </span>
-      <span className="sub">{SUBTITLE[tab]}</span>
-      <div className="head-status">
-        {showTemperature && (
-          <span className={`hstat ${abnormal ? 'bad' : ''}`}>
-            {(devices.reduce((a, d) => a + d.temperature, 0) / devices.length).toFixed(1)} ℃
-          </span>
-        )}
-        <span className="hstat">
-          CO₂ <b>{(devices.reduce((a, d) => a + d.co2, 0) / devices.length).toFixed(1)} %</b>
+
+      <span className="hd-meta">
+        <span className="hm">
+          <small>인큐베이터</small>
+          <b>Incubator #1</b>
         </span>
-        <span className={`hstat ${linked === 4 && !errors ? '' : 'bad'}`}>
-          <i className="dot" />
-          유선 연결 <b>{linked} / 4</b>
+        <span className="hm">
+          <small>온도 · CO₂</small>
+          <b className={abnormal ? 'bad' : ''}>
+            {avg(d => d.temperature)} ℃ · {avg(d => d.co2)} %
+          </b>
         </span>
-        <span className="clock">
-          {ymd(now)} {hms(now)}
+        <span className="hm">
+          <small>유선 연결</small>
+          <b className={linked === devices.length ? '' : 'bad'}>
+            {linked} / {devices.length}
+          </b>
         </span>
-        <button className={`role-chip ${state.session.role}`} onClick={onRole}>
-          <i>{operator.slice(0, 1)}</i>
-          <span className="who">
-            {operator} · {state.session.role === 'admin' ? '관리자' : '분석자'}
-          </span>
+      </span>
+
+      <span className="hd-right">
+        {/* 알림은 장비 문제 건수다. 0 이면 숫자를 붙이지 않는다 — 없는 것을
+            0 으로 적으면 눈이 한 번 더 확인해야 한다. */}
+        <button className="hd-bell" onClick={onAlert} aria-label={`장비 알림 ${faults}건`}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
+            <path d="M5 18h14l-2-3V10a5 5 0 0 0-10 0v5z" />
+            <path d="M10 21h4" />
+          </svg>
+          {faults > 0 && <i>{faults}</i>}
         </button>
-      </div>
+        <span className="wm">
+          <Logo size={23} />
+          <b>
+            Colony<i>Scanner</i>
+          </b>
+        </span>
+      </span>
     </header>
   );
 }

@@ -19,5 +19,5 @@
  * 남는다. 화면을 옮겨도 그 자리에 새로 그려진 버튼이 눌린 것처럼 옅게 떠 있었다.
  */
 @media (hover:hover) and (pointer:fine){
- .filters .ghost-btn:hover{background:#f2f1f3;border-color:#9ba2ac}
+ .filters .ghost-btn:hover{background:#eaeaea;border-color:#8f8f8f}
 }

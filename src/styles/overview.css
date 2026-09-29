@@ -16,10 +16,10 @@
 /* 아이콘 칩은 꽉 찬 색면 + 흰 아이콘. 흰 글씨가 올라가므로 전부 깊은 톤이다. */
 .stat-ic{width:1.5rem;height:1.5rem;flex:none;border-radius:2px;display:grid;place-items:center;color:#fff}
 .stat-ic svg{width:0.875rem;height:0.875rem}
-.stat-ic.wait{background:#c77d0a}
+.stat-ic.wait{background:#a8720d}
 .stat-ic.run{background:var(--blue7)}
 .stat-ic.send{background:#5c636e}
-.stat-ic.fault{background:#ca263f}
+.stat-ic.fault{background:#c01d27}
 .overview-head .legend{margin-left:auto}
 
 .scanner-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0.75rem;flex:1;min-height:0}
@@ -44,15 +44,15 @@
 .head-next small{font-size:0.625rem;font-weight:700;letter-spacing:.04em;color:var(--gt)}
 .head-next b{font-size:0.9375rem;font-weight:800;letter-spacing:-.02em;color:var(--gt);font-variant-numeric:tabular-nums}
 .head-next b.go{color:var(--blue)}
-.head-next b.stop{color:#ca263f}
+.head-next b.stop{color:#c01d27}
 
 /* 배지: 평상시엔 중립 회색, 촬영 중·점검 필요만 꽉 찬 색면 + 흰 글씨 */
-.scanner .badge{border:1px solid #dcdfe3;border-radius:2px;padding:0.3125rem 0.625rem;
-  font-size:0.6875rem;font-weight:700;background:#eceef1;color:var(--gt)}
+.scanner .badge{border:1px solid #d2d2d2;border-radius:2px;padding:0.3125rem 0.625rem;
+  font-size:0.6875rem;font-weight:700;background:#e6e6e6;color:var(--gt)}
 .scanner .badge.good{background:var(--blue7);border-color:var(--blue7);color:#fff}
-.scanner .badge.bad{background:#ca263f;border-color:#ca263f;color:#fff}
-.scanner .badge.warn{background:#c77d0a;border-color:#c77d0a;color:#fff}
-.scanner .badge.info{background:#eceef1;border-color:#dcdfe3;color:var(--gt)}
+.scanner .badge.bad{background:#c01d27;border-color:#c01d27;color:#fff}
+.scanner .badge.warn{background:#a8720d;border-color:#a8720d;color:#fff}
+.scanner .badge.info{background:#e6e6e6;border-color:#d2d2d2;color:var(--gt)}
 
 .tray-box{margin:0 0.625rem 0 0.375rem;background:transparent;border:0;padding:0 0 0.75rem}
 
@@ -68,13 +68,13 @@
  * 왼쪽에 그 칸을 같은 모양(점선 테두리 · 빈 원)으로 다시 그린다.
  */
 .pick-box{display:flex;align-items:center;gap:0.875rem;padding:0.875rem 1rem;
-  background:#f8f9fb;border:1px solid var(--g3);border-radius:var(--rr)}
+  background:#f5f5f5;border:1px solid var(--g3);border-radius:var(--rr)}
 .pick-cell{width:3.25rem;height:2.5rem;flex:none;display:grid;place-items:center;
-  background:#fff;border:1px dashed #d8dce1;border-radius:var(--rr)}
+  background:#fff;border:1px dashed #d8d8d8;border-radius:var(--rr)}
 .pick-cell::before{content:'';width:1.125rem;height:1.125rem;border-radius:50%;
-  background:#fff;border:2px solid #dcdfe3}
+  background:#fff;border:2px solid #d2d2d2}
 .pick-box b{display:block;font-size:1.0625rem;font-weight:800;letter-spacing:-.2px;color:var(--gt)}
 .pick-box span{display:block;font-size:0.8125rem;color:var(--gt);margin-top:2px}
 .pick-ask{margin:1rem 0 0;font-size:0.9375rem;font-weight:650;color:var(--gt)}
-.pick-info{margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid #eceef1;
+.pick-info{margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid #e6e6e6;
   grid-template-columns:5.5rem 1fr;gap:0.375rem 0.625rem;font-size:0.84375rem}

@@ -22,7 +22,7 @@
 
 /* 등록 완료 모달 */
 .done-box{display:flex;align-items:center;gap:0.8125rem;padding:0.9375rem 1rem;background:#fff;border:1px solid var(--g3);border-radius:var(--rr)}
-.done-box i{width:2.125rem;height:2.125rem;flex:none;border-radius:50%;background:#147d40;position:relative}
+.done-box i{width:2.125rem;height:2.125rem;flex:none;border-radius:50%;background:#4e8f47;position:relative}
 .done-box i:after{content:'';position:absolute;left:0.6875rem;top:0.5625rem;width:0.5625rem;height:1rem;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
 .done-box b{display:block;font-size:1.0625rem;font-weight:800;letter-spacing:-.2px;color:var(--gt)}
 .done-box span{display:block;font-size:0.8125rem;color:var(--gt);margin-top:2px}

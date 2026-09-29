@@ -23,9 +23,9 @@
  * 영상 뷰어(.modal.wide)는 제 레이아웃이 따로 있어 건드리지 않는다.
  */
 .modal-bg{background:#0d1637b3}
-.modal:not(.wide)>h2{background:#f8f9fb}
+.modal:not(.wide)>h2{background:#f5f5f5}
 .modal:not(.wide) .actions{margin:1.25rem -1.5rem -1.5rem;padding:0.9375rem 1.5rem;
-  justify-content:center;background:#f8f9fb;border-top:1px solid var(--g3);
+  justify-content:center;background:#f5f5f5;border-top:1px solid var(--g3);
   border-radius:0 0 var(--rr) var(--rr)}
 /* 닫기 ×는 머리글 띠 위에 얹히므로 면을 가지고 있어야 눌리는 것으로 보인다. */
 .modal:not(.wide)>.modal-x{top:0.8125rem;right:0.8125rem;width:2.375rem;height:2.375rem;

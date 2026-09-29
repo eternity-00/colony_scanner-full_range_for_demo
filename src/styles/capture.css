@@ -4,12 +4,12 @@
 .cam-shot img{width:100%;height:100%;object-fit:contain;display:block}
 .stages{display:flex;align-items:flex-start;gap:0}
 .stages div{flex:1;display:flex;flex-direction:column;align-items:center;gap:0.3125rem;position:relative;font-size:0.625rem;color:var(--gt);font-weight:700;text-align:center;line-height:1.2}
-.stages div:before{content:'';position:absolute;top:0.3125rem;left:-50%;width:100%;height:2px;background:#dcdfe3}
+.stages div:before{content:'';position:absolute;top:0.3125rem;left:-50%;width:100%;height:2px;background:#d2d2d2}
 .stages div:first-child:before{display:none}
-.stages i{width:0.75rem;height:0.75rem;border-radius:50%;background:#fff;border:2px solid #dcdfe3;position:relative;z-index:1}
+.stages i{width:0.75rem;height:0.75rem;border-radius:50%;background:#fff;border:2px solid #d2d2d2;position:relative;z-index:1}
 .stages .done{color:var(--gt)}
-.stages .done i{background:#2f9e5f;border-color:#2f9e5f}
-.stages .done:before{background:#2f9e5f}
+.stages .done i{background:#5aa153;border-color:#5aa153}
+.stages .done:before{background:#5aa153}
 .stages .now{color:var(--gt)}
 .stages .now i{background:var(--dot);border-color:var(--dot)}
 
@@ -18,8 +18,8 @@
 .run-bar{display:flex;align-items:center;justify-content:space-between;gap:0.75rem;flex:none}
 .run-tabs{display:flex;gap:0.375rem;flex-wrap:wrap}
 .run-tabs .rt{display:inline-flex;align-items:center;gap:0.4375rem;min-height:2.375rem;padding:0 0.875rem;border:1px solid var(--line);border-radius:var(--rr);background:#fff;color:var(--gt);font-size:0.875rem;font-weight:800}
-.run-tabs .rt i{width:0.5625rem;height:0.5625rem;border-radius:50%;background:#9ba2ac;flex:none}
-.run-tabs .rt.good i{background:#2f9e5f}.run-tabs .rt.bad i{background:#e53946}.run-tabs .rt.warn i{background:#e8971a}.run-tabs .rt.info i{background:#5c636e}
+.run-tabs .rt i{width:0.5625rem;height:0.5625rem;border-radius:50%;background:#8f8f8f;flex:none}
+.run-tabs .rt.good i{background:#5aa153}.run-tabs .rt.bad i{background:#d6202b}.run-tabs .rt.warn i{background:#d99009}.run-tabs .rt.info i{background:#5c636e}
 .run-tabs .rt.sel{background:var(--blue);border-color:var(--blue);color:#fff}
 .run-right{display:flex;align-items:center;gap:0.625rem;flex:none}
 .viewtoggle{display:inline-flex;border:1px solid var(--line);border-radius:var(--rr);overflow:hidden;background:#fff}
@@ -32,10 +32,10 @@
 .app[data-w="sm"] .job-grid.grid{grid-template-columns:minmax(0,1fr);grid-template-rows:repeat(4,minmax(0,1fr))}
 .job-grid.single{grid-template-columns:1fr;grid-template-rows:1fr}
 .job{padding:0.6875rem 0.8125rem;display:flex;flex-direction:column;gap:0.5625rem;min-height:0;overflow:hidden}
-.cam-wrap{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;background:#f2f1f3;border:1px solid var(--g3);border-radius:var(--rr);padding:0.5rem;overflow:hidden}
+.cam-wrap{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;background:#eaeaea;border:1px solid var(--g3);border-radius:var(--rr);padding:0.5rem;overflow:hidden}
 .cam-shot{aspect-ratio:4/3;max-width:100%;max-height:100%;height:100%;background:#0b1220;border-radius:var(--rr);display:grid;place-items:center;position:relative;overflow:hidden}
-.cam-shot.live:before{content:'LIVE';position:absolute;left:0.5rem;top:0.4375rem;z-index:1;font-size:0.5625rem;font-weight:800;letter-spacing:1px;color:#fff;background:#ca263f;padding:2px 0.375rem;border-radius:2px}
-.cam-shot.off span{color:#9ea4ad;font-size:0.75rem;font-weight:700;letter-spacing:.5px}
+.cam-shot.live:before{content:'LIVE';position:absolute;left:0.5rem;top:0.4375rem;z-index:1;font-size:0.5625rem;font-weight:800;letter-spacing:1px;color:#fff;background:#c01d27;padding:2px 0.375rem;border-radius:2px}
+.cam-shot.off span{color:#9a9a9a;font-size:0.75rem;font-weight:700;letter-spacing:.5px}
 .job .actions{margin-top:0;gap:0.375rem;justify-content:flex-start;flex-wrap:nowrap}
 .job .actions button{min-height:3rem;padding:0.5rem 0.625rem;font-size:0.875rem;font-weight:800;flex:1;white-space:nowrap}
 
@@ -64,22 +64,22 @@
 /* 진행 바(스테이지) 크게 */
 .stages.big{flex:none;padding:1.5rem 0.5rem 0.75rem}
 .stages.big div{font-size:0.84375rem;gap:0.75rem;font-weight:800}
-.stages.big i{width:1.875rem;height:1.875rem;border:3px solid #dcdfe3;transition:background .2s,border-color .2s}
+.stages.big i{width:1.875rem;height:1.875rem;border:3px solid #d2d2d2;transition:background .2s,border-color .2s}
 .stages.big div:before{top:0.84375rem;height:0.3125rem;border-radius:3px}
 .job-grid.grid .stages.big div{font-size:0.625rem}
 .job-grid.grid .stages.big i{width:0.875rem;height:0.875rem}
 
 /* 촬영 카드 카메라: 영역 꽉 채움 */
-.cam-row .cam-wrap{padding:0.625rem;background:#f2f1f3;border:1px solid var(--g3);display:flex;align-items:center;justify-content:center}
+.cam-row .cam-wrap{padding:0.625rem;background:#eaeaea;border:1px solid var(--g3);display:flex;align-items:center;justify-content:center}
 .cam-row .cam-shot{aspect-ratio:16/9;height:100%;width:auto;max-width:100%;margin:auto;background:#0b1220;border-radius:var(--rr)}
 .cam-row .cam-shot img{object-fit:cover}
 
 /* 진행 바 애니메이션 (단일 모드) */
-.stages.big .done i{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E") center/16px no-repeat,#2f9e5f;border-color:#2f9e5f}
+.stages.big .done i{background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E") center/16px no-repeat,#5aa153;border-color:#5aa153}
 /* 촬영 중은 조치가 필요 없는 상태라 움직이지 않는다 — 물결·흐르는 그라디언트를 뺐다.
    진행 여부는 지나온 단계가 초록으로 채워지는 것으로 읽는다. */
 .stages.big .now i{background:var(--dot);border-color:var(--dot);box-shadow:none}
-.stages.big .now:before{background:#2f9e5f}
+.stages.big .now:before{background:#5aa153}
 .stages.big .now{color:var(--gt)}
 .stages.big .now i{width:2rem;height:2rem}
 
@@ -113,5 +113,5 @@
  * 남는다. 화면을 옮겨도 그 자리에 새로 그려진 버튼이 눌린 것처럼 옅게 떠 있었다.
  */
 @media (hover:hover) and (pointer:fine){
- .qrow:hover{background:#f2f1f3;border-color:#9ba2ac}
+ .qrow:hover{background:#eaeaea;border-color:#8f8f8f}
 }

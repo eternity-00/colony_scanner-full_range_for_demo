@@ -2,7 +2,7 @@
 
 .active-error{border-color:var(--g3);background:#fff}
 .active-error div{display:flex;gap:0.875rem;margin-top:0.5rem}
-.active-error span{color:#ca263f;font-weight:700}
+.active-error span{color:#c01d27;font-weight:700}
 
 /* 넘침 방지 */
 .device-grid .card{min-height:0}
@@ -19,9 +19,9 @@
 .da{display:flex;align-items:center;gap:0.5625rem;width:100%;min-height:2.625rem;padding:0 0.8125rem;border:1px solid var(--line);border-radius:var(--rr);background:#fff;color:var(--gt);font-size:0.875rem;font-weight:700;text-align:left}
 .da svg{width:1.125rem;height:1.125rem;flex:none}
 .da.home{color:var(--blue)}
-.da.reset{color:#147d40}
-.da.clear{color:#ca263f}
-.da.clear:disabled{background:#f2f1f3;border-color:var(--line);color:#9ea4ad}
+.da.reset{color:#4e8f47}
+.da.clear{color:#c01d27}
+.da.clear:disabled{background:#eaeaea;border-color:var(--line);color:#9a9a9a}
 
 /* 캘리브레이션 바 (하단) */
 .cal-row{display:flex;align-items:stretch;gap:0.75rem}
@@ -43,8 +43,8 @@
  * 남는다. 화면을 옮겨도 그 자리에 새로 그려진 버튼이 눌린 것처럼 옅게 떠 있었다.
  */
 @media (hover:hover) and (pointer:fine){
- .da.home:hover{background:#f2f1f3;border-color:#9ba2ac}
- .da.reset:hover{background:#f2f1f3;border-color:#9ba2ac}
- .da.clear:hover:not(:disabled){background:#f2f1f3;border-color:#9ba2ac}
- .cal-btn.ghost:hover{background:#f2f1f3;border-color:#9ba2ac}
+ .da.home:hover{background:#eaeaea;border-color:#8f8f8f}
+ .da.reset:hover{background:#eaeaea;border-color:#8f8f8f}
+ .da.clear:hover:not(:disabled){background:#eaeaea;border-color:#8f8f8f}
+ .cal-btn.ghost:hover{background:#eaeaea;border-color:#8f8f8f}
 }

@@ -13,11 +13,11 @@
  * 반려된 표현: 옅은 틴트 배경, 칸 왼쪽 컬러 바, 칸 전체를 상태색으로 채우기.
  */
 .cell{height:2.625rem;min-height:2.625rem;padding:0 0.3125rem;border-radius:var(--rr);
-  background:#fff;border:1px solid #ccd2d9;color:var(--gt);
+  background:#fff;border:1px solid #cccccc;color:var(--gt);
   display:flex;flex-direction:row;align-items:center;justify-content:center;gap:0.4375rem;
   font-size:0.78125rem;font-weight:700;letter-spacing:-.02em;line-height:1.12;white-space:nowrap}
 .cell::before{content:'';width:1.125rem;height:1.125rem;flex:none;border-radius:50%;
-  background:#2f9e5f;border:2px solid #2f9e5f}
+  background:#5aa153;border:2px solid #5aa153}
 
 .tray.compact{gap:0.3125rem}
 .tray.compact .tray-row{grid-template-columns:1.625rem repeat(3,minmax(0,1fr));gap:0.3125rem}
@@ -28,8 +28,8 @@
 .tray-box .tray-row{align-items:stretch}
 
 /* Well 상태 5종 — 원의 색으로만 구분한다. 원 위에 글자가 없으니 밝은 톤을 쓴다. */
-.cell.w-empty{border:1px dashed #d8dce1;color:#9ea4ad}
-.cell.w-empty::before{background:#fff;border-color:#dcdfe3}
+.cell.w-empty{border:1px dashed #d8d8d8;color:#9a9a9a}
+.cell.w-empty::before{background:#fff;border-color:#d2d2d2}
 /* 촬영 중은 사람이 할 일이 없는 상태라 깜빡이지 않는다. */
 .cell.w-busy::before{background:var(--dot);border-color:var(--dot)}
 .cell.w-done::before{background:var(--well-done);border-color:var(--well-done)}
@@ -45,21 +45,21 @@
  * 같은 색인데도 따로 논다. 그래서 애니메이션은 :root 에서 한 번만 돌리고 칸은 그 값을
  * 읽기만 한다. :root 는 다시 마운트되지 않으므로 같은 색끼리 항상 같은 위상이다.
  */
-@property --well-done{syntax:'<color>';inherits:true;initial-value:#e8971a}
-@property --well-bad{syntax:'<color>';inherits:true;initial-value:#e53946}
+@property --well-done{syntax:'<color>';inherits:true;initial-value:#d99009}
+@property --well-bad{syntax:'<color>';inherits:true;initial-value:#d6202b}
 :root{animation:well-done 1.8s step-end infinite,well-bad .9s step-end infinite}
-@keyframes well-done{0%{--well-done:#e8971a}70%{--well-done:#fff}}
-@keyframes well-bad{0%{--well-bad:#e53946}70%{--well-bad:#fff}}
+@keyframes well-done{0%{--well-done:#d99009}70%{--well-done:#fff}}
+@keyframes well-bad{0%{--well-bad:#d6202b}70%{--well-bad:#fff}}
 @media(prefers-reduced-motion:reduce){:root{animation:none}}
 
 /* 상태 범례 — 칸 안의 원을 그대로 줄여 쓴다 */
 .legend{display:flex;align-items:center;gap:0.875rem;font-size:0.78125rem;color:var(--gt);font-weight:500;white-space:nowrap}
 .legend span{display:inline-flex;align-items:center;gap:0.375rem;white-space:nowrap}
-.legend i{width:0.8125rem;height:0.8125rem;flex:none;border-radius:50%;background:#2f9e5f;border:2px solid #2f9e5f}
-.legend i.w-empty{background:#fff;border-color:#dcdfe3}
+.legend i{width:0.8125rem;height:0.8125rem;flex:none;border-radius:50%;background:#5aa153;border:2px solid #5aa153}
+.legend i.w-empty{background:#fff;border-color:#d2d2d2}
 .legend i.w-busy{background:var(--dot);border-color:var(--dot)}
-.legend i.w-done{background:#e8971a;border-color:#e8971a}
-.legend i.w-bad{background:#e53946;border-color:#e53946}
+.legend i.w-done{background:#d99009;border-color:#d99009}
+.legend i.w-bad{background:#d6202b;border-color:#d6202b}
 
 /* 선택 표현 — 반투명 그림자·들림 없이 테두리만 굵힌다 */
 .cell.selected,.cell.selected:hover:not(:disabled){position:relative;z-index:3;
@@ -74,5 +74,5 @@
  * 남는다. 화면을 옮겨도 그 자리에 새로 그려진 버튼이 눌린 것처럼 옅게 떠 있었다.
  */
 @media (hover:hover) and (pointer:fine){
- .tray.compact .cell:not(:disabled):hover{border-color:#9ba2ac}
+ .tray.compact .cell:not(:disabled):hover{border-color:#8f8f8f}
 }

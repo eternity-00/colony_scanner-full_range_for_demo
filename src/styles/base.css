@@ -11,21 +11,21 @@ html{font-size:calc(16px * var(--ui-scale, 1))}
 /*
  * 모서리는 2~3px. 둥근 모서리·알약 모양은 "장난감 같다"는 이유로 반려됐다.
  *
- * --blue 와 --blue7 은 같은 값(#0063b3)이다. 화면 전체를 D1 으로 옮기면서
- * 옛 파랑(#2a4bc7)을 전부 걷어냈고, --blue7 은 먼저 옮긴 파일들이 쓰고 있어 남겨둔
- * 별칭이다. 새 코드는 --blue 를 쓴다.
+ * v5 팔레트 — ProCalX·Coperion 레퍼런스의 강철빛 파랑. 이름은 그대로 두고 값만
+ * 옮겨서, 화면마다 흩어진 var() 를 고치지 않아도 전체가 따라오게 했다.
  *
- * 톤이 둘인 건 의도다: 색면 위에 글자가 올라가면 깊은 톤(--blue7), 글자 없는 원·점이면
- * 밝은 톤(--dot). 밝은 톤에 흰 글씨는 대비 3:1 대라 기준(4.5:1) 미달이다.
+ * 톤이 둘인 건 의도다: 색면 위에 글자가 올라가면 깊은 톤(--blue7 · 흰 글씨 4.6:1),
+ * 글자 없는 원·점이면 밝은 톤(--dot). 밝은 톤에 흰 글씨는 2.3:1 이라 못 쓴다.
+ * --deep 은 좌측 레일의 회색이다.
  */
-:root{--ui-scale:1;--rr:3px;font-family:Pretendard,'Noto Sans CJK KR',system-ui,sans-serif;color:#101828;background:#f7f9fc;font-synthesis:none;--navy:#131f4d;--blue:#0063b3;--line:#dcdfe3;--blue7:#0063b3;--dot:#0088df;--deep:#112453;--g3:#e5e5e5;--gt:#121215}
+:root{--ui-scale:1;--rr:3px;font-family:Pretendard,'Noto Sans CJK KR',system-ui,sans-serif;color:#1a1a1a;background:#efefef;font-synthesis:none;--navy:#3f3f3f;--blue:#4a7b96;--line:#d2d2d2;--blue7:#4a7b96;--dot:#6ba4c4;--deep:#555555;--g3:#e0e0e0;--gt:#5b5b5b;--ink:#1a1a1a}
 *{box-sizing:border-box}
 body{margin:0}
 button,input,select{font:inherit}
 button{min-height:2.625rem;padding:0.5rem 0.875rem;border:1px solid var(--line);border-radius:var(--rr);background:#fff;color:var(--gt);font-weight:700;cursor:pointer}
 button:disabled{opacity:.48;cursor:not-allowed}
 button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #66b0e8;outline-offset:2px}
-input,select{min-height:2.625rem;border:1px solid #ccd2d9;border-radius:var(--rr);padding:0.5rem 0.6875rem;background:#fff}
+input,select{min-height:2.625rem;border:1px solid #cccccc;border-radius:var(--rr);padding:0.5rem 0.6875rem;background:#fff}
 h1,h2,h3,p{margin:0}
 h2{font-size:1.125rem}
 h3{font-size:0.9375rem}
@@ -35,8 +35,8 @@ dt{color:var(--gt)}
 dd{margin:0;font-weight:650}
 
 table{border-collapse:collapse;width:100%;font-size:0.8125rem}
-th{background:#f2f1f3;color:var(--gt);font-weight:800;font-size:0.84375rem;letter-spacing:-.2px}
-th,td{text-align:left;padding:0.5625rem 0.6875rem;border-bottom:1px solid #eceef1;white-space:nowrap}
+th{background:#eaeaea;color:var(--gt);font-weight:800;font-size:0.84375rem;letter-spacing:-.2px}
+th,td{text-align:left;padding:0.5625rem 0.6875rem;border-bottom:1px solid #e6e6e6;white-space:nowrap}
 td.payload{white-space:normal;max-width:26.875rem;font-family:ui-monospace,monospace;font-size:0.6875rem}
 
 /* 터치스크린: 드래그/선택/롱프레스/더블탭줌 방지 (입력 필드는 예외) */
@@ -56,5 +56,5 @@ select::-ms-expand{display:none}
  */
 @media (hover:hover) and (pointer:fine){
  button:hover:not(:disabled){filter:brightness(.96)}
- select:hover{border-color:#9ba2ac}
+ select:hover{border-color:#8f8f8f}
 }
