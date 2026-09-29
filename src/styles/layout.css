@@ -66,7 +66,7 @@
 .hm small{font-size:0.65625rem;font-weight:700;letter-spacing:.08em;color:var(--gt)}
 .hm b{font-size:0.84375rem;font-weight:700;letter-spacing:-.01em;color:var(--ink);font-variant-numeric:tabular-nums}
 .hm b.bad{color:#c01d27}
-.hd-right{flex:none;display:flex;align-items:center;gap:0.375rem;padding:0 0.625rem 0 0.25rem}
+.hd-right{flex:none;display:flex;align-items:center;gap:0.25rem;padding:0 0.5rem 0 0.25rem}
 .hd-bell{position:relative;width:3rem;height:3rem;min-height:0;flex:none;padding:0;display:grid;place-items:center;
   border:0;background:transparent;color:var(--ink);cursor:pointer}
 .hd-bell svg{width:1.75rem;height:1.75rem}
@@ -74,9 +74,9 @@
   background:#c01d27;color:#fff;font-size:0.625rem;font-weight:700;font-style:normal;display:grid;place-items:center}
 /* 오른쪽 끝은 제품 로고 — 레퍼런스가 로고를 두는 자리다. 2단 락업이라
    헤더 높이(4rem)에 맞춰 세로를 잡고 가로는 비율로 따라간다.
-   위아래 5px 만 남기고 칸을 채운다 — 작게 두면 여백만 넓어 비어 보인다. */
-.wm{display:block;height:3.375rem;width:auto;flex:none}
-.app[data-w="sm"] .wm{height:2.375rem}
+   위아래 2px 만 남기고 칸을 채운다 — 작게 두면 여백만 넓어 비어 보인다. */
+.wm{display:block;height:3.75rem;width:auto;flex:none}
+.app[data-w="sm"] .wm{height:2.75rem}
 .app[data-w="md"] .hd-meta .hm:first-child{display:none}
 
 /* 종료 오버레이 */
