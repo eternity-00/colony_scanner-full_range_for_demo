@@ -159,7 +159,7 @@ export function RegisterScreen({state, send, setTab, device = 1, slot: picked}: 
               className="primary large"
               onClick={() => (blockReason ? setBlockOpen(true) : register())}
             >
-              등록하고 수납
+              등록
             </button>
           </aside>
         </div>

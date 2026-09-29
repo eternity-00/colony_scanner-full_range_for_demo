@@ -8,7 +8,8 @@
 .outline-danger{color:#c01d27;border-color:var(--line)}
 .soft{background:#fff;border-color:var(--line);color:var(--gt)}
 .link{align-self:flex-start;border:0;background:transparent;color:var(--blue);padding-left:0}
-.large{height:3.25rem;font-size:1rem}
+/* 화면에서 제일 중요한 실행 버튼. 손가락으로 누르는 크기다. */
+.large{height:4rem;font-size:1.125rem;font-weight:800}
 .dark{background:var(--deep);border-color:var(--deep);color:#fff}
 .badge{display:inline-flex;align-items:center;padding:0.25rem 0.5rem;border-radius:2px;color:var(--gt);background:#e6e6e6;border:1px solid var(--line);font-size:0.78125rem;font-weight:700;white-space:nowrap}
 .badge.good{color:#fff;background:#4e8f47;border-color:#4e8f47}
