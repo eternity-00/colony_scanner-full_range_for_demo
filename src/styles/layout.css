@@ -13,11 +13,12 @@
    이름은 aria-label · title 로 남는다 — 보이지 않을 뿐 사라진 것이 아니다. */
 /* 64 → 72px. 안쪽 버튼도 48 → 52px 로 같이 키워 여백 비율을 지킨다. */
 .rail{width:4.5rem;flex:none;display:flex;flex-direction:column;align-items:center;background:var(--deep)}
-/* 맨 위는 계정. 화면이 바뀌어도 누가 쓰고 있는지가 늘 같은 자리에 있다. */
-.rail-acc{width:4.5rem;flex:none;display:flex;flex-direction:column;align-items:center;gap:0.1875rem;
-  padding:0.6875rem 0 0.625rem;border:0;background:transparent;cursor:pointer}
-.rail-acc span{width:2.125rem;height:2.125rem;border-radius:50%;background:#fff;color:var(--deep);
-  display:grid;place-items:center;font-size:0.8125rem;font-weight:800}
+/* 맨 위는 계정. 화면이 바뀌어도 누가 쓰고 있는지가 늘 같은 자리에 있다.
+   권한 전환이 걸린 버튼이라 누를 자리를 넉넉히 준다 — 72 → 84px 높이. */
+.rail-acc{width:4.5rem;flex:none;display:flex;flex-direction:column;align-items:center;gap:0.25rem;
+  padding:0.9375rem 0 0.8125rem;border:0;background:transparent;cursor:pointer}
+.rail-acc span{width:2.375rem;height:2.375rem;border-radius:50%;background:#fff;color:var(--deep);
+  display:grid;place-items:center;font-size:0.875rem;font-weight:800}
 .rail-acc em{font-style:normal;font-size:0.59375rem;font-weight:600;color:#d5d5d5}
 /* 시계도 레일에 둔다 — 헤더에서 한 칸을 되찾는다. 초까지 여덟 자가 4rem 안에
    들어가야 하고, 등폭 숫자라 초가 바뀌어도 자리가 흔들리지 않는다. */
@@ -60,10 +61,10 @@
 .hm b{font-size:0.84375rem;font-weight:700;letter-spacing:-.01em;color:var(--ink);font-variant-numeric:tabular-nums}
 .hm b.bad{color:#c01d27}
 .hd-right{flex:none;display:flex;align-items:center;gap:0.5rem;padding:0 1rem 0 0.25rem}
-.hd-bell{position:relative;width:2.625rem;height:2.625rem;min-height:0;flex:none;padding:0;display:grid;place-items:center;
+.hd-bell{position:relative;width:3rem;height:3rem;min-height:0;flex:none;padding:0;display:grid;place-items:center;
   border:0;background:transparent;color:var(--ink);cursor:pointer}
-.hd-bell svg{width:1.5rem;height:1.5rem}
-.hd-bell i{position:absolute;top:1px;right:1px;min-width:1rem;height:1rem;padding:0 0.25rem;border-radius:0.5rem;
+.hd-bell svg{width:1.75rem;height:1.75rem}
+.hd-bell i{position:absolute;top:2px;right:2px;min-width:1.0625rem;height:1.0625rem;padding:0 0.25rem;border-radius:0.53125rem;
   background:#c01d27;color:#fff;font-size:0.625rem;font-weight:700;font-style:normal;display:grid;place-items:center}
 /* 오른쪽 끝은 제품 이름 — 레퍼런스가 로고를 두는 자리다. */
 .wm{display:flex;align-items:center;gap:0.5rem;font-size:1.1875rem;letter-spacing:-.02em;color:var(--ink)}
