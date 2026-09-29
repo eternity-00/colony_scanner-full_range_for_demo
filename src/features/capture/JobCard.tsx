@@ -43,10 +43,9 @@ export function JobCard({device: d, state, send, openDetail}: Props) {
             {/* 값이 없을 때의 줄표는 짧은 것(–)을 쓴다. 긴 줄표(—)는 좁은 칩 안에서 선처럼 보인다. */}
             WELL <b>{well ?? '–'}</b> / {WELLS}
           </span>
-          <Badge type={tone(d)}>
-            {status(d)}
-            {running ? ` · ${d.job?.progress}%` : ''}
-          </Badge>
+          {/* 퍼센트는 빼 둔다. 바로 옆 머리 줄이 어느 단계인지를 이미 말하고,
+              숫자가 250ms 마다 바뀌면 그 옆에서 읽어야 할 상태 글자가 흔들린다. */}
+          <Badge type={tone(d)}>{status(d)}</Badge>
         </div>
       </div>
 
