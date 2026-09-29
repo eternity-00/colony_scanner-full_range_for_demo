@@ -1,6 +1,5 @@
 import type {AppState} from '../api/types.ts';
 import {TABS, type TabKey} from '../config/defines.ts';
-import {Logo} from '../shared/Logo.tsx';
 import {TabIcon} from '../shared/TabIcon.tsx';
 import {AlertBell} from './AlertBell.tsx';
 import {tempAbnormal} from '../utils/plate.ts';
@@ -81,12 +80,8 @@ export function Header({state, tab, onDevice, onPlate, onNeedAdmin}: Props) {
           onNeedAdmin={onNeedAdmin}
         />
 
-        <span className="wm">
-          <Logo size={23} />
-          <b>
-            Colony<i>Scanner</i>
-          </b>
-        </span>
+        {/* 제품 로고 원본(2단 락업). 글자와 표식이 한 파일이라 직접 조판하지 않는다. */}
+        <img className="wm" src="/logo.png" alt="ColonyScanner" />
       </span>
     </header>
   );

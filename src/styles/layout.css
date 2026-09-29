@@ -69,12 +69,11 @@
 .hd-bell svg{width:1.75rem;height:1.75rem}
 .hd-bell i{position:absolute;top:2px;right:2px;min-width:1.0625rem;height:1.0625rem;padding:0 0.25rem;border-radius:0.53125rem;
   background:#c01d27;color:#fff;font-size:0.625rem;font-weight:700;font-style:normal;display:grid;place-items:center}
-/* 오른쪽 끝은 제품 이름 — 레퍼런스가 로고를 두는 자리다. */
-.wm{display:flex;align-items:center;gap:0.5rem;font-size:1.1875rem;letter-spacing:-.02em;color:var(--ink)}
-.wm .logo{flex:none;color:var(--blue);position:relative;top:2px}
-.wm b{font-weight:900}
-.wm i{font-style:normal;color:var(--blue)}
-.app[data-w="sm"] .wm b,.app[data-w="md"] .hd-meta .hm:first-child{display:none}
+/* 오른쪽 끝은 제품 로고 — 레퍼런스가 로고를 두는 자리다. 2단 락업이라
+   헤더 높이(4rem)에 맞춰 세로를 잡고 가로는 비율로 따라간다. */
+.wm{display:block;height:2.625rem;width:auto;flex:none}
+.app[data-w="sm"] .wm{height:2rem}
+.app[data-w="md"] .hd-meta .hm:first-child{display:none}
 
 /* 종료 오버레이 */
 .exit-overlay{position:fixed;inset:0;z-index:60;background:var(--deep);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.875rem;color:#fff}
