@@ -1,5 +1,6 @@
 import {useEffect, useState} from 'react';
 import type {AppState} from '../api/types.ts';
+import {Modal} from '../shared/Modal.tsx';
 import {active, faultLabel, pending, plateBad, pos, totalRuns} from '../utils/plate.ts';
 
 interface Props {
@@ -22,6 +23,11 @@ interface Item {
   /** 무슨 일인지 */
   what: string;
   go?: () => void;
+  /**
+   * 누르면 화면이 바뀌는 줄에는 확인을 한 번 받는다. 알림을 읽으려고 눌렀는데
+   * 보던 화면이 사라지면 놀란다. 확인이 필요 없는 줄(안내만 뜨는 줄)은 비워 둔다.
+   */
+  ask?: string;
 }
 
 /*
@@ -55,6 +61,8 @@ export function AlertBell({state, onDevice, onPlate, onNeedAdmin}: Props) {
   const [seen, setSeen] = useState<string[]>([]);
   /** 점이 지워진 것. 그 줄을 눌러야만 들어간다. */
   const [read, setRead] = useState<string[]>([]);
+  /** 화면을 옮기기 전에 확인을 받는 줄. */
+  const [ask, setAsk] = useState<Item | null>(null);
   const isAdmin = state.session.role === 'admin';
 
   useEffect(() => {
@@ -78,6 +86,7 @@ export function AlertBell({state, onDevice, onPlate, onNeedAdmin}: Props) {
         what: faultLabel(d) as string,
         // 관리자는 고치러 가고, 분석자는 왜 못 고치는지를 듣는다.
         go: isAdmin ? onDevice : () => onNeedAdmin(d.name, faultLabel(d) as string),
+        ask: isAdmin ? '장비 화면으로 이동하시겠습니까?' : undefined,
       })),
     ...plates.filter(plateBad).map<Item>(p => ({
       id: `b${p.id}`,
@@ -85,6 +94,7 @@ export function AlertBell({state, onDevice, onPlate, onNeedAdmin}: Props) {
       where: `${name(p.deviceId)} · ${pos(p.slot)}`,
       what: p.runs.at(-1)?.imageState === 'failed' ? '촬영 실패' : `미전송 ${pending(p)}건`,
       go: () => onPlate(p.deviceId, p.slot),
+      ask: '이 플레이트 상세로 이동하시겠습니까?',
     })),
     ...plates
       .filter(p => p.runs.length >= need)
@@ -94,6 +104,7 @@ export function AlertBell({state, onDevice, onPlate, onNeedAdmin}: Props) {
         where: `${name(p.deviceId)} · ${pos(p.slot)}`,
         what: `촬영 완료 ${p.runs.length}/${need}`,
         go: () => onPlate(p.deviceId, p.slot),
+        ask: '이 플레이트 상세로 이동하시겠습니까?',
       })),
   ];
 
@@ -161,7 +172,8 @@ export function AlertBell({state, onDevice, onPlate, onNeedAdmin}: Props) {
                       onClick={() => {
                         setRead(prev => (prev.includes(i.id) ? prev : [...prev, i.id]));
                         setOpen(false);
-                        i.go?.();
+                        if (i.ask) setAsk(i);
+                        else i.go?.();
                       }}
                     >
                       <b>{i.where}</b>
@@ -173,6 +185,25 @@ export function AlertBell({state, onDevice, onPlate, onNeedAdmin}: Props) {
             )}
           </section>
         </>
+      )}
+
+      {ask && (
+        <Modal
+          title="화면 이동"
+          confirmLabel="이동"
+          onConfirm={() => {
+            const go = ask.go;
+            setAsk(null);
+            go?.();
+          }}
+          onClose={() => setAsk(null)}
+        >
+          <div className={`ask-row ${ask.kind}`}>
+            <b>{ask.where}</b>
+            <span>{ask.what}</span>
+          </div>
+          <p>{ask.ask}</p>
+        </Modal>
       )}
     </span>
   );

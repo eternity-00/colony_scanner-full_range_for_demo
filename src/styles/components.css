@@ -211,3 +211,12 @@
   box-shadow:inset 3px 0 0 #c01d27}
 .ask-fault b{font-size:1rem;font-weight:800;color:var(--ink)}
 .ask-fault span{font-size:0.875rem;font-weight:700;color:#c01d27}
+/* 알림에서 화면을 옮기기 전 확인 — 어느 줄을 눌렀는지 먼저 못박는다. */
+.ask-row{display:flex;align-items:baseline;justify-content:space-between;gap:0.75rem;
+  padding:0.75rem 0.875rem;margin-bottom:0.875rem;background:#f5f5f5;border-radius:var(--rr)}
+.ask-row b{font-size:1rem;font-weight:800;color:var(--ink)}
+.ask-row span{font-size:0.875rem;font-weight:700}
+.ask-row.device span,.ask-row.plate span{color:#c01d27}
+.ask-row.done span{color:#a8720d}
+.ask-row.device,.ask-row.plate{box-shadow:inset 3px 0 0 #c01d27}
+.ask-row.done{box-shadow:inset 3px 0 0 #a8720d}
