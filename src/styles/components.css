@@ -188,9 +188,12 @@
 .alert-list button:disabled{cursor:default;opacity:1}
 .alert-list b{font-size:0.875rem;font-weight:800;color:var(--ink);white-space:nowrap}
 /* 아직 안 본 줄에 점 하나. 흐리게 하는 대신 표시를 더하는 쪽을 골랐다 —
-   흐려지면 읽어야 할 글자의 대비가 같이 떨어진다. */
-.alert-list .fresh b::before{content:'';display:inline-block;width:0.375rem;height:0.375rem;
-  margin-right:0.4375rem;vertical-align:0.125rem;border-radius:50%;background:#c01d27}
+   흐려지면 읽어야 할 글자의 대비가 같이 떨어진다.
+   점이 없는 줄에도 자리는 남긴다. 안 그러면 눌러서 점이 사라질 때마다
+   그 줄의 글자만 왼쪽으로 밀려 줄이 들쭉날쭉해진다. */
+.alert-list b::before{content:'';display:inline-block;width:0.375rem;height:0.375rem;
+  margin-right:0.4375rem;vertical-align:0.125rem;border-radius:50%;background:transparent}
+.alert-list .fresh b::before{background:#c01d27}
 .alert-list .fresh.done b::before{background:#a8720d}
 .alert-list span{font-size:0.8125rem;font-weight:700;text-align:right;white-space:nowrap}
 /* 색이 뜻을 나눈다 — 고장·손봐야 할 것은 빨강, 다 찍혀 꺼내면 되는 것은 앰버. */
