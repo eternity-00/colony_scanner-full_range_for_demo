@@ -40,7 +40,23 @@ export const server=createServer(async(req,res)=>{
  }catch(error){json(res,error.status||500,{code:error.code||'INTERNAL_ERROR',message:error.status?error.message:'서버 처리 중 오류가 발생했습니다.'});}
 });
 
-if(process.env.NODE_ENV!=='test')server.listen(port,host,()=>console.log(`Colony Scanner LCD: http://${host}:${port}`));
-const shutdown=()=>server.close(()=>{controller.close();process.exit(0)});
+if(process.env.NODE_ENV!=='test'){
+ // 포트를 못 잡으면 죽는다. 화면에 못 나서는 서버가 살아 있으면, 보이지도 않는
+ // 채로 엔진에 촬영을 걸고 state.json 을 덮어쓴다.
+ server.on('error',error=>{console.error(`Colony Scanner LCD 기동 실패 · ${error.message}`);process.exit(1);});
+ server.listen(port,host,()=>console.log(`Colony Scanner LCD: http://${host}:${port}`));
+}
+/*
+ * 종료 — 열린 연결을 먼저 끊는다.
+ * server.close() 의 콜백은 모든 연결이 닫혀야 불리는데, /api/events 는 끊지 않는
+ * SSE 라서 영영 불리지 않았다. 그래서 kill 을 해도 프로세스가 남아, 다음 번에
+ * 새로 띄운 서버와 함께 엔진을 폴링하고 촬영을 걸었다. 화면은 한 서버만 보는데
+ * 장비는 여럿이 부리는 상태가 된다.
+ */
+const shutdown=()=>{
+ server.closeAllConnections?.();
+ server.close(()=>{controller.close();process.exit(0);});
+ setTimeout(()=>process.exit(0),2000).unref();
+};
 process.on('SIGINT',shutdown);process.on('SIGTERM',shutdown);
 export {controller};

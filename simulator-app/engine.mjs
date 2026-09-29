@@ -21,4 +21,6 @@ const server=createServer(async(req,res)=>{
  }catch(error){json(res,error.status||500,{code:error.code||'ENGINE_ERROR',message:error.message||'엔진 오류'});}
 });
 server.listen(port,host,()=>console.log(`Virtual Device Engine: http://${host}:${port}`));
-const shutdown=()=>server.close(()=>{clearInterval(timer);adapter.close();process.exit(0)});process.on('SIGINT',shutdown);process.on('SIGTERM',shutdown);
+// 연결을 먼저 끊지 않으면 server.close() 의 콜백이 불리지 않아 프로세스가 남는다.
+const shutdown=()=>{server.closeAllConnections?.();server.close(()=>{clearInterval(timer);adapter.close();process.exit(0);});setTimeout(()=>process.exit(0),2000).unref();};
+process.on('SIGINT',shutdown);process.on('SIGTERM',shutdown);
