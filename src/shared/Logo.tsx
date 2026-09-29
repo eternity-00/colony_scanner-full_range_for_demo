@@ -5,9 +5,8 @@
  * 테두리는 플레이트, 안의 원 여섯은 Well 이고, 하나만 주황이라 「찍고 있는 칸」을
  * 뜻한다 — 현황 트레이의 색 규칙과 같다.
  *
- * PNG 가 아니라 SVG 인 이유: LCD 의 UI 배율(UI_SCALE)이 패널마다 달라서 PNG 는
- * 배율이 바뀌면 흐려진다. 색도 CSS 에서 바꿀 수 있고 파일 요청이 없다.
- * 바탕화면 아이콘은 이 그림을 PNG 로 떠서 쓴다(`scripts/make-icon.mjs`).
+ * 헤더는 받은 로고 파일(public/logo.png)을 그대로 쓰고, 이 컴포넌트는 색을
+ * 물려받아야 하는 자리(파비콘·아이콘 원본)의 기준 도형으로 남긴다.
  */
 export function Logo({size = 26}: {size?: number}) {
   return (
@@ -27,7 +26,7 @@ export function Logo({size = 26}: {size?: number}) {
             cx={8 + col * 8}
             cy={12 + row * 8}
             r="2.9"
-            fill={row === 1 && col === 2 ? 'var(--well-mark, #e8971a)' : 'currentColor'}
+            fill={row === 1 && col === 2 ? 'var(--well-mark, #f29a2e)' : 'currentColor'}
           />
         )),
       )}
