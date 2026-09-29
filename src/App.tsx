@@ -9,6 +9,7 @@ import {
   type TabKey,
 } from './config/defines.ts';
 import {RoleDialog} from './features/auth/RoleDialog.tsx';
+import {UserCard} from './features/auth/UserCard.tsx';
 import {CaptureScreen} from './features/capture/CaptureScreen.tsx';
 import {DetailScreen} from './features/detail/DetailScreen.tsx';
 import {DeviceScreen} from './features/device/DeviceScreen.tsx';
@@ -47,6 +48,7 @@ export default function App() {
   const [confirmModal, setConfirmModal] = useState<ConfirmModal | null>(null);
   const [viewer, setViewer] = useState<ShotTarget | null>(null);
   const [roleDialog, setRoleDialog] = useState(false);
+  const [userCard, setUserCard] = useState(false);
   // 관리자 권한이 없어 막힌 동작. PIN 이 맞으면 retry 로 그대로 이어서 보낸다.
   const [gate, setGate] = useState<{reason: string; retry: () => void} | null>(null);
   const [registerAt, setRegisterAt] = useState<{deviceId: number; slot?: number}>({deviceId: 1});
@@ -235,7 +237,7 @@ export default function App() {
         clock={hms(state.serverTime)}
         day={ymd(state.serverTime).slice(5)}
         onSelect={setTab}
-        onRole={() => setRoleDialog(true)}
+        onRole={() => setUserCard(true)}
         onExit={() => setExitAsk(true)}
       />
       <div className="shell">
@@ -281,6 +283,23 @@ export default function App() {
         >
           <p>{confirmModal.text}</p>
         </Modal>
+      )}
+
+      {userCard && (
+        <UserCard
+          state={state}
+          send={execute}
+          operator={operator}
+          onSettings={() => {
+            setUserCard(false);
+            setTab('settings');
+          }}
+          onUpgrade={() => {
+            setUserCard(false);
+            setRoleDialog(true);
+          }}
+          onClose={() => setUserCard(false)}
+        />
       )}
 
       {roleDialog && (
