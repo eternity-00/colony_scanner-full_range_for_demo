@@ -44,11 +44,12 @@
 
 /* ── 헤더 ── */
 .shell>header{height:4rem;flex:none;display:flex;align-items:stretch;background:#fff;border-bottom:1px solid var(--g3)}
-/* 지금 보는 화면을 색면으로 못박는다. 오른쪽 끝을 깎아 「내용은 이쪽」이라는
-   방향을 준다 — 네모로 끊기면 색면이 그냥 멈춘다. 깎이는 폭만큼 여백을 더 준다. */
-.hd-mode{flex:none;display:flex;align-items:center;gap:0.625rem;padding:0 2rem 0 1.125rem;
+/* 지금 보는 화면을 색면으로 못박는다. 오른쪽 아래 모서리만 깎아 네모가 그냥
+   끊기지 않게 한다. 화살표로 깎으면 방향을 가리키는 뜻이 생기는데, 이 색면은
+   어디로 가라는 것이 아니라 「여기가 지금 보는 화면」이라는 표시다. */
+.hd-mode{flex:none;display:flex;align-items:center;gap:0.625rem;padding:0 1.375rem 0 1.125rem;
   background:var(--blue);color:#fff;
-  clip-path:polygon(0 0,calc(100% - 1rem) 0,100% 50%,calc(100% - 1rem) 100%,0 100%)}
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 1.125rem),calc(100% - 1.125rem) 100%,0 100%)}
 .hd-mode>svg{width:1.625rem;height:1.625rem;flex:none}
 /* 아이콘까지 baseline 으로 묶으면 SVG 의 기준선이 아래 모서리라 글자가 위로 밀린다. */
 .hd-mode-t{display:flex;align-items:baseline;gap:0.5rem;white-space:nowrap}
