@@ -5,6 +5,8 @@ interface Props {
   children: ReactNode;
   confirmLabel?: string;
   onConfirm?: () => void;
+  /** 아직 누를 수 없는 확인. PIN 처럼 본문을 다 채워야 열리는 팝업이 쓴다. */
+  confirmDisabled?: boolean;
   onClose: () => void;
   danger?: boolean;
   /** 하단 기본 버튼 줄을 그리지 않는다. 본문에서 직접 그릴 때 쓴다. */
@@ -17,6 +19,7 @@ export function Modal({
   children,
   confirmLabel,
   onConfirm,
+  confirmDisabled = false,
   onClose,
   danger = false,
   bare = false,
@@ -52,7 +55,11 @@ export function Modal({
           <div className="actions">
             {onConfirm && <button onClick={onClose}>취소</button>}
             {onConfirm ? (
-              <button className={danger ? 'danger' : 'primary'} onClick={onConfirm}>
+              <button
+                className={danger ? 'danger' : 'primary'}
+                disabled={confirmDisabled}
+                onClick={onConfirm}
+              >
                 {confirmLabel || '확인'}
               </button>
             ) : (

@@ -36,8 +36,19 @@ export function RoleDialog({state, send, onClose, reason, onAuthed}: Props) {
     }
   };
 
+  // PIN 을 묻는 동안에는 아래 줄이 [취소] [확인] 이다. 본문에 실행 버튼을 따로
+  // 두면 팝업 하나에 누를 곳이 셋(본문 버튼 · 닫기 · ×)이 되어 어디를 눌러야
+  // 되는지가 흐려진다. 권한이 이미 열려 있는 쪽은 고를 일이 없어 그대로 둔다.
+  const asking = !(state.session.role === 'admin' && !reason);
+
   return (
-    <Modal title={reason ? '관리자 확인이 필요합니다' : '권한 전환'} onClose={onClose}>
+    <Modal
+      title={reason ? '관리자 확인이 필요합니다' : '권한 전환'}
+      onClose={onClose}
+      onConfirm={asking ? login : undefined}
+      confirmDisabled={pin.length !== PIN_LENGTH || state.session.lockedFor > 0}
+      confirmLabel={reason ? '확인하고 계속' : '확인'}
+    >
       {state.session.role === 'admin' && !reason ? (
         <>
           <p>관리자 권한이 열려 있습니다.</p>
@@ -86,13 +97,6 @@ export function RoleDialog({state, send, onClose, reason, onAuthed}: Props) {
               ⌫
             </button>
           </div>
-          <button
-            className="primary pin-go"
-            disabled={pin.length !== PIN_LENGTH || state.session.lockedFor > 0}
-            onClick={login}
-          >
-            {reason ? '확인하고 계속' : '관리자 전환'}
-          </button>
         </>
       )}
     </Modal>
