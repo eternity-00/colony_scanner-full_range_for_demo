@@ -1,6 +1,6 @@
 /* 촬영 화면 — 진행 카드 · 단계 표시 · 촬영 큐 드로어 */
 
-.job h2{font-size:0.9375rem;font-weight:800;color:var(--gt);letter-spacing:-.2px}
+.job h2{font-size:1.125rem;font-weight:800;color:var(--ink);letter-spacing:-.3px}
 .cam-shot img{width:100%;height:100%;object-fit:contain;display:block}
 .stages{display:flex;align-items:flex-start;gap:0}
 .stages div{flex:1;display:flex;flex-direction:column;align-items:center;gap:0.3125rem;position:relative;font-size:0.625rem;color:var(--gt);font-weight:700;text-align:center;line-height:1.2}
@@ -17,7 +17,7 @@
 .run-page{display:flex;flex-direction:column;gap:0.75rem;height:100%;min-height:0}
 .run-bar{display:flex;align-items:center;justify-content:space-between;gap:0.75rem;flex:none}
 .run-tabs{display:flex;gap:0.375rem;flex-wrap:wrap}
-.run-tabs .rt{display:inline-flex;align-items:center;gap:0.4375rem;min-height:2.375rem;padding:0 0.875rem;border:1px solid var(--line);border-radius:var(--rr);background:#fff;color:var(--gt);font-size:0.875rem;font-weight:800}
+.run-tabs .rt{display:inline-flex;align-items:center;gap:0.4375rem;min-height:2.875rem;padding:0 1.125rem;border:1px solid var(--line);border-radius:var(--rr);background:#fff;color:var(--gt);font-size:0.875rem;font-weight:800}
 .run-tabs .rt i{width:0.5625rem;height:0.5625rem;border-radius:50%;background:#8f8f8f;flex:none}
 .run-tabs .rt.good i{background:#5aa153}.run-tabs .rt.bad i{background:#d6202b}.run-tabs .rt.warn i{background:#d99009}.run-tabs .rt.info i{background:#5c636e}
 .run-tabs .rt.sel{background:var(--blue);border-color:var(--blue);color:#fff}
@@ -32,7 +32,7 @@
 .cam-shot.live:before{content:'LIVE';position:absolute;left:0.5rem;top:0.4375rem;z-index:1;font-size:0.5625rem;font-weight:800;letter-spacing:1px;color:#fff;background:#c01d27;padding:2px 0.375rem;border-radius:2px}
 .cam-shot.off span{color:#9a9a9a;font-size:0.75rem;font-weight:700;letter-spacing:.5px}
 .job .actions{margin-top:0;gap:0.375rem;justify-content:flex-start;flex-wrap:nowrap}
-.job .actions button{min-height:3rem;padding:0.5rem 0.625rem;font-size:0.875rem;font-weight:800;flex:1;white-space:nowrap}
+.job .actions button{min-height:3.5rem;padding:0.5rem 0.625rem;font-size:0.9375rem;font-weight:800;flex:1;white-space:nowrap}
 
 /* 두 칩의 높이를 맞춘다. WELL 칩은 안에 큰 숫자가 있어 baseline 정렬로 두면
    상태 배지보다 키가 커진다. 높이를 못박고 가운데로 정렬한다. */
@@ -45,7 +45,8 @@
 .cam-row{flex:1;min-height:0;display:flex;gap:0.75rem}
 .cam-row .cam-wrap{flex:1;min-height:0}
 .job .actions.right{flex:none;width:9.375rem;display:flex;flex-direction:column;gap:0.5rem;overflow-y:auto}
-.job .actions.right button{flex:none;width:100%;min-height:0;height:auto;padding:0.625rem 0.5rem;font-size:0.875rem;font-weight:800;white-space:nowrap}
+/* 오른쪽 세로 버튼들 — 손가락으로 누르는 자리라 키를 넉넉히 준다. */
+.job .actions.right button{flex:none;width:100%;min-height:3.5rem;height:auto;padding:0.625rem 0.5rem;font-size:0.9375rem;font-weight:800;white-space:nowrap}
 /*
  * 좁은 화면에서는 카메라 옆 세로 버튼 열이 눌릴 수 없을 만큼 납작해진다.
  * 카메라 아래 가로 한 줄로 내린다.
