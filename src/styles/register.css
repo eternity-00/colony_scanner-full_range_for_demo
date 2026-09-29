@@ -37,10 +37,14 @@
 /* 등록 화면의 범례는 「있음 / 없음」 둘뿐이라 한 줄을 다 쓸 이유가 없다.
    줄여서 넘긴 높이는 아래 버튼과 트레이 칸이 가져간다 — 눌러야 하는 건 그쪽이다. */
 /* 본문 위 여백(1rem) 안으로 끌어올린다. 범례는 읽기만 하는 줄이라
-   헤더에 붙여 두고, 벌어 둔 자리는 아래 카드가 쓴다. */
-.reg-page .overview-head{height:1.125rem;margin-top:-0.5rem}
-.reg-page .legend{font-size:0.6875rem;gap:0.625rem}
-.reg-page .legend i{width:0.625rem;height:0.625rem;border-width:2px}
+   헤더에 붙여 두고, 벌어 둔 자리는 아래 카드가 쓴다.
+   아래 register-layout 과 같은 칸으로 나눠, 범례가 트레이(흰 상자)의
+   오른쪽 끝에 맞도록 둔다 — 설명하는 대상이 그 상자이지 오른쪽 패널이 아니다. */
+.reg-page .overview-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(15rem,19.75rem);
+  gap:0.75rem;height:1.25rem;margin-top:-0.5rem}
+.reg-page .legend{grid-column:1;justify-self:end;font-size:0.8125rem;gap:0.75rem}
+.reg-page .legend i{width:0.75rem;height:0.75rem;border-width:2px}
+.app[data-w="sm"] .reg-page .overview-head{grid-template-columns:minmax(0,1fr)}
 .register-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(15rem,19.75rem);gap:0.75rem;flex:1;min-height:0;align-items:stretch}
 .app[data-w="sm"] .register-layout{grid-template-columns:minmax(0,1fr);overflow:auto}
 .register-layout>section{min-height:0;display:flex;flex-direction:column}

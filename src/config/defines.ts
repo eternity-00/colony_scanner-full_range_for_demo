@@ -36,8 +36,8 @@ export type SendCommand = (
  */
 export const TABS: readonly (readonly [TabKey, string, string, boolean])[] = [
   ['overview', '현황', 'Overview', false],
-  ['detail', '상세', 'Detail', false],
   ['register', '등록', 'Register', false],
+  ['detail', '상세', 'Detail', false],
   ['running', '촬영', 'Capture', false],
   ['history', '이력', 'History', false],
   ['device', '장비', 'Device', true],
