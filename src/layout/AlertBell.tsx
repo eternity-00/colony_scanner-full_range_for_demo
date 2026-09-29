@@ -24,20 +24,13 @@ interface Item {
   go?: () => void;
 }
 
-/**
- * 읽은 알림의 id. 한 번 펼쳐서 본 것은 배지에서 빼되 목록에는 남긴다 —
- * 본 것과 처리한 것은 다르다. 같은 일이 사라졌다 다시 생기면 새 알림으로 친다.
+/*
+ * 읽은 알림은 저장하지 않는다. 화면을 다시 띄우면 전부 새 알림으로 돌아간다.
+ *
+ * 키오스크에는 로그인이 없다. 앱이 새로 뜬 뒤에는 아무도 종을 들여다본 적이
+ * 없으므로, 아침에 장비 앞에 선 사람은 밀려 있는 일을 전부 봐야 한다.
+ * 브라우저에 저장해 두면 그 사람이 「이미 본 것」으로 묻힌 채 시작한다.
  */
-const SEEN_KEY = 'colony-alerts-seen';
-
-const readSeen = (): string[] => {
-  try {
-    const raw = localStorage.getItem(SEEN_KEY);
-    return raw ? (JSON.parse(raw) as string[]) : [];
-  } catch {
-    return [];
-  }
-};
 
 /**
  * 헤더의 알림 종.
@@ -47,7 +40,8 @@ const readSeen = (): string[] => {
  * 사라지는 사건(도어를 여닫음, 촬영 한 회가 성공)은 알려도 할 일이 없어 넣지 않는다.
  * 지난 일의 기록은 장비 화면의 이벤트 로그가 맡는다.
  *
- * 배지는 아직 안 본 건수다. 한 번 펼치면 사라지고, 새 일이 생기면 다시 뜬다.
+ * 배지는 아직 안 본 건수다. 한 번 펼치면 사라지고, 새 일이 생기거나 화면을
+ * 다시 띄우면 다시 뜬다.
  * 목록 자체는 줄지 않는다 — 본 것과 처리한 것은 다르기 때문이다. 대신 안 본
  * 것에 점을 찍고 위로 올려, 확인한 뒤에 무엇이 새로 생겼는지가 보이게 한다.
  *
@@ -57,7 +51,7 @@ const readSeen = (): string[] => {
  */
 export function AlertBell({state, onDevice, onPlate, onNeedAdmin}: Props) {
   const [open, setOpen] = useState(false);
-  const [seen, setSeen] = useState<string[]>(readSeen);
+  const [seen, setSeen] = useState<string[]>([]);
   /**
    * 펼친 순간의 읽음 상태. 펼치자마자 전부 읽음으로 바뀌므로, 무엇이 새것이었는지
    * 화면에 보여 주려면 그 직전 상태를 따로 붙잡아 둬야 한다.
@@ -117,11 +111,6 @@ export function AlertBell({state, onDevice, onPlate, onNeedAdmin}: Props) {
     setSeen(prev => {
       const next = open ? ids : prev.filter(id => ids.includes(id));
       if (next.length === prev.length && next.every((v, i) => v === prev[i])) return prev;
-      try {
-        localStorage.setItem(SEEN_KEY, JSON.stringify(next));
-      } catch {
-        /* 저장소를 못 써도 이번 세션 동안은 동작한다. */
-      }
       return next;
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
