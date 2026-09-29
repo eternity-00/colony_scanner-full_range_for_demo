@@ -66,7 +66,9 @@
 .hm small{font-size:0.65625rem;font-weight:700;letter-spacing:.08em;color:var(--gt)}
 .hm b{font-size:0.84375rem;font-weight:700;letter-spacing:-.01em;color:var(--ink);font-variant-numeric:tabular-nums}
 .hm b.bad{color:#c01d27}
-.hd-right{flex:none;display:flex;align-items:center;gap:0.25rem;padding:0 0.5rem 0 0.25rem}
+/* 종과 로고는 하는 일이 다르다 — 하나는 누르는 자리, 하나는 읽는 표식이다.
+   붙여 두면 로고까지 눌러 보게 된다. 사이를 벌려 둘을 갈라 놓는다. */
+.hd-right{flex:none;display:flex;align-items:center;gap:1.25rem;padding:0 0.75rem 0 0.25rem}
 .hd-bell{position:relative;width:3rem;height:3rem;min-height:0;flex:none;padding:0;display:grid;place-items:center;
   border:0;background:transparent;color:var(--ink);cursor:pointer}
 .hd-bell svg{width:1.75rem;height:1.75rem}
