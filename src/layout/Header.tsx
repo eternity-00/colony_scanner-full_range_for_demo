@@ -8,6 +8,8 @@ import {faultLabel, tempAbnormal} from '../utils/plate.ts';
 interface Props {
   state: AppState;
   tab: TabKey;
+  /** 관리자가 알림에서 곧장 장비 화면으로 넘어간다. */
+  onDevice: () => void;
 }
 
 const NAME = new Map(TABS.map(([key, ko, en]) => [key, {ko, en}]));
@@ -24,7 +26,7 @@ const NAME = new Map(TABS.map(([key, ko, en]) => [key, {ko, en}]));
  *
  * 시계와 계정은 좌측 레일로 내려갔다.
  */
-export function Header({state, tab}: Props) {
+export function Header({state, tab, onDevice}: Props) {
   const [alert, setAlert] = useState(false);
   const devices = state.devices;
   const faulted = devices.filter(d => faultLabel(d));
@@ -32,6 +34,7 @@ export function Header({state, tab}: Props) {
   const linked = devices.filter(d => d.connected).length;
   const abnormal = devices.some(tempAbnormal);
   const name = NAME.get(tab);
+  const isAdmin = state.session.role === 'admin';
 
   useEffect(() => {
     if (!alert) return;
@@ -103,14 +106,37 @@ export function Header({state, tab}: Props) {
                 {faults === 0 ? (
                   <p className="pop-empty">지금 문제가 있는 장비가 없습니다.</p>
                 ) : (
-                  <ul className="alert-list">
-                    {faulted.map(d => (
-                      <li key={d.id}>
-                        <b>{d.name}</b>
-                        <span>{faultLabel(d)}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  <>
+                    <ul className="alert-list">
+                      {faulted.map(d => (
+                        <li key={d.id}>
+                          <b>{d.name}</b>
+                          <span>{faultLabel(d)}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    {/*
+                      * 알리기만 하면 끝이 아니다. 분석자는 장비를 고칠 수 없으니
+                      * 다음에 할 일(관리자를 부르는 것)을 적어 주고, 관리자는
+                      * 고칠 수 있는 화면으로 바로 넘겨준다.
+                      */}
+                    {isAdmin ? (
+                      <button
+                        className="primary alert-go"
+                        onClick={() => {
+                          setAlert(false);
+                          onDevice();
+                        }}
+                      >
+                        장비 화면으로
+                      </button>
+                    ) : (
+                      <p className="alert-ask">
+                        <b>관리자에게 문의하세요.</b>
+                        <span>오류 해제와 원점 복귀는 관리자 권한이 필요합니다.</span>
+                      </p>
+                    )}
+                  </>
                 )}
               </section>
             </>
