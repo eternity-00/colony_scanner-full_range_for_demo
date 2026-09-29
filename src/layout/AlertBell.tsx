@@ -8,6 +8,8 @@ interface Props {
   onDevice: () => void;
   /** 플레이트를 손보러 상세로 간다. */
   onPlate: (deviceId: number, slot: number) => void;
+  /** 분석자가 장비 오류 줄을 눌렀을 때 — 할 수 없는 일이라고 알린다. */
+  onNeedAdmin: (where: string, what: string) => void;
 }
 
 type Kind = 'device' | 'plate' | 'done';
@@ -34,10 +36,10 @@ const MAX = 7;
  * 지난 일의 기록은 장비 화면의 이벤트 로그가 맡는다.
  *
  * 세 가지를 센다 — 장비 오류 · 손봐야 하는 플레이트 · 반출을 기다리는 플레이트.
- * 누르면 각자 고칠 수 있는 곳으로 간다. 장비 오류만 분석자가 할 수 있는 일이
- * 없어서 「관리자에게 문의하세요」로 끝난다.
+ * 줄마다 갈 곳이 다르다. 플레이트는 상세로, 장비 오류는 관리자면 장비 화면으로,
+ * 분석자면 왜 못 고치는지를 알리는 팝업으로 간다.
  */
-export function AlertBell({state, onDevice, onPlate}: Props) {
+export function AlertBell({state, onDevice, onPlate, onNeedAdmin}: Props) {
   const [open, setOpen] = useState(false);
   const isAdmin = state.session.role === 'admin';
 
@@ -60,7 +62,8 @@ export function AlertBell({state, onDevice, onPlate}: Props) {
         kind: 'device',
         where: d.name,
         what: faultLabel(d) as string,
-        go: isAdmin ? onDevice : undefined,
+        // 관리자는 고치러 가고, 분석자는 왜 못 고치는지를 듣는다.
+        go: isAdmin ? onDevice : () => onNeedAdmin(d.name, faultLabel(d) as string),
       })),
     ...plates.filter(plateBad).map<Item>(p => ({
       id: `b${p.id}`,
@@ -130,25 +133,6 @@ export function AlertBell({state, onDevice, onPlate}: Props) {
                 {items.length > MAX && <li className="alert-more">외 {items.length - MAX}건</li>}
               </ul>
             )}
-
-            {/* 장비 오류만 분석자가 할 수 있는 일이 없다. 나머지는 위에서 눌러 들어간다. */}
-            {faulted &&
-              (isAdmin ? (
-                <button
-                  className="primary alert-go"
-                  onClick={() => {
-                    setOpen(false);
-                    onDevice();
-                  }}
-                >
-                  장비 화면으로
-                </button>
-              ) : (
-                <p className="alert-ask">
-                  <b>장비 오류는 관리자에게 문의하세요.</b>
-                  <span>오류 해제와 원점 복귀는 관리자 권한이 필요합니다.</span>
-                </p>
-              ))}
           </section>
         </>
       )}

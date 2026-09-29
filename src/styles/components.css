@@ -194,3 +194,9 @@
 @media (hover:hover) and (pointer:fine){
  .alert-list button:hover:not(:disabled){background:#f2f2f2}
 }
+/* 장비 오류 안내 팝업의 머리 — 어느 장비의 무슨 오류인지 먼저 못박는다. */
+.ask-fault{display:flex;align-items:baseline;justify-content:space-between;gap:0.75rem;
+  padding:0.75rem 0.875rem;margin-bottom:0.875rem;background:#f5f5f5;border-radius:var(--rr);
+  box-shadow:inset 3px 0 0 #c01d27}
+.ask-fault b{font-size:1rem;font-weight:800;color:var(--ink)}
+.ask-fault span{font-size:0.875rem;font-weight:700;color:#c01d27}

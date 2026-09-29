@@ -48,6 +48,8 @@ export default function App() {
   const [viewer, setViewer] = useState<ShotTarget | null>(null);
   const [roleDialog, setRoleDialog] = useState(false);
   const [userCard, setUserCard] = useState(false);
+  /** 분석자가 장비 오류를 눌렀을 때 뜨는 안내. */
+  const [adminAsk, setAdminAsk] = useState<{where: string; what: string} | null>(null);
   // 관리자 권한이 없어 막힌 동작. PIN 이 맞으면 retry 로 그대로 이어서 보낸다.
   const [gate, setGate] = useState<{reason: string; retry: () => void} | null>(null);
   const [registerAt, setRegisterAt] = useState<{deviceId: number; slot?: number}>({deviceId: 1});
@@ -244,6 +246,7 @@ export default function App() {
           tab={visible}
           onDevice={() => setTab('device')}
           onPlate={openDetail}
+          onNeedAdmin={(where, what) => setAdminAsk({where, what})}
         />
         <main>{screens[visible]}</main>
       </div>
@@ -266,6 +269,27 @@ export default function App() {
           danger={confirmModal.danger}
         >
           <p>{confirmModal.text}</p>
+        </Modal>
+      )}
+
+      {adminAsk && (
+        <Modal
+          title="관리자 확인이 필요합니다"
+          confirmLabel="관리자 전환"
+          onConfirm={() => {
+            setAdminAsk(null);
+            setRoleDialog(true);
+          }}
+          onClose={() => setAdminAsk(null)}
+        >
+          <div className="ask-fault">
+            <b>{adminAsk.where}</b>
+            <span>{adminAsk.what}</span>
+          </div>
+          <p>
+            오류 해제와 원점 복귀는 <b>관리자 권한</b>이 필요합니다. 관리자에게 문의하시거나 PIN 을
+            넣어 전환하세요.
+          </p>
         </Modal>
       )}
 

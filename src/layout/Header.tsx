@@ -12,6 +12,8 @@ interface Props {
   onDevice: () => void;
   /** 알림에서 플레이트를 손보러 상세로 넘어간다. */
   onPlate: (deviceId: number, slot: number) => void;
+  /** 분석자가 장비 오류를 눌렀을 때. */
+  onNeedAdmin: (where: string, what: string) => void;
 }
 
 const NAME = new Map(TABS.map(([key, ko, en]) => [key, {ko, en}]));
@@ -28,7 +30,7 @@ const NAME = new Map(TABS.map(([key, ko, en]) => [key, {ko, en}]));
  *
  * 시계와 계정은 좌측 레일로 내려갔다.
  */
-export function Header({state, tab, onDevice, onPlate}: Props) {
+export function Header({state, tab, onDevice, onPlate, onNeedAdmin}: Props) {
   const devices = state.devices;
   const linked = devices.filter(d => d.connected).length;
   const abnormal = devices.some(tempAbnormal);
@@ -72,7 +74,12 @@ export function Header({state, tab, onDevice, onPlate}: Props) {
             0 으로 적으면 눈이 한 번 더 확인해야 한다.
             목록은 화면을 덮는 팝업이 아니라 종 밑에 붙는 말풍선이다 — 읽는
             자리라, 누른 곳에 붙어 있어야 어디서 나온 것인지가 눈으로 이어진다. */}
-        <AlertBell state={state} onDevice={onDevice} onPlate={onPlate} />
+        <AlertBell
+          state={state}
+          onDevice={onDevice}
+          onPlate={onPlate}
+          onNeedAdmin={onNeedAdmin}
+        />
 
         <span className="wm">
           <Logo size={23} />
