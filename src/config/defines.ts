@@ -65,10 +65,13 @@ export const ADMIN_ACTION: Record<string, string> = {
 };
 
 /**
- * 화면에 표시할 UI 버전. 파이에 react-demo-v3·v4 가 나란히 있어서
- * 어느 것이 도는지 구분할 수단이 필요하다. 배포 디렉터리 이름과 맞춘다.
+ * 화면에 표시할 UI 버전.
+ *
+ * 브랜치를 소수점으로 센다 — 데모였던 v2 가 1.2, v3 이 1.3, v4 가 1.4.
+ * 마지막 자리는 파이에 올린 횟수다. 파이에 올릴 때마다 하나씩 올린다.
+ * 파이에 무엇이 도는지 화면만 보고 알 수 있어야 해서 붙인 값이다.
  */
-export const APP_VERSION = 'v4';
+export const APP_VERSION = 'v1.4.1';
 
 /** 장비 오류 코드의 한글 이름. 사용자에게 "무엇이 고장났는지"를 말해주기 위한 것이다. */
 export const FAULT_LABEL: Record<string, string> = {
