@@ -11,10 +11,7 @@ interface Props {
   openDetail: (deviceId: number, slot?: number) => void;
 }
 
-type ViewMode = 'single' | 'grid';
-
 export function CaptureScreen({state, send, openDetail}: Props) {
-  const [mode, setMode] = useState<ViewMode>('single');
   const [selected, setSelected] = useState(1);
   const [queueOpen, setQueueOpen] = useState(false);
 
@@ -32,7 +29,9 @@ export function CaptureScreen({state, send, openDetail}: Props) {
     );
   }
 
-  const shown = mode === 'single' ? devices.filter(d => d.id === selected) : devices;
+  // 한 번에 한 대만 본다. 4분할은 카메라 화면이 1/4 로 줄어 정작 무엇이 찍히는지
+  // 보이지 않았고, 어차피 스캐너는 한 번에 한 대만 움직인다.
+  const shown = devices.filter(d => d.id === selected);
 
   return (
     <div className="run-page">
@@ -41,11 +40,8 @@ export function CaptureScreen({state, send, openDetail}: Props) {
           {devices.map(d => (
             <button
               key={d.id}
-              className={`rt ${tone(d)} ${mode === 'single' && selected === d.id ? 'sel' : ''}`}
-              onClick={() => {
-                setSelected(d.id);
-                setMode('single');
-              }}
+              className={`rt ${tone(d)} ${selected === d.id ? 'sel' : ''}`}
+              onClick={() => setSelected(d.id)}
             >
               <i />
               {d.name}
@@ -53,21 +49,13 @@ export function CaptureScreen({state, send, openDetail}: Props) {
           ))}
         </div>
         <div className="run-right">
-          <div className="viewtoggle">
-            <button className={mode === 'single' ? 'on' : ''} onClick={() => setMode('single')}>
-              단일
-            </button>
-            <button className={mode === 'grid' ? 'on' : ''} onClick={() => setMode('grid')}>
-              4분할
-            </button>
-          </div>
           <button className="queue-btn" onClick={() => setQueueOpen(true)}>
             촬영 큐 <b>{queue.length}</b>
           </button>
         </div>
       </div>
 
-      <div className={`job-grid ${mode}`}>
+      <div className="job-grid single">
         {shown.map(d => (
           <JobCard key={d.id} device={d} state={state} send={send} openDetail={openDetail} />
         ))}
