@@ -25,7 +25,12 @@ export function Modal({
   const ref = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    ref.current?.focus();
+    // 본문이 먼저 눌리길 바라는 버튼을 지정했으면 그쪽을 잡는다.
+    // 아니면 닫기 ×로 — 팝업 안에 포커스를 가둬 두기 위한 것이다.
+    const pick = ref.current
+      ?.closest('.modal')
+      ?.querySelector<HTMLElement>('[data-autofocus]');
+    (pick || ref.current)?.focus();
     const fn = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
     document.addEventListener('keydown', fn);
     return () => document.removeEventListener('keydown', fn);

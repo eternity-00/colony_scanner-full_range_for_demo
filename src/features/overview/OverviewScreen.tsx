@@ -58,9 +58,11 @@ export function OverviewScreen({state, openDetail, openRegister}: Props) {
                 ? '—'
                 : next > state.serverTime
                   ? hm(next)
-                  : state.autoRun
-                    ? '지금'
-                    : '자동 꺼짐';
+                  : !state.autoRun
+                    ? '자동 꺼짐'
+                    : state.captureHold
+                      ? '등록 중'
+                      : '지금';
 
           return (
             <section className={`card scanner ${tone(d)}`} key={d.id}>
@@ -68,7 +70,11 @@ export function OverviewScreen({state, openDetail, openRegister}: Props) {
                 <h3>{d.name}</h3>
                 <span className="head-next">
                   <small>NEXT</small>
-                  <b className={running ? 'go' : stopped || nextLabel === '자동 꺼짐' ? 'stop' : ''}>
+                  <b
+                    className={
+                      running ? 'go' : stopped || nextLabel === '자동 꺼짐' ? 'stop' : ''
+                    }
+                  >
                     {nextLabel}
                   </b>
                 </span>
@@ -114,8 +120,8 @@ export function OverviewScreen({state, openDetail, openRegister}: Props) {
               {!state.autoRun
                 ? '자동 촬영이 꺼져 있습니다'
                 : state.routine.delay
-                  ? `등록 ${state.routine.delay}분 뒤`
-                  : '등록 직후'}
+                  ? `등록 완료 ${state.routine.delay}분 뒤`
+                  : '등록 완료 직후'}
             </dd>
           </dl>
         </Modal>

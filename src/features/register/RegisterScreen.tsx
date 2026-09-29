@@ -19,7 +19,6 @@ interface Props {
 
 interface Done {
   place: string;
-  first: number;
 }
 
 export function RegisterScreen({state, send, setTab, device = 1, slot: picked}: Props) {
@@ -33,6 +32,8 @@ export function RegisterScreen({state, send, setTab, device = 1, slot: picked}: 
   // 현황에서 누른 칸이 있으면 그 칸으로 시작한다. 그새 찼으면 첫 빈 칸으로 떨어진다.
   const [slot, setSlot] = useState(() => (picked && free.includes(picked) ? picked : free[0] || 0));
   const [done, setDone] = useState<Done | null>(null);
+  /** 「완료」를 누를 때까지 이어서 넣은 매수. 팝업을 닫아도 유지된다. */
+  const [batch, setBatch] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [blockOpen, setBlockOpen] = useState(false);
 
@@ -60,21 +61,31 @@ export function RegisterScreen({state, send, setTab, device = 1, slot: picked}: 
             ? '빈 슬롯이 없습니다. 다른 스캐너를 선택하세요.'
             : '';
 
-  // 지연은 투입~1회차 간격이다. 지연이 0분이면 등록하는 순간이 곧 첫 촬영이다.
-  const firstShotAt = (base: number) => base + state.routine.delay * 60000;
-
   const register = async () => {
     setSubmitting(true);
     const place = `${d.name} · ${pos(slot)}`;
     // 투입 시각은 서버가 찍는다. 화면은 무엇이 기록될지 미리 보여줄 뿐이다.
     const result = await send('register', deviceId, {slot});
-    if (result) setDone({place, first: firstShotAt(Date.now())});
-    else setSubmitting(false);
+    if (result) {
+      setBatch(n => n + 1);
+      setDone({place});
+    } else setSubmitting(false);
   };
 
   const closeDone = () => {
     setSubmitting(false);
     setDone(null);
+  };
+
+  /**
+   * 등록을 끝낸다. 서버는 등록이 들어올 때마다 촬영을 붙잡아 두므로,
+   * 여기서 풀어 줘야 밀어 둔 것들이 한꺼번에 돌기 시작한다.
+   */
+  const finish = () => {
+    closeDone();
+    setBatch(0);
+    void send('registerDone', 0);
+    setTab('overview');
   };
 
   return (
@@ -130,8 +141,11 @@ export function RegisterScreen({state, send, setTab, device = 1, slot: picked}: 
                 </dd>
                 <dt>총 촬영</dt>
                 <dd>{totalRuns(state)}회</dd>
-                <dt>첫 촬영</dt>
-                <dd>{kdt(firstShotAt(state.serverTime))}</dd>
+    <dt>첫 촬영</dt>
+                <dd>
+                  {state.routine.delay ? `등록 완료 ${state.routine.delay}분 뒤` : '등록 완료 직후'}
+                  <em>등록을 마쳐야 촬영이 시작됩니다</em>
+                </dd>
               </dl>
               <button className="link" onClick={() => setTab('settings')}>
                 설정에서 변경 →
@@ -172,30 +186,25 @@ export function RegisterScreen({state, send, setTab, device = 1, slot: picked}: 
         <Modal
           bare
           title="등록 완료"
-          onClose={() => {
-            closeDone();
-            setTab('overview');
-          }}
+          onClose={finish}
         >
           <div className="done-box">
             <i />
             <div>
               <b>{done.place}</b>
-              <span>첫 촬영 {kdt(done.first)}</span>
+              <span>
+                이번에 {batch}매 등록 ·{' '}
+                {state.routine.delay
+                  ? `첫 촬영은 완료 ${state.routine.delay}분 뒤`
+                  : '완료를 누르면 촬영 시작'}
+              </span>
             </div>
           </div>
           <p className="done-ask">플레이트를 이어서 등록하시겠습니까?</p>
           <div className="actions">
-            <button
-              onClick={() => {
-                closeDone();
-                setTab('overview');
-              }}
-            >
+            <button onClick={closeDone}>계속 등록</button>
+            <button className="primary" data-autofocus onClick={finish}>
               완료
-            </button>
-            <button className="primary" onClick={closeDone}>
-              계속 등록
             </button>
           </div>
         </Modal>

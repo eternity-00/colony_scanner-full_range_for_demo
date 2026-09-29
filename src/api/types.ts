@@ -116,6 +116,8 @@ export interface AppState {
   plates: Plate[];
   routine: Routine;
   autoRun: boolean;
+  /** 등록하는 동안 촬영을 붙잡아 둔 상태. 「완료」를 누르면 풀린다. */
+  captureHold: boolean;
   session: SessionState;
   logs: LogEntry[];
   io: IoEntry[];

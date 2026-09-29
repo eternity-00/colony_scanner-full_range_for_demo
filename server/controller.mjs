@@ -21,12 +21,16 @@ const MAX_INCUBATION_DAYS=42;
 // 동작이지 고장 대응이 아니고, 루틴을 고칠 수 있는 사람이 그 루틴을 돌릴 수
 // 없는 것도 앞뒤가 맞지 않는다.
 const ADMIN_ONLY=['stop','home','reset','clearError','calibrate','environment'];
+// 등록하는 동안은 촬영을 붙잡아 둔다. 등록하자마자 촬영이 걸리면 그 스캐너가
+// 작업 중이 되어 다음 장을 넣을 수 없다(DEVICE_BUSY). 등록을 마쳤다고 알릴
+// 때까지 미뤘다가 한꺼번에 시작한다. 알리지 않고 떠나도 이 시간이 지나면 풀린다.
+const REGISTER_HOLD_MS=5*60*1000;
 const busy=d=>d.job&&['running','paused'].includes(d.job.status);
 const validInt=(x,min,max)=>Number.isInteger(x)&&x>=min&&x<=max;
 const assert=(ok,code,message,status=409)=>{if(!ok)throw new DeviceError(code,message,status);};
 export class Controller extends EventEmitter {
  constructor({dataDir,stageMs=1600,tickMs=250,autoTick=true,adapter}={}){
-  super();this.dataDir=dataDir;mkdirSync(join(dataDir,'images'),{recursive:true});this.stateFile=join(dataDir,'state.json');this.revision=0;this.adminPin=process.env.ADMIN_PIN||'0000';this.session={role:'analyst',failed:0,lockUntil:0,idleAt:null};
+  super();this.dataDir=dataDir;mkdirSync(join(dataDir,'images'),{recursive:true});this.stateFile=join(dataDir,'state.json');this.revision=0;this.adminPin=process.env.ADMIN_PIN||'0000';this.session={role:'analyst',failed:0,lockUntil:0,idleAt:null};this.holdUntil=0;
   if(existsSync(this.stateFile)){this.db=JSON.parse(readFileSync(this.stateFile,'utf8'));assert(this.db.version===1,'BAD_STATE','지원하지 않는 데이터 파일입니다.',500);}
   // 플레이트는 씨딩하지 않는다. 장비는 빈 트레이로 시작하고, 사용자가 등록한 것만
   // 검사 루틴을 따라 촬영된다. 예전에는 데모용으로 63매를 미리 넣어 두었는데,
@@ -43,13 +47,13 @@ export class Controller extends EventEmitter {
  }
  log(level,message){this.db.logs.unshift({id:randomUUID(),at:Date.now(),level,message});this.db.logs=this.db.logs.slice(0,1000);}
  io(direction,type,deviceId,requestId,payload){this.db.io.unshift({id:randomUUID(),at:Date.now(),direction,type,deviceId,requestId,payload});this.db.io=this.db.io.slice(0,150);}
- snapshot(){const now=Date.now();return {revision:this.revision,serverTime:now,mode:this.adapter.engineConnected===undefined?'embedded-test':'external',devices:this.adapter.snapshot(),plates:structuredClone(this.db.plates),routine:{...this.db.routine},autoRun:this.db.autoRun,session:{role:this.session.role,lockedFor:Math.max(0,this.session.lockUntil-now),idleFor:this.session.idleAt?Math.max(0,now-this.session.idleAt):0},logs:structuredClone(this.db.logs.slice(0,100)),io:structuredClone(this.db.io),capabilities:['capture','pause','resume','stop','home','calibrate','reset','clearError'],storage:'server-json'};}
+ snapshot(){const now=Date.now();return {revision:this.revision,serverTime:now,mode:this.adapter.engineConnected===undefined?'embedded-test':'external',devices:this.adapter.snapshot(),plates:structuredClone(this.db.plates),routine:{...this.db.routine},autoRun:this.db.autoRun,captureHold:this.holdUntil>now,session:{role:this.session.role,lockedFor:Math.max(0,this.session.lockUntil-now),idleFor:this.session.idleAt?Math.max(0,now-this.session.idleAt):0},logs:structuredClone(this.db.logs.slice(0,100)),io:structuredClone(this.db.io),capabilities:['capture','pause','resume','stop','home','calibrate','reset','clearError'],storage:'server-json'};}
  persist(){this.db.devices=this.adapter.snapshot();const tmp=this.stateFile+'.tmp';writeFileSync(tmp,JSON.stringify(this.db));renameSync(tmp,this.stateFile);}
  publish(){this.revision++;this.emit('state',this.snapshot());}
  tick(ms){this.adapter.tick?.(ms);if(this.session.role==='admin'&&Date.now()-this.session.idleAt>=300000){this.session={role:'analyst',failed:0,lockUntil:0,idleAt:null};this.log('INFO','관리자 권한 자동 해제');}if(this.db.autoRun)this.schedule();this.publish();}
  // 지연은 투입~1회차, 주기는 회차~회차. 지연 0분이면 투입 즉시 1회차를 찍는다.
  nextAt(p){return p.registeredAt+this.db.routine.delay*60000+p.runs.length*this.db.routine.cycleHours*3600000;}
- async schedule(){if(this.scheduling)return;this.scheduling=true;try{for(const d of this.adapter.devices){if(!d.connected||d.doorOpen||d.fault||busy(d))continue;const p=this.db.plates.find(p=>p.deviceId===d.id&&!p.removedAt&&!p.paused&&p.runs.length<Math.floor(this.db.routine.days*24/this.db.routine.cycleHours)&&this.nextAt(p)<=Date.now());if(p)await this.execute({requestId:randomUUID(),command:'capture',deviceId:d.id,args:{plateId:p.id}},'scheduler');}}catch(error){this.log('WARN',`자동 촬영 시작 실패 · ${error.message}`);}finally{this.scheduling=false;}}
+ async schedule(){if(this.scheduling||this.holdUntil>Date.now())return;this.scheduling=true;try{for(const d of this.adapter.devices){if(!d.connected||d.doorOpen||d.fault||busy(d))continue;const p=this.db.plates.find(p=>p.deviceId===d.id&&!p.removedAt&&!p.paused&&p.runs.length<Math.floor(this.db.routine.days*24/this.db.routine.cycleHours)&&this.nextAt(p)<=Date.now());if(p)await this.execute({requestId:randomUUID(),command:'capture',deviceId:d.id,args:{plateId:p.id}},'scheduler');}}catch(error){this.log('WARN',`자동 촬영 시작 실패 · ${error.message}`);}finally{this.scheduling=false;}}
  imageSet(){this.imgSeq=(this.imgSeq||0)+1;return Array.from({length:6},(_,i)=>`well-${((this.imgSeq+i)%9)+1}.png`);}
  onEvent(e){
   this.io('RX',e.type,e.deviceId,e.requestId,e);
@@ -93,6 +97,11 @@ export class Controller extends EventEmitter {
     // 값이 있어도 쓰지 않는다 — 화면에서 감추는 것만으로는 막은 게 아니다.
     const registeredAt=Date.now();
     const p={id:`PL-${randomUUID().slice(0,8).toUpperCase()}`,deviceId,slot:args.slot,registeredAt,removedAt:null,paused:false,runs:[]};this.db.plates.push(p);result={plateId:p.id};this.log('INFO',`${p.id} · SCANNER ${deviceId} · 슬롯 ${args.slot} 등록`);
+    this.holdUntil=Date.now()+REGISTER_HOLD_MS;
+   }else if(command==='registerDone'){
+    // 등록을 마쳤다. 밀어 둔 촬영을 지금부터 스케줄러가 집어간다.
+    if(this.holdUntil)this.log('INFO','등록 완료 · 밀어 둔 촬영 시작');
+    this.holdUntil=0;
    }else if(['remove','platePause','retry','capture'].includes(command)){
     const p=this.db.plates.find(p=>p.id===args.plateId);assert(p&&!p.removedAt,'PLATE_NOT_FOUND','수납 중인 플레이트를 찾을 수 없습니다.',404);assert(p.deviceId===deviceId,'DEVICE_MISMATCH','플레이트와 스캐너가 일치하지 않습니다.',400);const d=this.adapter.get(deviceId);
     if(command==='capture')await this.adapter.command(deviceId,'capture',{plateId:p.id,slot:p.slot},requestId);
