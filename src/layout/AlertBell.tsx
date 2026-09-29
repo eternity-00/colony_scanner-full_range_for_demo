@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from 'react';
+import {useEffect, useState} from 'react';
 import type {AppState} from '../api/types.ts';
 import {active, faultLabel, pending, plateBad, pos, totalRuns} from '../utils/plate.ts';
 
@@ -51,13 +51,10 @@ interface Item {
  */
 export function AlertBell({state, onDevice, onPlate, onNeedAdmin}: Props) {
   const [open, setOpen] = useState(false);
+  /** 배지에서 빠진 것. 종을 펼치면 전부 들어간다. */
   const [seen, setSeen] = useState<string[]>([]);
-  /**
-   * 펼친 순간의 읽음 상태. 펼치자마자 전부 읽음으로 바뀌므로, 무엇이 새것이었는지
-   * 화면에 보여 주려면 그 직전 상태를 따로 붙잡아 둬야 한다.
-   */
-  const [snap, setSnap] = useState<string[]>([]);
-  const wasOpen = useRef(false);
+  /** 점이 지워진 것. 그 줄을 눌러야만 들어간다. */
+  const [read, setRead] = useState<string[]>([]);
   const isAdmin = state.session.role === 'admin';
 
   useEffect(() => {
@@ -105,21 +102,27 @@ export function AlertBell({state, onDevice, onPlate, onNeedAdmin}: Props) {
 
   // 펼치면 지금 목록을 다 본 것으로 친다. 사라진 일은 기록에서도 지워,
   // 같은 장비가 다시 고장나면 새 알림으로 다시 센다.
+  const prune = (prev: string[]) => prev.filter(id => ids.includes(id));
+
   useEffect(() => {
-    if (open && !wasOpen.current) setSnap(seen);
-    wasOpen.current = open;
+    // 펼치면 숫자는 바로 내려간다 — 무엇이 있는지는 봤기 때문이다.
     setSeen(prev => {
-      const next = open ? ids : prev.filter(id => ids.includes(id));
+      const next = open ? ids : prune(prev);
       if (next.length === prev.length && next.every((v, i) => v === prev[i])) return prev;
       return next;
+    });
+    // 점은 그대로 둔다. 사라진 일만 기록에서 뺀다.
+    setRead(prev => {
+      const next = prune(prev);
+      return next.length === prev.length ? prev : next;
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, open]);
 
   const unread = items.filter(i => !seen.includes(i.id));
   const urgent = unread.some(i => i.kind === 'device');
-  /** 펼쳐 놓은 동안에는 「펼칠 때 새것이었는지」로 표시한다. */
-  const isNew = (i: Item) => !snap.includes(i.id);
+  /** 아직 눌러 보지 않은 줄. 점은 이 기준으로 찍는다. */
+  const isNew = (i: Item) => !read.includes(i.id);
   // 새것을 위로. 「확인했는데 왜 그대로냐」는 느낌은 목록을 지워서가 아니라
   // 새것과 본 것을 갈라서 푼다 — 여기 있는 건 지나간 사건이 아니라 현재
   // 상태라, 지우면 고장이 나 있는데 알림창이 비어 보인다.
@@ -160,6 +163,7 @@ export function AlertBell({state, onDevice, onPlate, onNeedAdmin}: Props) {
                     <button
                       disabled={!i.go}
                       onClick={() => {
+                        setRead(prev => (prev.includes(i.id) ? prev : [...prev, i.id]));
                         setOpen(false);
                         i.go?.();
                       }}
