@@ -69,11 +69,11 @@
 /* 종과 로고는 하는 일이 다르다 — 하나는 누르는 자리, 하나는 읽는 표식이다.
    붙여 두면 로고까지 눌러 보게 된다. 사이를 벌려 둘을 갈라 놓는다. */
 .hd-right{flex:none;display:flex;align-items:center;gap:1.25rem;padding:0 0.75rem 0 0.25rem}
-.hd-bell{position:relative;width:3rem;height:3rem;min-height:0;flex:none;padding:0;display:grid;place-items:center;
+.hd-bell{position:relative;width:3.25rem;height:3.25rem;min-height:0;flex:none;padding:0;display:grid;place-items:center;
   border:0;background:transparent;color:var(--ink);cursor:pointer}
-.hd-bell svg{width:1.75rem;height:1.75rem}
-.hd-bell i{position:absolute;top:2px;right:2px;min-width:1.0625rem;height:1.0625rem;padding:0 0.25rem;border-radius:0.53125rem;
-  background:#c01d27;color:#fff;font-size:0.625rem;font-weight:700;font-style:normal;display:grid;place-items:center}
+.hd-bell svg{width:2rem;height:2rem}
+.hd-bell i{position:absolute;top:1px;right:1px;min-width:1.125rem;height:1.125rem;padding:0 0.25rem;border-radius:0.5625rem;
+  background:#c01d27;color:#fff;font-size:0.65625rem;font-weight:700;font-style:normal;display:grid;place-items:center}
 /* 오른쪽 끝은 제품 로고 — 레퍼런스가 로고를 두는 자리다. 2단 락업이라
    헤더 높이(4rem)에 맞춰 세로를 잡고 가로는 비율로 따라간다.
    위아래 2px 만 남기고 칸을 채운다 — 작게 두면 여백만 넓어 비어 보인다. */

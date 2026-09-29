@@ -143,7 +143,9 @@ export function AlertBell({state, onDevice, onPlate, onNeedAdmin}: Props) {
         aria-label={`알림 ${items.length}건 · 새 알림 ${unread.length}건`}
         aria-expanded={open}
       >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
+        {/* 선을 굵게 하고 모서리를 둥글려 멀리서도 종으로 읽히게 한다. */}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4"
+          strokeLinecap="round" strokeLinejoin="round">
           <path d="M5 18h14l-2-3V10a5 5 0 0 0-10 0v5z" />
           <path d="M10 21h4" />
         </svg>
