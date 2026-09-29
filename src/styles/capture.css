@@ -34,9 +34,12 @@
 .job .actions{margin-top:0;gap:0.375rem;justify-content:flex-start;flex-wrap:nowrap}
 .job .actions button{min-height:3rem;padding:0.5rem 0.625rem;font-size:0.875rem;font-weight:800;flex:1;white-space:nowrap}
 
+/* 두 칩의 높이를 맞춘다. WELL 칩은 안에 큰 숫자가 있어 baseline 정렬로 두면
+   상태 배지보다 키가 커진다. 높이를 못박고 가운데로 정렬한다. */
 .jtags{display:flex;align-items:center;gap:0.5rem}
-.wellbadge{display:inline-flex;align-items:baseline;gap:0.25rem;font-size:0.78125rem;font-weight:700;color:var(--gt);background:#fff;border:1px solid var(--line);border-radius:2px;padding:0.25rem 0.625rem}
-.wellbadge b{font-size:1rem;font-weight:800;color:var(--gt)}
+.jtags>*{height:1.75rem;padding-top:0;padding-bottom:0}
+.wellbadge{display:inline-flex;align-items:center;gap:0.25rem;font-size:0.78125rem;font-weight:700;color:var(--gt);background:#fff;border:1px solid var(--line);border-radius:2px;padding:0 0.625rem}
+.wellbadge b{font-size:1rem;font-weight:800;color:var(--gt);line-height:1}
 
 /* 촬영 카드 재배치: 카메라 좌 · 버튼 우 · 진행바 하단 */
 .cam-row{flex:1;min-height:0;display:flex;gap:0.75rem}

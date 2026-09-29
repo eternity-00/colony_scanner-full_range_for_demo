@@ -23,7 +23,8 @@ export function JobCard({device: d, state, send, openDetail}: Props) {
         <h2>{d.name}</h2>
         <div className="jtags">
           <span className="wellbadge">
-            WELL <b>{well ?? '—'}</b> / {WELLS}
+            {/* 값이 없을 때의 줄표는 짧은 것(–)을 쓴다. 긴 줄표(—)는 좁은 칩 안에서 선처럼 보인다. */}
+            WELL <b>{well ?? '–'}</b> / {WELLS}
           </span>
           <Badge type={tone(d)}>
             {status(d)}
