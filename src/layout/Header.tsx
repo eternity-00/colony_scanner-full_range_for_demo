@@ -1,3 +1,4 @@
+import logoUrl from '../assets/logo.png';
 import type {AppState} from '../api/types.ts';
 import {TABS, type TabKey} from '../config/defines.ts';
 import {TabIcon} from '../shared/TabIcon.tsx';
@@ -80,8 +81,13 @@ export function Header({state, tab, onDevice, onPlate, onNeedAdmin}: Props) {
           onNeedAdmin={onNeedAdmin}
         />
 
-        {/* 제품 로고 원본(2단 락업). 글자와 표식이 한 파일이라 직접 조판하지 않는다. */}
-        <img className="wm" src="/logo.png" alt="ColonyScanner" />
+        {/*
+          * 제품 로고 원본(2단 락업). 글자와 표식이 한 파일이라 직접 조판하지 않는다.
+          * public/ 이 아니라 import 로 들여오는 이유: 번들러가 파일 내용으로 이름을
+          * 지어 주므로(logo-<해시>.png) 로고가 바뀌면 주소도 바뀐다. 고정된 주소면
+          * 브라우저가 옛 그림을 계속 들고 있어서, 바꿔 올려도 파이 화면이 그대로다.
+          */}
+        <img className="wm" src={logoUrl} alt="ColonyScanner" />
       </span>
     </header>
   );
