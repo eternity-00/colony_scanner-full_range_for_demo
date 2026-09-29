@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from 'react';
+import {useLayoutEffect, useRef, useState} from 'react';
 import type {AppState, Plate} from '../../api/types.ts';
 import {ROW_HEIGHT_REM} from '../../config/defines.ts';
 import {Badge} from '../../shared/Badge.tsx';
@@ -42,7 +42,9 @@ export function HistoryScreen({state, openDetail, openPlateViewer}: Props) {
   };
 
   // 표 높이에 맞춰 페이지당 행 수를 계산한다.
-  useEffect(() => {
+  // 그리기 전에 재야 한다(useLayoutEffect). 그리고 나서 줄이면 넘친 표가 한 번
+  // 보였다가 접히면서 스크롤바가 깜빡인다.
+  useLayoutEffect(() => {
     const el = wrap.current;
     if (!el) return;
     const calc = () => {
@@ -57,7 +59,7 @@ export function HistoryScreen({state, openDetail, openPlateViewer}: Props) {
   }, []);
 
   // 계산 결과가 1행 넘칠 때가 있어 렌더 후 한 번 더 줄인다.
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = wrap.current;
     const table = el?.querySelector('table');
     if (el && table && table.getBoundingClientRect().height > el.clientHeight + 1) {

@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from 'react';
+import {useLayoutEffect, useRef, useState} from 'react';
 import type {ImageState, Plate, Run} from '../../api/types.ts';
 import {RUN_ROW_HEIGHT_REM, WELLS} from '../../config/defines.ts';
 import {Badge} from '../../shared/Badge.tsx';
@@ -29,7 +29,9 @@ export function RunsTable({plate, onView, fill = false}: Props) {
   const wrap = useRef<HTMLDivElement>(null);
 
   // 표 높이가 바뀌면 한 페이지에 들어갈 행 수를 다시 센다.
-  useEffect(() => {
+  // useLayoutEffect 인 이유: useEffect 로 재면 처음 그린 뒤에 줄여서, 넘친 표가
+  // 한 번 그려졌다가 접힌다. 느린 화면에서는 그 사이 스크롤바가 떴다 사라진다.
+  useLayoutEffect(() => {
     if (!fill) return;
     const el = wrap.current;
     if (!el) return;
@@ -45,7 +47,7 @@ export function RunsTable({plate, onView, fill = false}: Props) {
   }, [fill]);
 
   // 계산 결과가 1행 넘칠 때가 있어 렌더 후 한 번 더 줄인다.
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!fill) return;
     const el = wrap.current;
     const table = el?.querySelector('table');
