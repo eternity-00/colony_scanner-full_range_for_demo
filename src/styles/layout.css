@@ -44,12 +44,13 @@
 
 /* ── 헤더 ── */
 .shell>header{height:4rem;flex:none;display:flex;align-items:stretch;background:#fff;border-bottom:1px solid var(--g3)}
-/* 지금 보는 화면을 색면으로 못박는다. 모양은 직사각 그대로 두고 오른쪽 끝을
-   밝은 파랑 띠로 맺는다 — 깎으면(화살표든 모서리든) 어디로 가라는 방향이
-   생기는데, 이 색면은 「여기가 지금 보는 화면」이라는 표시지 지시가 아니다.
-   띠는 글자가 올라가지 않는 자리라 밝은 톤(--dot)을 쓸 수 있다. */
-.hd-mode{flex:none;display:flex;align-items:center;gap:0.625rem;padding:0 1.125rem;
-  background:var(--blue);color:#fff;border-right:0.375rem solid var(--dot)}
+/* 지금 보는 화면을 색면으로 못박는다. 오른쪽 아래 모서리만 깎아 네모가 그냥
+   끊기지 않게 한다 — 화살표로 깎으면 어디로 가라는 방향이 생기는데, 이 색면은
+   「여기가 지금 보는 화면」이라는 표시지 지시가 아니다. 깎이는 폭만큼 오른쪽
+   여백을 더 줘서 글자가 사선에 닿지 않게 한다. */
+.hd-mode{flex:none;display:flex;align-items:center;gap:0.625rem;padding:0 1.375rem 0 1.125rem;
+  background:var(--blue);color:#fff;
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 1.125rem),calc(100% - 1.125rem) 100%,0 100%)}
 .hd-mode>svg{width:1.625rem;height:1.625rem;flex:none}
 /* 아이콘까지 baseline 으로 묶으면 SVG 의 기준선이 아래 모서리라 글자가 위로 밀린다. */
 .hd-mode-t{display:flex;align-items:baseline;gap:0.5rem;white-space:nowrap}
