@@ -3,8 +3,10 @@
 .tray-box{flex:1;background:transparent;border:0;padding:0.375rem 0;display:flex;align-items:stretch}
 .tray{display:grid;gap:0.375rem;width:100%}
 .tray-row{display:grid;grid-template-columns:1.9375rem repeat(3,minmax(0,1fr));align-items:center;gap:0.375rem}
-/* 단 이름은 칸 쪽에 붙인다. 왼쪽 정렬이면 카드 가장자리에 몰려 보인다. */
-.tier{align-self:center;text-align:right;color:var(--gt);font-size:0.75rem;font-weight:700}
+/* 단 이름은 칸 쪽에 붙인다. 왼쪽 정렬이면 카드 가장자리에 몰려 보인다.
+   다만 칸에 딱 붙지는 않게 오른쪽에 약간 띄운다. */
+.tier{align-self:center;text-align:right;padding-right:0.1875rem;color:var(--gt);
+  font-size:0.75rem;font-weight:700}
 
 /*
  * 칸은 흰 면이고, 상태는 왼쪽 원 하나로만 말한다.
