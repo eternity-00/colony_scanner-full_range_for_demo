@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import type {AppState} from '../api/types.ts';
 import {active, faultLabel, pending, plateBad, pos, totalRuns} from '../utils/plate.ts';
 
@@ -48,7 +48,8 @@ const readSeen = (): string[] => {
  * 지난 일의 기록은 장비 화면의 이벤트 로그가 맡는다.
  *
  * 배지는 아직 안 본 건수다. 한 번 펼치면 사라지고, 새 일이 생기면 다시 뜬다.
- * 목록 자체는 줄지 않는다 — 본 것과 처리한 것은 다르기 때문이다.
+ * 목록 자체는 줄지 않는다 — 본 것과 처리한 것은 다르기 때문이다. 대신 안 본
+ * 것에 점을 찍고 위로 올려, 확인한 뒤에 무엇이 새로 생겼는지가 보이게 한다.
  *
  * 세 가지를 센다 — 장비 오류 · 손봐야 하는 플레이트 · 반출을 기다리는 플레이트.
  * 줄마다 갈 곳이 다르다. 플레이트는 상세로, 장비 오류는 관리자면 장비 화면으로,
@@ -57,6 +58,12 @@ const readSeen = (): string[] => {
 export function AlertBell({state, onDevice, onPlate, onNeedAdmin}: Props) {
   const [open, setOpen] = useState(false);
   const [seen, setSeen] = useState<string[]>(readSeen);
+  /**
+   * 펼친 순간의 읽음 상태. 펼치자마자 전부 읽음으로 바뀌므로, 무엇이 새것이었는지
+   * 화면에 보여 주려면 그 직전 상태를 따로 붙잡아 둬야 한다.
+   */
+  const [snap, setSnap] = useState<string[]>([]);
+  const wasOpen = useRef(false);
   const isAdmin = state.session.role === 'admin';
 
   useEffect(() => {
@@ -105,6 +112,8 @@ export function AlertBell({state, onDevice, onPlate, onNeedAdmin}: Props) {
   // 펼치면 지금 목록을 다 본 것으로 친다. 사라진 일은 기록에서도 지워,
   // 같은 장비가 다시 고장나면 새 알림으로 다시 센다.
   useEffect(() => {
+    if (open && !wasOpen.current) setSnap(seen);
+    wasOpen.current = open;
     setSeen(prev => {
       const next = open ? ids : prev.filter(id => ids.includes(id));
       if (next.length === prev.length && next.every((v, i) => v === prev[i])) return prev;
@@ -120,6 +129,12 @@ export function AlertBell({state, onDevice, onPlate, onNeedAdmin}: Props) {
 
   const unread = items.filter(i => !seen.includes(i.id));
   const urgent = unread.some(i => i.kind === 'device');
+  /** 펼쳐 놓은 동안에는 「펼칠 때 새것이었는지」로 표시한다. */
+  const isNew = (i: Item) => !snap.includes(i.id);
+  // 새것을 위로. 「확인했는데 왜 그대로냐」는 느낌은 목록을 지워서가 아니라
+  // 새것과 본 것을 갈라서 푼다 — 여기 있는 건 지나간 사건이 아니라 현재
+  // 상태라, 지우면 고장이 나 있는데 알림창이 비어 보인다.
+  const sorted = [...items.filter(isNew), ...items.filter(i => !isNew(i))];
 
   return (
     <span className="bell-wrap">
@@ -151,8 +166,8 @@ export function AlertBell({state, onDevice, onPlate, onNeedAdmin}: Props) {
               <p className="pop-empty">지금 처리할 일이 없습니다.</p>
             ) : (
               <ul className="alert-list">
-                {items.map(i => (
-                  <li key={i.id} className={i.kind}>
+                {sorted.map(i => (
+                  <li key={i.id} className={`${i.kind} ${isNew(i) ? 'fresh' : ''}`}>
                     <button
                       disabled={!i.go}
                       onClick={() => {
