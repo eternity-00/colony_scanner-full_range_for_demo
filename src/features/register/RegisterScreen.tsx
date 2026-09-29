@@ -140,7 +140,10 @@ export function RegisterScreen({state, send, setTab, device = 1, slot: picked}: 
                   {state.routine.cycleHours}시간 · {state.routine.days}일
                 </dd>
                 <dt>총 촬영</dt>
-                <dd>{totalRuns(state)}회</dd>
+                <dd>
+                  {totalRuns(state)}회
+                  <em>Well당 {state.routine.wellShots}장</em>
+                </dd>
     <dt>첫 촬영</dt>
                 <dd>
                   {state.routine.delay ? `등록 완료 ${state.routine.delay}분 뒤` : '등록 완료 직후'}

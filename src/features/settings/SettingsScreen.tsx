@@ -4,6 +4,7 @@ import {
   ADMIN_IDLE_LIMIT_SEC,
   MAX_INCUBATION_DAYS,
   SLOTS_PER_DEVICE,
+  WELLS,
   type SendCommand,
 } from '../../config/defines.ts';
 import {Badge} from '../../shared/Badge.tsx';
@@ -193,9 +194,38 @@ export function SettingsScreen({state, send, operator, setOperator, onRole}: Pro
               </span>
             </div>
           ))}
+          {/*
+            * Well 한 칸을 가운데 한 장만 찍을지, 상하좌우까지 다섯 장을 찍을지.
+            * 장수라 스테퍼로 둘 수도 있지만 쓰는 값이 1 과 5 둘뿐이라 스위치로 둔다.
+            */}
+          <div className="field">
+            <span className="fl">
+              Well 십자 촬영
+              <em>Well 한 칸을 가운데 · 상하좌우 다섯 장으로 나눠 찍습니다</em>
+            </span>
+            <span className="fv">
+              <Toggle
+                label={`Well당 ${routine.wellShots}장`}
+                checked={routine.wellShots === 5}
+                onChange={on => setRoutine(r => ({...r, wellShots: on ? 5 : 1}))}
+              />
+            </span>
+          </div>
         </div>
         <div className="calc">
-          <span>현재 설정 기준</span>
+          <span>
+            현재 설정 기준
+            {/* 장수는 회차보다 저장·전송량에 직결되는 값이라 같이 적는다. */}
+            <em>
+              플레이트 1매당 사진{' '}
+              {(
+                Math.floor((routine.days * 24) / routine.cycleHours) *
+                WELLS *
+                routine.wellShots
+              ).toLocaleString()}
+              장
+            </em>
+          </span>
           <b>
             총 {Math.floor((routine.days * 24) / routine.cycleHours)}
             <em>회 촬영</em>
@@ -365,8 +395,8 @@ export function SettingsScreen({state, send, operator, setOperator, onRole}: Pro
             플레이트의 남은 촬영 일정까지 다시 계산됩니다.
           </p>
           <p className="muted">
-            주기 {routine.cycleHours}시간 · 배양 {routine.days}일 · 지연 {routine.delay}분 · 총{' '}
-            {Math.floor((routine.days * 24) / routine.cycleHours)}회 촬영
+            주기 {routine.cycleHours}시간 · 배양 {routine.days}일 · 지연 {routine.delay}분 · Well당{' '}
+            {routine.wellShots}장 · 총 {Math.floor((routine.days * 24) / routine.cycleHours)}회 촬영
           </p>
         </Modal>
       )}

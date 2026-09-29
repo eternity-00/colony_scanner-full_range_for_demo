@@ -79,6 +79,11 @@ export interface Routine {
   cycleHours: number;
   days: number;
   delay: number;
+  /**
+   * Well 한 칸을 몇 장 찍는지. 1 = 가운데 한 장, 5 = 가운데 + 상하좌우 십자.
+   * 아직 화면 표시용이다 — 가상장비는 그대로 Well 당 한 장을 만든다.
+   */
+  wellShots: number;
 }
 
 export interface SessionState {

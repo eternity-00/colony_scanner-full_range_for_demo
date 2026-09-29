@@ -67,3 +67,6 @@
 @media (hover:hover) and (pointer:fine){
  .stepper>button:hover:not(:disabled){background:#f2f1f3;border-color:#9ba2ac}
 }
+/* 「현재 설정 기준」 왼쪽에 붙는 부연 — 회차보다 장수가 저장량을 말해 준다. */
+.calc span{display:flex;flex-direction:column;gap:2px}
+.calc span em{font-style:normal;font-size:0.71875rem;font-weight:500;color:var(--gt)}

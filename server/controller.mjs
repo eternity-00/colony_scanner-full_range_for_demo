@@ -37,7 +37,7 @@ export class Controller extends EventEmitter {
   // 그것들이 화면을 다 채우고 회차도 제각각이라 실제 동작을 가리고 있었다.
   // autoRun 은 켠 채로 시작한다. 주기가 되면 알아서 찍는 것이 이 장비의 기본
   // 동작이고, 꺼져 있으면 등록해 두고도 아무 일이 없어 고장으로 보인다.
-  else {this.db={version:1,plates:[],routine:{cycleHours:12,days:42,delay:0},autoRun:true,logs:[],io:[],receipts:[],devices:[]};}
+  else {this.db={version:1,plates:[],routine:{cycleHours:12,days:42,delay:0,wellShots:1},autoRun:true,logs:[],io:[],receipts:[],devices:[]};}
   for(const p of this.db.plates)for(const r of p.runs){if(typeof r.image==='string'&&r.image.endsWith('.svg')){r.image=null;r.imageState='expired';}
    if(r.imageState==='held'&&!r.images?.length){const b=(Number(String(r.image||'').match(/\d+/)?.[0])||r.n)-1;r.images=Array.from({length:6},(_,i)=>`well-${((b+i)%9)+1}.png`);r.image=null;}}
   this.adapter=adapter||new VirtualDeviceAdapter({stageMs,config:this.db.devices});
@@ -47,7 +47,7 @@ export class Controller extends EventEmitter {
  }
  log(level,message){this.db.logs.unshift({id:randomUUID(),at:Date.now(),level,message});this.db.logs=this.db.logs.slice(0,1000);}
  io(direction,type,deviceId,requestId,payload){this.db.io.unshift({id:randomUUID(),at:Date.now(),direction,type,deviceId,requestId,payload});this.db.io=this.db.io.slice(0,150);}
- snapshot(){const now=Date.now();return {revision:this.revision,serverTime:now,mode:this.adapter.engineConnected===undefined?'embedded-test':'external',devices:this.adapter.snapshot(),plates:structuredClone(this.db.plates),routine:{...this.db.routine},autoRun:this.db.autoRun,captureHold:this.holdUntil>now,session:{role:this.session.role,lockedFor:Math.max(0,this.session.lockUntil-now),idleFor:this.session.idleAt?Math.max(0,now-this.session.idleAt):0},logs:structuredClone(this.db.logs.slice(0,100)),io:structuredClone(this.db.io),capabilities:['capture','pause','resume','stop','home','calibrate','reset','clearError'],storage:'server-json'};}
+ snapshot(){const now=Date.now();return {revision:this.revision,serverTime:now,mode:this.adapter.engineConnected===undefined?'embedded-test':'external',devices:this.adapter.snapshot(),plates:structuredClone(this.db.plates),routine:{wellShots:1,...this.db.routine},autoRun:this.db.autoRun,captureHold:this.holdUntil>now,session:{role:this.session.role,lockedFor:Math.max(0,this.session.lockUntil-now),idleFor:this.session.idleAt?Math.max(0,now-this.session.idleAt):0},logs:structuredClone(this.db.logs.slice(0,100)),io:structuredClone(this.db.io),capabilities:['capture','pause','resume','stop','home','calibrate','reset','clearError'],storage:'server-json'};}
  persist(){this.db.devices=this.adapter.snapshot();const tmp=this.stateFile+'.tmp';writeFileSync(tmp,JSON.stringify(this.db));renameSync(tmp,this.stateFile);}
  publish(){this.revision++;this.emit('state',this.snapshot());}
  tick(ms){this.adapter.tick?.(ms);if(this.session.role==='admin'&&Date.now()-this.session.idleAt>=300000){this.session={role:'analyst',failed:0,lockUntil:0,idleAt:null};this.log('INFO','관리자 권한 자동 해제');}if(this.db.autoRun)this.schedule();this.publish();}
@@ -110,7 +110,9 @@ export class Controller extends EventEmitter {
     if(command==='retry'){assert(d.connected&&d.pcConnected,'PC_OFFLINE','장비 및 PC 전송 연결이 필요합니다.');let count=0;p.runs.forEach(r=>{if(r.imageState==='held'&&!r.transferred){r.transferred=true;count++;}});result={count};this.log('INFO',`${p.id} · ${count}장 PC 재전송 완료`);}
    }else if(command==='routine'){
     assert(validInt(args.cycleHours,1,48)&&validInt(args.days,1,MAX_INCUBATION_DAYS)&&validInt(args.delay,0,720)&&args.delay%15===0,'INVALID_ROUTINE',`주기 1~48시간, 배양 1~${MAX_INCUBATION_DAYS}일, 지연 0~720분(15분 단위)을 입력하세요.`,400);
-    this.db.routine={cycleHours:args.cycleHours,days:args.days,delay:args.delay};this.log('INFO','공통 루틴 저장 · 전체 일정 재산정');
+    // wellShots 는 Well 한 칸의 촬영 장수다. 1(가운데) 또는 5(십자)만 받는다.
+    assert(args.wellShots===undefined||[1,5].includes(args.wellShots),'INVALID_ROUTINE','Well 촬영 장수는 1 또는 5여야 합니다.',400);
+    this.db.routine={cycleHours:args.cycleHours,days:args.days,delay:args.delay,wellShots:args.wellShots??this.db.routine.wellShots??1};this.log('INFO','공통 루틴 저장 · 전체 일정 재산정');
    }else if(command==='autoRun'){
     assert(typeof args.enabled==='boolean','INVALID_VALUE','enabled는 boolean이어야 합니다.',400);this.db.autoRun=args.enabled;this.log('INFO',`자동 촬영 ${args.enabled?'활성화':'비활성화'}`);
    }else if(command==='environment'){
