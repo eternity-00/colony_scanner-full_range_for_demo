@@ -52,9 +52,13 @@
 /* 여기에는 장비 전체에 하나뿐인 값만 둔다(Header.tsx 주석). */
 .hd-meta{flex:1;min-width:0;display:flex;align-items:center;gap:1.625rem;padding:0 1.25rem;overflow:hidden}
 .hm{flex:none;display:flex;flex-direction:column;gap:2px;white-space:nowrap}
-/* 값 사이를 세로선으로 가른다. 라벨/값이 두 줄이라 간격만으로는 어디까지가
-   한 쌍인지 흐려진다. 선은 글자 높이만큼만 — 헤더 끝까지 그으면 칸처럼 보인다. */
-.hm+.hm{padding-left:1.625rem;border-left:1px solid var(--g3)}
+/* 값 사이의 구분은 화면 이름 색면과 같은 뾰족한 꼴로 긋는다. 기울기도 같은
+   1:2 라, 헤더 왼쪽 끝의 사선과 같은 각으로 이어진다. 곧은 세로선은 칸을
+   나누는 느낌이라 무게가 실리는데, 이쪽은 방향만 준다. */
+.hm+.hm{position:relative;padding-left:1.75rem}
+.hm+.hm::before{content:'';position:absolute;left:0.625rem;top:50%;width:0.4375rem;height:1.25rem;
+  margin-top:-0.625rem;
+  background:no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='20' viewBox='0 0 7 20' fill='none' stroke='%23b0b0b0' stroke-width='1.6' stroke-linecap='square'%3E%3Cpath d='M2 2L5.5 10L2 18'/%3E%3C/svg%3E")}
 .hm small{font-size:0.59375rem;font-weight:700;letter-spacing:.08em;color:var(--gt)}
 .hm b{font-size:0.78125rem;font-weight:700;letter-spacing:-.01em;color:var(--ink);font-variant-numeric:tabular-nums}
 .hm b.bad{color:#c01d27}
