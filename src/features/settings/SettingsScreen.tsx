@@ -106,7 +106,7 @@ export function SettingsScreen({state, send, operator, setOperator, onRole}: Pro
   const sections: Record<SectionKey, ReactNode> = {
     login: (
       <section className="card stack">
-        <h2>로그인 정보 — 현재 세션</h2>
+        <h2>로그인 정보</h2>
         <p className="muted">
           장비 단위 단일 세션입니다. 별도 로그인 화면 없이 PIN으로 권한을 전환합니다.
         </p>
@@ -164,7 +164,8 @@ export function SettingsScreen({state, send, operator, setOperator, onRole}: Pro
 
     routine: (
       <section className="card stack">
-        <h2>검사 루틴 — 장비 전체 공통</h2>
+        <h2>검사 루틴</h2>
+        <p className="muted">장비 전체에 공통으로 적용됩니다.</p>
         <div className="fields">
           {ROUTINE_FIELDS.map(f => (
             <div className="field step" key={f.key}>
