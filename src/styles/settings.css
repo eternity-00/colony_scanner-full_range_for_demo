@@ -9,6 +9,10 @@
 
 /* 항목 행 정렬 */
 .fields{display:flex;flex-direction:column;border-top:1px solid #eceef1}
+/* 카드 머리글이 이미 구분선을 그린다. 바로 뒤에 오는 항목 목록까지 제 선을
+   그리면 14px 사이에 선이 둘 겹쳐 보인다. 뒤따라오는 쪽을 지운다. */
+.card>h2:first-child+.fields,
+.card>h2:first-child+p+.fields{border-top:0}
 .field{display:grid;grid-template-columns:1fr 10.5rem;align-items:center;gap:1rem;
   padding:0.8125rem 2px;border-bottom:1px solid #eceef1}
 .fl{display:flex;flex-direction:column;gap:2px;font-size:0.875rem;font-weight:700;color:var(--gt)}
