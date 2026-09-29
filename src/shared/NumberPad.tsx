@@ -54,7 +54,7 @@ export function NumberPad({
   return (
     <Modal title={title} onClose={onClose} bare>
       <div className={`padview ${error && !empty ? 'error' : ''}`}>
-        <b>{empty ? '—' : text}</b>
+        <b>{empty ? '–' : text}</b>
         <i>{unit}</i>
       </div>
       <p className={`pad-hint ${error ? 'bad' : ''}`}>

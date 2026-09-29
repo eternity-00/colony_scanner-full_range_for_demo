@@ -45,5 +45,8 @@ export const elapsedLabel = (from: number, now: number) => {
   return `${Math.floor(hours / 24)}일 ${hours % 24}시간`;
 };
 
-/** 값이 없으면 —, 있으면 날짜+시각. */
-export const fmt = (t?: number | null) => (t ? kdt(t) : '—');
+/**
+ * 값이 없으면 –, 있으면 날짜+시각.
+ * 짧은 줄표(–)를 쓴다 — 긴 줄표(—)는 좁은 칸 안에서 글자가 아니라 선처럼 보인다.
+ */
+export const fmt = (t?: number | null) => (t ? kdt(t) : '–');

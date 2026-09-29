@@ -181,7 +181,7 @@ export function HistoryScreen({state, openDetail, openPlateViewer}: Props) {
                     {p.runs.length}/{totalRuns(state)}
                   </td>
                   <td>{fmt(p.registeredAt)}</td>
-                  <td>{p.removedAt ? '—' : fmt(nextAt(state, p))}</td>
+                  <td>{p.removedAt ? '–' : fmt(nextAt(state, p))}</td>
                   <td>{p.runs.filter(r => r.imageState === 'held').length}</td>
                   <td>
                     {/*

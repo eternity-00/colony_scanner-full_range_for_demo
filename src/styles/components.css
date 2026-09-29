@@ -162,7 +162,8 @@
 
 /* 장비 알림 말풍선 — 헤더의 종 밑에 붙는다. 꼬리는 위를 가리킨다. */
 .bell-wrap{position:relative;display:inline-flex}
-.alert-pop{position:absolute;z-index:49;top:calc(100% + 0.625rem);right:-0.5rem;width:19rem;
+/* 가로로는 절대 스크롤하지 않는다 — 한 줄이 길면 말풍선을 넓힌다. */
+.alert-pop{position:absolute;z-index:49;top:calc(100% + 0.625rem);right:-0.5rem;width:23rem;
   background:#fff;border:1px solid var(--g3);border-radius:var(--rr);
   box-shadow:0 12px 32px #00000026;padding:0 1rem 1rem}
 .alert-pop::before,.alert-pop::after{content:'';position:absolute;right:1.5rem;width:0;height:0;
@@ -173,13 +174,15 @@
 /* 줄 수가 많아도 다 볼 수 있게 스크롤한다. 접어서 「외 N건」으로 두면 그 안에
    무엇이 들었는지 알 길이 없다. */
 .alert-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;
-  max-height:23rem;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;
+  max-height:23rem;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;touch-action:pan-y;
   overscroll-behavior:contain}
 .alert-list li{border-bottom:1px solid #eaeaea}
 .alert-list li:last-child{border-bottom:0}
-/* 줄 전체가 버튼이다 — 손가락이 큰 사람이 글자를 조준하지 않아도 된다. */
+/* 줄 전체가 버튼이다 — 손가락이 큰 사람이 글자를 조준하지 않아도 된다.
+   폭은 딱 100% 다. 예전에는 음수 여백으로 양옆까지 번지게 했는데, 목록이
+   스크롤 상자라 그만큼 가로로 넘쳐 버렸다. */
 .alert-list button{display:flex;align-items:baseline;justify-content:space-between;gap:0.75rem;
-  width:100%;min-height:0;margin:0 -0.5rem;padding:0.625rem 0.5rem;width:calc(100% + 1rem);
+  width:100%;min-height:0;margin:0;padding:0.625rem 0;
   border:0;border-radius:var(--rr);background:transparent;text-align:left;cursor:pointer}
 /* 누를 수 없는 줄(분석자에게 장비 오류)도 흐려지면 안 된다 — 읽어야 하는 정보다. */
 .alert-list button:disabled{cursor:default;opacity:1}

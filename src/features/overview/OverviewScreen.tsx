@@ -47,7 +47,7 @@ export function OverviewScreen({state, openDetail, openRegister}: Props) {
           // 찍을 시각이 정해져 있지 않으면(촬영 중·정지·플레이트 없음·시각이 이미
           // 지남) — 로 비워 둔다.
           const scheduled = next !== undefined && next > state.serverTime && !running && !stopped;
-          const nextLabel = scheduled ? hm(next) : '—';
+          const nextLabel = scheduled ? hm(next) : '–';
 
           // 배지는 장비 상태를 말한다. 거기에 「왜 안 찍고 있는지」를 더한다.
           // 시각이 지났는데 멈춰 있는 이유가 화면 어디에도 없으면 고장으로 보인다.
