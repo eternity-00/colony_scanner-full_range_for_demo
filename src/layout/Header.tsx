@@ -8,6 +8,10 @@ import {tempAbnormal} from '../utils/plate.ts';
 interface Props {
   state: AppState;
   tab: TabKey;
+  /** 08:40:29 */
+  clock: string;
+  /** 09-30 */
+  day: string;
   /** 관리자가 알림에서 곧장 장비 화면으로 넘어간다. */
   onDevice: () => void;
   /** 알림에서 플레이트를 손보러 상세로 넘어간다. */
@@ -28,9 +32,10 @@ const NAME = new Map(TABS.map(([key, ko, en]) => [key, {ko, en}]));
  * 플레이트마다 다른 값은 하나만 골라 적는 순간 나머지를 가리는 거짓말이 된다 —
  * 그건 스캐너 카드의 NEXT 와 상세 화면이 각자 말한다.
  *
- * 시계와 계정은 좌측 레일로 내려갔다.
+ * 계정은 좌측 레일에 있다. 시계는 값 줄의 오른쪽 끝에 붙는다 —
+ * 하나뿐인 값이라는 점은 같고, 초가 바뀌는 줄이라 읽는 값들과 떨어뜨린다.
  */
-export function Header({state, tab, onDevice, onPlate, onNeedAdmin}: Props) {
+export function Header({state, tab, clock, day, onDevice, onPlate, onNeedAdmin}: Props) {
   const devices = state.devices;
   const linked = devices.filter(d => d.connected).length;
   const abnormal = devices.some(tempAbnormal);
@@ -66,6 +71,12 @@ export function Header({state, tab, onDevice, onPlate, onNeedAdmin}: Props) {
           <b className={linked === devices.length ? '' : 'bad'}>
             {linked} / {devices.length}
           </b>
+        </span>
+        {/* 초까지 바뀌는 줄이라 다른 값들과 붙여 두면 옆 글자가 흔들려 보인다.
+            오른쪽 끝으로 밀고 세로선도 두지 않는다. */}
+        <span className="hm hm-clock">
+          <small>{day}</small>
+          <b>{clock}</b>
         </span>
       </span>
 
