@@ -17,11 +17,15 @@
    권한 전환이 걸린 버튼이라 누를 자리를 넉넉히 준다 — 72 → 94px 높이.
    동그라미도 같이 키운다. 아이콘만 키우고 면을 두면 조준해서 눌러야 한다. */
 .rail-acc{width:4.5rem;flex:none;display:flex;flex-direction:column;align-items:center;gap:0.3125rem;
-  padding:1.0625rem 0 0.9375rem;border:0;border-bottom:1px solid #6d6d6d;background:transparent;cursor:pointer}
+  padding:1.0625rem 0 0.9375rem;border:0;background:transparent;cursor:pointer}
 .rail-acc span{width:2.75rem;height:2.75rem;border-radius:50%;background:#fff;color:var(--deep);
   display:grid;place-items:center;font-size:1rem;font-weight:800}
 .rail-acc em{font-style:normal;font-size:0.625rem;font-weight:600;color:#d5d5d5}
-/* 시계가 헤더로 옮겨가면서, 계정과 아래 아이콘을 가르던 선을 계정이 물려받는다. */
+/* 시계도 레일에 둔다 — 헤더에서 한 칸을 되찾는다. 초까지 여덟 자가 4rem 안에
+   들어가야 하고, 등폭 숫자라 초가 바뀌어도 자리가 흔들리지 않는다. */
+.rail-clock{width:4.5rem;flex:none;padding:0 0 0.6875rem;text-align:center;line-height:1.35;
+  border-bottom:1px solid #6d6d6d;font-size:0.625rem;font-weight:600;color:#d5d5d5;font-variant-numeric:tabular-nums}
+.rail-clock b{display:block;font-size:0.6875rem;font-weight:700;letter-spacing:-.02em;color:#fff}
 /* .rail 이 align-items:center 라, 레일 폭을 채우려면 여기서 스스로 늘려야 한다. */
 .rail-nav{width:100%;align-self:stretch;flex:1;min-height:0;display:flex;flex-direction:column;
   align-items:stretch;gap:1rem;padding:1rem 0;overflow-y:auto}
@@ -62,11 +66,6 @@
 .hm small{font-size:0.65625rem;font-weight:700;letter-spacing:.08em;color:var(--gt)}
 .hm b{font-size:0.84375rem;font-weight:700;letter-spacing:-.01em;color:var(--ink);font-variant-numeric:tabular-nums}
 .hm b.bad{color:#c01d27}
-/* 시계는 오른쪽 끝. 세로선을 두지 않는다 — 읽는 값들과 같은 묶음이 아니다. */
-.hm-clock{margin-left:auto;text-align:right}
-.hm-clock+.hm,.hm.hm-clock{padding-left:0;border-left:0}
-.hm-clock small{letter-spacing:.04em}
-.hm-clock b{font-size:1rem;letter-spacing:0}
 .hd-right{flex:none;display:flex;align-items:center;gap:0.25rem;padding:0 0.5rem 0 0.25rem}
 .hd-bell{position:relative;width:3rem;height:3rem;min-height:0;flex:none;padding:0;display:grid;place-items:center;
   border:0;background:transparent;color:var(--ink);cursor:pointer}

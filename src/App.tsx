@@ -234,6 +234,8 @@ export default function App() {
         tab={visible}
         isAdmin={isAdmin}
         operator={operator}
+        clock={hms(state.serverTime)}
+        day={ymd(state.serverTime).slice(5)}
         onSelect={setTab}
         onRole={() => setUserCard(true)}
         onExit={() => setExitAsk(true)}
@@ -242,8 +244,6 @@ export default function App() {
         <Header
           state={state}
           tab={visible}
-          clock={hms(state.serverTime)}
-          day={ymd(state.serverTime).slice(5)}
           onDevice={() => setTab('device')}
           onPlate={openDetail}
           onNeedAdmin={(where, what) => setAdminAsk({where, what})}

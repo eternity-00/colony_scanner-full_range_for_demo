@@ -6,6 +6,8 @@ interface Props {
   tab: TabKey;
   isAdmin: boolean;
   operator: string;
+  clock: string;
+  day: string;
   onSelect: (tab: TabKey) => void;
   onRole: () => void;
   onExit: () => void;
@@ -21,9 +23,9 @@ const KO = new Map(TABS.map(([key, ko]) => [key, ko]));
  * 사라진 것이 아니다.
  *
  * 맨 위는 계정이다. 화면이 바뀌어도 누가 쓰고 있는지가 늘 같은 자리에 있다.
- * 시계는 헤더로 옮겼다 — 4.5rem 폭에서는 초까지 여덟 자가 너무 작았다.
+ * 시계도 여기 둔다 — 헤더에서 한 칸을 되찾는다.
  */
-export function Rail({tab, isAdmin, operator, onSelect, onRole, onExit}: Props) {
+export function Rail({tab, isAdmin, operator, clock, day, onSelect, onRole, onExit}: Props) {
   const role = isAdmin ? '관리자' : '분석자';
   return (
     <nav className="rail">
@@ -31,6 +33,10 @@ export function Rail({tab, isAdmin, operator, onSelect, onRole, onExit}: Props) 
         <span>{operator.slice(0, 1)}</span>
         <em>{role}</em>
       </button>
+      <div className="rail-clock">
+        {day}
+        <b>{clock}</b>
+      </div>
       <div className="rail-nav">
         {tabsFor(isAdmin).map(([key]) => (
           <button
