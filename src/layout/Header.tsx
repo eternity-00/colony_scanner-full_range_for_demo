@@ -59,7 +59,11 @@ export function Header({state, tab, operator, onRole, onMenu}: Props) {
       </button>
       <span className="wm">
         <Logo />
-        Colony<i>Scanner</i>
+        {/* 글자는 한 덩어리로 묶는다. 풀어두면 .wm 의 flex gap 이 Colony 와
+            Scanner 사이에도 들어가 두 낱말로 갈라진다. */}
+        <b>
+          Colony<i>Scanner</i>
+        </b>
       </span>
       <span className="sub">{SUBTITLE[tab]}</span>
       <div className="head-status">
