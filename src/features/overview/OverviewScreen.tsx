@@ -44,25 +44,24 @@ export function OverviewScreen({state, openDetail, openRegister}: Props) {
             .sort((a, b) => a - b)[0];
           const running = d.job?.status === 'running';
           const stopped = !d.connected || d.fault || d.doorOpen || d.job?.status === 'paused';
-          // 플레이트가 없으면 찍을 것도 없다. 예전에는 「지금+주기」를 보여 줬는데
-          // 빈 트레이에 다음 촬영 시각이 떠 있는 게 더 이상했다.
-          //
-          // 시각이 지났는데 자동 촬영이 꺼져 있으면 「지금」이라고 해선 안 된다.
-          // 아무 일도 일어나지 않는데 곧 찍을 것처럼 보이고, 화면 어디에도
-          // 왜 안 찍는지가 없었다. 스케줄러가 멈춰 있다는 것을 여기서 말한다.
-          const nextLabel = running
-            ? '진행 중'
-            : stopped
-              ? '정지'
-              : next === undefined
-                ? '—'
-                : next > state.serverTime
-                  ? hm(next)
-                  : !state.autoRun
-                    ? '자동 꺼짐'
-                    : state.captureHold
-                      ? '등록 중'
-                      : '지금';
+          // NEXT 는 시각만 적는다. 상태를 말하는 낱말은 옆 배지의 몫이다 —
+          // 같은 줄에서 둘이 같은 말을 하면 어느 쪽을 읽어야 할지 흐려진다.
+          // 찍을 시각이 정해져 있지 않으면(촬영 중·정지·플레이트 없음·시각이 이미
+          // 지남) — 로 비워 둔다.
+          const scheduled = next !== undefined && next > state.serverTime && !running && !stopped;
+          const nextLabel = scheduled ? hm(next) : '—';
+
+          // 배지는 장비 상태를 말한다. 거기에 「왜 안 찍고 있는지」를 더한다.
+          // 시각이 지났는데 멈춰 있는 이유가 화면 어디에도 없으면 고장으로 보인다.
+          const due = next !== undefined && next <= state.serverTime;
+          const badge =
+            !running && !stopped && due
+              ? !state.autoRun
+                ? '자동 꺼짐'
+                : state.captureHold
+                  ? '등록 중'
+                  : '촬영 대기'
+              : status(d);
 
           return (
             <section className={`card scanner ${tone(d)}`} key={d.id}>
@@ -70,15 +69,9 @@ export function OverviewScreen({state, openDetail, openRegister}: Props) {
                 <h3>{d.name}</h3>
                 <span className="head-next">
                   <small>NEXT</small>
-                  <b
-                    className={
-                      running ? 'go' : stopped || nextLabel === '자동 꺼짐' ? 'stop' : ''
-                    }
-                  >
-                    {nextLabel}
-                  </b>
+                  <b className={scheduled ? '' : 'idle'}>{nextLabel}</b>
                 </span>
-                <Badge type={tone(d)}>{status(d)}</Badge>
+                <Badge type={badge === '자동 꺼짐' ? 'warn' : tone(d)}>{badge}</Badge>
               </div>
               <div className="tray-box">
                 <Tray state={state} deviceId={d.id} compact onSelect={slot => tap(d.id, slot)} />
