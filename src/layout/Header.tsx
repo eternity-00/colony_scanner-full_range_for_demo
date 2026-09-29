@@ -1,4 +1,4 @@
-import logoUrl from '../assets/logo.png';
+import logoUrl from '../assets/logo.svg';
 import type {AppState} from '../api/types.ts';
 import {TABS, type TabKey} from '../config/defines.ts';
 import {TabIcon} from '../shared/TabIcon.tsx';
@@ -83,8 +83,11 @@ export function Header({state, tab, onDevice, onPlate, onNeedAdmin}: Props) {
 
         {/*
           * 제품 로고 원본(2단 락업). 글자와 표식이 한 파일이라 직접 조판하지 않는다.
+          * 받은 SVG 원본을 그대로 쓴다. 폰트 참조 없는 순수 도형이라 배율이 바뀌어도
+          * 흐려지지 않고, 파이의 UI_SCALE 이 패널마다 달라도 같은 선으로 나온다.
+          *
           * public/ 이 아니라 import 로 들여오는 이유: 번들러가 파일 내용으로 이름을
-          * 지어 주므로(logo-<해시>.png) 로고가 바뀌면 주소도 바뀐다. 고정된 주소면
+          * 지어 주므로(logo-<해시>.svg) 로고가 바뀌면 주소도 바뀐다. 고정된 주소면
           * 브라우저가 옛 그림을 계속 들고 있어서, 바꿔 올려도 파이 화면이 그대로다.
           */}
         <img className="wm" src={logoUrl} alt="ColonyScanner" />

@@ -1,8 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
-  <rect x="1.5" y="4.5" width="29" height="23" rx="5" stroke="#3f7a96" stroke-width="2.4"/>
-  <g fill="#3f7a96">
-    <circle cx="8" cy="12" r="2.9"/><circle cx="16" cy="12" r="2.9"/><circle cx="24" cy="12" r="2.9"/>
-    <circle cx="8" cy="20" r="2.9"/><circle cx="16" cy="20" r="2.9"/>
-  </g>
-  <circle cx="24" cy="20" r="2.9" fill="#f29a2e"/>
+<!-- 로고 원본(docs/ColonyScanner_2단락업_라이트.svg)에서 표식만 떼어낸 것. 좌표·색 그대로. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="12 4 88 88">
+  <rect x="19.5" y="19.5" width="73" height="57" rx="14" fill="none" stroke="#3F7A96" stroke-width="7"/>
+  <circle cx="42" cy="41" r="5.5" fill="#3F7A96"/>
+  <circle cx="56" cy="41" r="5.5" fill="#3F7A96"/>
+  <circle cx="70" cy="41" r="5.5" fill="#3F7A96"/>
+  <circle cx="42" cy="55" r="5.5" fill="#3F7A96"/>
+  <circle cx="56" cy="55" r="5.5" fill="#3F7A96"/>
+  <circle cx="70" cy="55" r="5.5" fill="#F29A2E"/>
 </svg>
