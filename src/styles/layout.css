@@ -48,7 +48,10 @@
 
 
 /* ── 헤더 (D1 시안) ── */
-.wm{padding-left:1.125rem;font-size:1.375rem;font-weight:800;letter-spacing:-.02em;color:var(--gt)}
+.wm{display:flex;align-items:center;gap:0.5625rem;padding-left:1.125rem;font-size:1.375rem;
+  font-weight:800;letter-spacing:-.02em;color:var(--gt)}
+/* 표식은 워드마크의 파랑을 따른다 — 글자 색(--gt)과 나란히 두면 표식이 묻힌다. */
+.wm .logo{flex:none;color:var(--blue)}
 .wm i{font-style:normal;color:var(--blue7)}
 /* 구분선은 색보다 길이가 문제였다. 글자 높이만큼만 그리면 눈금처럼 보인다. */
 .sub{margin-left:0.875rem;padding-left:0.875rem;border-left:1px solid #9ba2ac;font-size:0.875rem;color:var(--gt);white-space:nowrap}

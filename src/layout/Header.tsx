@@ -1,6 +1,7 @@
 import {useEffect, useRef, useState} from 'react';
 import type {AppState} from '../api/types.ts';
 import type {TabKey} from '../config/defines.ts';
+import {Logo} from '../shared/Logo.tsx';
 import {hms, ymd} from '../utils/datetime.ts';
 import {tempAbnormal} from '../utils/plate.ts';
 
@@ -57,6 +58,7 @@ export function Header({state, tab, operator, onRole, onMenu}: Props) {
         <span />
       </button>
       <span className="wm">
+        <Logo />
         Colony<i>Scanner</i>
       </span>
       <span className="sub">{SUBTITLE[tab]}</span>
