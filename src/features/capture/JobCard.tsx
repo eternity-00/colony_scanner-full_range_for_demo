@@ -1,5 +1,6 @@
 import type {AppState, Device} from '../../api/types.ts';
 import {SHORT_STAGES, STAGES, STAGES_SHOWN, WELLS, type SendCommand} from '../../config/defines.ts';
+import {ActIcon} from '../../shared/ActIcon.tsx';
 import {Badge} from '../../shared/Badge.tsx';
 import {platesFor, status, tone} from '../../utils/plate.ts';
 
@@ -65,9 +66,11 @@ export function JobCard({device: d, state, send, openDetail}: Props) {
           */}
         <div className="actions right">
           <button disabled={!running} onClick={() => send('pause', d.id)}>
+            <ActIcon name="pause" />
             일시정지
           </button>
           <button disabled={d.job?.status !== 'paused'} onClick={() => send('resume', d.id)}>
+            <ActIcon name="play" />
             재개
           </button>
           {isAdmin && (
@@ -76,6 +79,7 @@ export function JobCard({device: d, state, send, openDetail}: Props) {
               disabled={!['running', 'paused'].includes(d.job?.status ?? '')}
               onClick={() => send('stop', d.id, {}, null, true)}
             >
+              <ActIcon name="stop" />
               비상 정지
             </button>
           )}
@@ -88,6 +92,7 @@ export function JobCard({device: d, state, send, openDetail}: Props) {
               openDetail(d.id, target?.slot || 1);
             }}
           >
+            <ActIcon name="find" />
             플레이트 상세
           </button>
         </div>

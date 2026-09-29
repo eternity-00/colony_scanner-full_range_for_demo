@@ -1,5 +1,6 @@
 import type {AppState, Plate, Run} from '../../api/types.ts';
 import type {SendCommand, TabKey} from '../../config/defines.ts';
+import {ActIcon} from '../../shared/ActIcon.tsx';
 import {Badge} from '../../shared/Badge.tsx';
 import {Tray} from '../../shared/Tray.tsx';
 import {elapsedLabel, fmt} from '../../utils/datetime.ts';
@@ -119,6 +120,7 @@ export function DetailScreen({
                   disabled={['running', 'paused'].includes(device.job?.status ?? '')}
                   onClick={() => send('capture', device.id, {plateId: plate.id}, 'running')}
                 >
+                  <ActIcon name="play" />
                   촬영 시작
                 </button>
                 <button
@@ -126,18 +128,21 @@ export function DetailScreen({
                     send('platePause', device.id, {plateId: plate.id, paused: !plate.paused})
                   }
                 >
+                  <ActIcon name={plate.paused ? 'play' : 'pause'} />
                   {plate.paused ? '일정 재개' : '촬영 일시정지'}
                 </button>
                 <button
                   disabled={!pending(plate) || !device.pcConnected}
                   onClick={() => send('retry', device.id, {plateId: plate.id})}
                 >
+                  <ActIcon name="send" />
                   재전송
                 </button>
                 <button
                   className="outline-danger"
                   onClick={() => send('remove', device.id, {plateId: plate.id}, null, true)}
                 >
+                  <ActIcon name="eject" />
                   플레이트 반출
                 </button>
               </div>

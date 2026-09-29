@@ -75,6 +75,8 @@
 .job .actions.right{flex:none;width:9.375rem;display:flex;flex-direction:column;gap:0.5rem;overflow-y:auto}
 /* 오른쪽 세로 버튼들 — 손가락으로 누르는 자리라 키를 넉넉히 준다. */
 .job .actions.right button{flex:none;width:100%;min-height:3.5rem;height:auto;padding:0.625rem 0.5rem;font-size:0.9375rem;font-weight:800;white-space:nowrap}
+/* 세로로 쌓인 버튼 열 — 아이콘을 글자 앞에 붙여 왼쪽 끝을 눈으로 훑게 한다. */
+.job .actions.right .acti{width:1.1875rem;height:1.1875rem}
 /*
  * 좁은 화면에서는 카메라 옆 세로 버튼 열이 눌릴 수 없을 만큼 납작해진다.
  * 카메라 아래 가로 한 줄로 내린다.

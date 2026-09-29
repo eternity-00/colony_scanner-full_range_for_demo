@@ -236,3 +236,10 @@
 .ask-row.done span{color:#a8720d}
 .ask-row.device,.ask-row.plate{box-shadow:inset 3px 0 0 #c01d27}
 .ask-row.done{box-shadow:inset 3px 0 0 #a8720d}
+
+/*
+ * 버튼 안의 동작 아이콘(ActIcon).
+ * 글자와 같은 색을 따라가게 두어, 비활성·위험 버튼에서도 따로 손볼 곳이 없다.
+ */
+.acti{width:1.125rem;height:1.125rem;flex:none}
+button:has(>.acti){display:inline-flex;align-items:center;justify-content:center;gap:0.4375rem}
