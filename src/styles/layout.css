@@ -11,29 +11,30 @@
 /* ── 좌측 아이콘 레일 ──
    D1 의 상단바 + 서랍을 대신한다. 글자를 빼 4rem 에 담고, 그만큼 본문이 넓어진다.
    이름은 aria-label · title 로 남는다 — 보이지 않을 뿐 사라진 것이 아니다. */
-.rail{width:4rem;flex:none;display:flex;flex-direction:column;align-items:center;background:var(--deep)}
+/* 64 → 72px. 안쪽 버튼도 48 → 52px 로 같이 키워 여백 비율을 지킨다. */
+.rail{width:4.5rem;flex:none;display:flex;flex-direction:column;align-items:center;background:var(--deep)}
 /* 맨 위는 계정. 화면이 바뀌어도 누가 쓰고 있는지가 늘 같은 자리에 있다. */
-.rail-acc{width:4rem;flex:none;display:flex;flex-direction:column;align-items:center;gap:0.1875rem;
+.rail-acc{width:4.5rem;flex:none;display:flex;flex-direction:column;align-items:center;gap:0.1875rem;
   padding:0.6875rem 0 0.625rem;border:0;background:transparent;cursor:pointer}
 .rail-acc span{width:2.125rem;height:2.125rem;border-radius:50%;background:#fff;color:var(--deep);
   display:grid;place-items:center;font-size:0.8125rem;font-weight:800}
 .rail-acc em{font-style:normal;font-size:0.59375rem;font-weight:600;color:#d5d5d5}
 /* 시계도 레일에 둔다 — 헤더에서 한 칸을 되찾는다. 초까지 여덟 자가 4rem 안에
    들어가야 하고, 등폭 숫자라 초가 바뀌어도 자리가 흔들리지 않는다. */
-.rail-clock{width:4rem;flex:none;padding:0 0 0.6875rem;text-align:center;line-height:1.35;
+.rail-clock{width:4.5rem;flex:none;padding:0 0 0.6875rem;text-align:center;line-height:1.35;
   border-bottom:1px solid #6d6d6d;font-size:0.625rem;font-weight:600;color:#d5d5d5;font-variant-numeric:tabular-nums}
 .rail-clock b{display:block;font-size:0.6875rem;font-weight:700;letter-spacing:-.02em;color:#fff}
 .rail-nav{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;gap:0.25rem;
   padding:0.75rem 0;overflow-y:auto}
-/* 3rem 정사각 — 손가락으로 누르는 최소 크기(2.75rem)를 넘긴다. */
-.rail-nav button{width:3rem;height:3rem;min-height:0;flex:none;padding:0;display:grid;place-items:center;
+/* 3.25rem 정사각 — 손가락으로 누르는 최소 크기(2.75rem)를 넘긴다. */
+.rail-nav button{width:3.25rem;height:3.25rem;min-height:0;flex:none;padding:0;display:grid;place-items:center;
   border:0;border-radius:var(--rr);background:transparent;color:#dcdcdc;cursor:pointer}
 .rail-nav button svg{width:1.3125rem;height:1.3125rem}
 /* 선택 행: 흰 색면 + 회색 글씨. 반투명 하이라이트를 대신한다. */
 .rail-nav button.on{background:#fff;color:var(--deep)}
 .rail-ver{flex:none;padding-bottom:0.375rem;font-size:0.59375rem;font-weight:700;color:#bdbdbd;
   font-variant-numeric:tabular-nums}
-.rail-exit{width:3rem;height:3rem;min-height:0;flex:none;margin-bottom:0.75rem;padding:0;display:grid;place-items:center;
+.rail-exit{width:3.25rem;height:3.25rem;min-height:0;flex:none;margin-bottom:0.75rem;padding:0;display:grid;place-items:center;
   border:1px solid #7a7a7a;border-radius:var(--rr);background:transparent;color:#efefef;cursor:pointer}
 .rail-exit svg{width:1.1875rem;height:1.1875rem}
 
