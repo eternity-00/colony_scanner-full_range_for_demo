@@ -1,5 +1,5 @@
 import type {AppState, Device} from '../../api/types.ts';
-import {SHORT_STAGES, STAGES, WELLS, type SendCommand} from '../../config/defines.ts';
+import {SHORT_STAGES, STAGES, STAGES_SHOWN, WELLS, type SendCommand} from '../../config/defines.ts';
 import {Badge} from '../../shared/Badge.tsx';
 import {platesFor, status, tone} from '../../utils/plate.ts';
 
@@ -15,7 +15,9 @@ export function JobCard({device: d, state, send, openDetail}: Props) {
   const job = d.job && ['running', 'paused'].includes(d.job.status) ? d.job : null;
   const well = job ? Math.min(WELLS, Math.floor((job.progress / 100) * WELLS) + 1) : null;
   const running = d.job?.status === 'running';
-  const stages = job && job.type !== 'capture' ? SHORT_STAGES : STAGES;
+  // 촬영은 앞의 네 단계만 그린다(STAGES_SHOWN 주석). 다른 작업은 세 단계 그대로.
+  const stages =
+    job && job.type !== 'capture' ? SHORT_STAGES : STAGES.slice(0, STAGES_SHOWN);
 
   return (
     <section className="card job">
