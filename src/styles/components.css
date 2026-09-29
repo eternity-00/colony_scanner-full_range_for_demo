@@ -56,7 +56,19 @@
 .pager span{font-weight:700;color:var(--gt)}
 .pager span{margin-right:auto}
 .error-text{color:#c01d27}
-.session-warning{position:fixed;z-index:40;right:1.25rem;top:4.5rem;padding:0.75rem 1rem;border-radius:var(--rr);background:#a8720d;border:1px solid #a8720d;color:#fff;font-weight:700}
+/*
+ * 관리자 권한 자동 해제 예고 — 계정 말풍선과 같은 자리에 붙인다.
+ * 권한은 레일의 계정이 말하는 것이라, 그 경고도 같은 곳에서 나야 어디를
+ * 눌러야 하는지가 이어진다. 오른쪽 위에 띄우면 종·로고 쪽과 헷갈린다.
+ */
+.session-warning{position:fixed;z-index:47;left:5rem;top:0.75rem;
+  padding:0.6875rem 0.9375rem;border-radius:var(--rr);
+  background:#a8720d;border:1px solid #a8720d;color:#fff;font-size:0.875rem;font-weight:700;
+  box-shadow:0 8px 24px #0000001f}
+/* 꼬리는 계정 이니셜 높이를 가리킨다 — 계정 말풍선과 같은 자리다. */
+.session-warning::before{content:'';position:absolute;left:-0.5rem;top:2.25rem;width:0;height:0;
+  border-top:0.5rem solid transparent;border-bottom:0.5rem solid transparent;
+  border-right:0.5rem solid #a8720d}
 
 .card{border-radius:var(--rr);border-color:var(--g3)}
 
