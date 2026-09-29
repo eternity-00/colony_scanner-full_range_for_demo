@@ -22,8 +22,12 @@
 .run-tabs .rt.good i{background:#5aa153}.run-tabs .rt.bad i{background:#d6202b}.run-tabs .rt.warn i{background:#d99009}.run-tabs .rt.info i{background:#5c636e}
 .run-tabs .rt.sel{background:var(--blue);border-color:var(--blue);color:#fff}
 .run-right{display:flex;align-items:center;gap:0.625rem;flex:none}
-.queue-btn{min-height:2.375rem;padding:0 1rem;border:1px solid var(--blue);border-radius:var(--rr);background:var(--blue);color:#fff;font-size:0.875rem;font-weight:800;display:inline-flex;align-items:center;gap:0.5rem}
-.queue-btn b{background:#00558f;border-radius:2px;min-width:1.375rem;padding:1px 0.4375rem;font-size:0.8125rem;text-align:center}
+/* 목록을 여는 버튼. 색면으로 두면 스캐너 탭의 선택 상태와 같은 무게가 되어
+   「지금 여기」로 읽힌다. 흰 면에 줄 세 개로 목록임을 말한다. */
+.queue-btn{min-height:2.875rem;padding:0 1.125rem;border:1px solid var(--line);border-radius:var(--rr);
+  background:#fff;color:var(--ink);font-size:0.875rem;font-weight:800;display:inline-flex;align-items:center;gap:0.5rem}
+.queue-btn svg{width:1.125rem;height:1.125rem;flex:none;color:var(--gt)}
+.queue-btn b{background:var(--blue);color:#fff;border-radius:2px;min-width:1.375rem;padding:2px 0.4375rem;font-size:0.8125rem;text-align:center}
 .job-grid{flex:1;min-height:0;display:grid;gap:0.75rem}
 .job-grid.single{grid-template-columns:1fr;grid-template-rows:1fr}
 .job{padding:0.6875rem 0.8125rem;display:flex;flex-direction:column;gap:0.5625rem;min-height:0;overflow:hidden}

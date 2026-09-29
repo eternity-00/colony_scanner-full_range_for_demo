@@ -50,6 +50,10 @@ export function CaptureScreen({state, send, openDetail}: Props) {
         </div>
         <div className="run-right">
           <button className="queue-btn" onClick={() => setQueueOpen(true)}>
+            {/* 목록을 여는 버튼이라 줄 세 개로 표시한다. */}
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M4 7h16M4 12h16M4 17h10" />
+            </svg>
             촬영 큐 <b>{queue.length}</b>
           </button>
         </div>
