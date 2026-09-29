@@ -44,18 +44,17 @@
 .hd-mode{flex:none;display:flex;align-items:center;gap:0.625rem;padding:0 2rem 0 1.125rem;
   background:var(--blue);color:#fff;
   clip-path:polygon(0 0,calc(100% - 1rem) 0,100% 50%,calc(100% - 1rem) 100%,0 100%)}
-.hd-mode>svg{width:1.4375rem;height:1.4375rem;flex:none}
+.hd-mode>svg{width:1.625rem;height:1.625rem;flex:none}
 /* 아이콘까지 baseline 으로 묶으면 SVG 의 기준선이 아래 모서리라 글자가 위로 밀린다. */
 .hd-mode-t{display:flex;align-items:baseline;gap:0.5rem;white-space:nowrap}
-.hd-mode-t b{font-size:1rem;font-weight:700;letter-spacing:.05em}
-.hd-mode-t em{font-style:normal;font-size:0.71875rem;font-weight:600;letter-spacing:.05em}
+.hd-mode-t b{font-size:1.1875rem;font-weight:700;letter-spacing:.04em}
+.hd-mode-t em{font-style:normal;font-size:0.84375rem;font-weight:600;letter-spacing:.04em}
 /* 여기에는 장비 전체에 하나뿐인 값만 둔다(Header.tsx 주석). */
 .hd-meta{flex:1;min-width:0;display:flex;align-items:center;gap:1.625rem;padding:0 1.25rem;overflow:hidden}
-/* 값 앞의 선 아이콘. 면을 채우지 않는다 — 아래 통계 타일이 채운 사각을 쓰므로
-   여기까지 채우면 어느 쪽이 지표인지 흐려진다(Header.tsx 주석). */
-.hm{flex:none;display:flex;align-items:center;gap:0.5rem;white-space:nowrap}
-.hm>svg{width:1.125rem;height:1.125rem;flex:none;color:var(--gt)}
-.hm>span{display:flex;flex-direction:column;gap:2px}
+.hm{flex:none;display:flex;flex-direction:column;gap:2px;white-space:nowrap}
+/* 값 사이를 세로선으로 가른다. 라벨/값이 두 줄이라 간격만으로는 어디까지가
+   한 쌍인지 흐려진다. 선은 글자 높이만큼만 — 헤더 끝까지 그으면 칸처럼 보인다. */
+.hm+.hm{padding-left:1.625rem;border-left:1px solid var(--g3)}
 .hm small{font-size:0.59375rem;font-weight:700;letter-spacing:.08em;color:var(--gt)}
 .hm b{font-size:0.78125rem;font-weight:700;letter-spacing:-.01em;color:var(--ink);font-variant-numeric:tabular-nums}
 .hm b.bad{color:#c01d27}
