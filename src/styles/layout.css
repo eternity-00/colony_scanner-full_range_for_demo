@@ -25,11 +25,20 @@
  * 칸에는 그림 아래 이름을 적는다. 판이 덮는 방식이라 폭은 공짜다 —
  * 118px 로 넓어져도 본문은 한 픽셀도 줄지 않는다. 그러니 가장 읽기 쉬운
  * 쪽을 고르지 않을 이유가 없다.
+ *
+ * 위아래 오른쪽 모서리를 비스듬히 깎는다. 왼쪽 변은 화면 끝에 붙어 있고
+ * 오른쪽 변만 짧아지므로, 판이 화면을 가르는 네모가 아니라 가장자리에서
+ * 밀려 나온 조각으로 읽힌다. 깎인 만큼 위아래 여백을 더 줘서 첫 칸(현황)과
+ * 끝 칸(설정)이 사선에 닿지 않게 한다.
+ *
+ * 깎으면 box-shadow 도 같이 잘리므로 filter:drop-shadow 를 쓴다 — 그림자가
+ * 잘린 모양을 그대로 따라간다.
  */
 .rail{position:fixed;z-index:46;left:0;top:50%;width:7.375rem;max-height:calc(100vh - 1.75rem);
   display:flex;flex-direction:column;align-items:center;
-  background:#f7f8f9;border:1px solid var(--line);border-left:0;border-radius:0 1.25rem 1.25rem 0;
-  box-shadow:6px 0 22px #0b203a1f;
+  background:#f7f8f9;border:1px solid var(--line);border-left:0;
+  clip-path:polygon(0 0,100% 2.75rem,100% calc(100% - 2.75rem),0 100%);
+  filter:drop-shadow(5px 0 16px #0b203a26);
   transform:translate(-100%,-50%);transition:transform .18s cubic-bezier(.4,0,.2,1)}
 .rail.on{transform:translate(0,-50%)}
 /* 판 밖을 눌러 닫는 가림막. 어둡게 덮지 않는다 — 뒤의 본문이 그대로 보여야
@@ -45,7 +54,7 @@
 .rail-grip.on{left:7.375rem}
 .rail-grip svg{width:0.9375rem;height:0.9375rem}
 .rail-nav{width:100%;flex:none;display:flex;flex-direction:column;
-  align-items:center;gap:0.5625rem;padding:1.25rem 0;overflow-y:auto}
+  align-items:center;gap:0.5625rem;padding:2.5rem 0;overflow-y:auto}
 /* 흰 둥근 네모에 파란 아이콘 + 이름. 아이콘은 그림이라 3:1 이면 되므로
    #4a7b96 로 두고, 글자는 4.5:1 이 필요해 #3f6a80 으로 한 단계 짙게 쓴다. */
 .rail-nav button{width:5.875rem;height:4.625rem;min-height:0;flex:none;padding:0;
