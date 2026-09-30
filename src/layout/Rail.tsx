@@ -5,11 +5,7 @@ import {TabIcon} from '../shared/TabIcon.tsx';
 interface Props {
   tab: TabKey;
   isAdmin: boolean;
-  operator: string;
-  clock: string;
-  day: string;
   onSelect: (tab: TabKey) => void;
-  onRole: () => void;
   onExit: () => void;
 }
 
@@ -27,10 +23,12 @@ const KO = new Map(TABS.map(([key, ko]) => [key, ko]));
  * 어떤 상태에서도 같은 크기라는 점이다 — 트레이 8단이 늘 같은 칸에 그려진다.
  *
  * 항목을 고르면 판은 스스로 닫힌다. 고르러 열었지 보려고 연 것이 아니다.
+ *
+ * 계정과 시계는 헤더로 올렸다. 판이 숨는 순간 그 둘도 같이 사라지는데,
+ * 지금 몇 시인지와 누가 쓰고 있는지는 늘 보여야 하는 값이다.
  */
-export function Rail({tab, isAdmin, operator, clock, day, onSelect, onRole, onExit}: Props) {
+export function Rail({tab, isAdmin, onSelect, onExit}: Props) {
   const [open, setOpen] = useState(false);
-  const role = isAdmin ? '관리자' : '분석자';
 
   useEffect(() => {
     if (!open) return;
@@ -50,19 +48,6 @@ export function Rail({tab, isAdmin, operator, clock, day, onSelect, onRole, onEx
       {open && <div className="rail-scrim" role="presentation" onMouseDown={() => setOpen(false)} />}
 
       <nav className={`rail ${open ? 'on' : ''}`} aria-hidden={!open}>
-        <button
-          className="rail-acc"
-          onClick={onRole}
-          title={`${operator} · ${role}`}
-          tabIndex={open ? 0 : -1}
-        >
-          <span>{operator.slice(0, 1)}</span>
-          <em>{role}</em>
-        </button>
-        <div className="rail-clock">
-          {day}
-          <b>{clock}</b>
-        </div>
         <div className="rail-nav">
           {tabsFor(isAdmin).map(([key]) => (
             <button

@@ -32,17 +32,8 @@
   transition:left .18s cubic-bezier(.4,0,.2,1)}
 .rail-grip.on{left:4.625rem}
 .rail-grip svg{width:1rem;height:1rem}
-/* 맨 위는 계정. 화면이 바뀌어도 누가 쓰고 있는지가 늘 같은 자리에 있다. */
-.rail-acc{width:100%;flex:none;display:flex;flex-direction:column;align-items:center;gap:0.3125rem;
-  padding:1.1875rem 0 1rem;border:0;border-bottom:1px solid #6d6d6d;background:transparent;cursor:pointer}
-.rail-acc span{width:3rem;height:3rem;border-radius:50%;background:#fff;color:var(--deep);
-  display:grid;place-items:center;font-size:1.0625rem;font-weight:800}
-.rail-acc em{font-style:normal;font-size:0.625rem;font-weight:600;color:#d5d5d5}
-.rail-clock{width:100%;flex:none;padding:0.5rem 0 0.6875rem;text-align:center;line-height:1.3;white-space:nowrap;
-  border-bottom:1px solid #6d6d6d;font-size:0.6875rem;font-weight:600;color:#d5d5d5;font-variant-numeric:tabular-nums}
-.rail-clock b{display:block;font-size:0.8125rem;font-weight:700;letter-spacing:-.04em;color:#fff}
 .rail-nav{width:100%;flex:1;min-height:0;display:flex;flex-direction:column;
-  align-items:center;gap:0.625rem;padding:0.875rem 0;overflow-y:auto}
+  align-items:center;justify-content:center;gap:0.75rem;padding:1rem 0;overflow-y:auto}
 /* 떠 있는 판에서는 아이콘을 동그라미로 둔다. 판이 이미 네모라, 그 안에서
    또 네모로 고른 것을 표시하면 모서리가 겹쳐 어디까지가 버튼인지 흐려진다. */
 .rail-nav button{width:2.875rem;height:2.875rem;min-height:0;flex:none;padding:0;display:grid;place-items:center;
@@ -61,9 +52,13 @@
    끊기지 않게 한다 — 화살표로 깎으면 어디로 가라는 방향이 생기는데, 이 색면은
    「여기가 지금 보는 화면」이라는 표시지 지시가 아니다. 깎이는 폭만큼 오른쪽
    여백을 더 줘서 글자가 사선에 닿지 않게 한다. */
-.hd-mode{flex:none;display:flex;align-items:center;gap:0.625rem;padding:0 1.375rem 0 1.125rem;
+/* 파란 색면 하나에 로고와 화면 이름을 함께 담는다. 둘을 따로 두면 파란
+   덩어리가 둘이 되어 어느 쪽이 「지금 화면」인지 흐려진다. */
+.hd-mode{flex:none;display:flex;align-items:center;gap:0.875rem;padding:0 1.375rem 0 1rem;
   background:var(--blue);color:#fff;
   clip-path:polygon(0 0,100% 0,100% calc(100% - 1.125rem),calc(100% - 1.125rem) 100%,0 100%)}
+/* 로고와 화면 이름을 가르는 선. 색면 위라 흰색을 옅게 깐다. */
+.hd-bar{width:1px;height:2.125rem;flex:none;background:#ffffff59}
 .hd-mode>svg{width:1.625rem;height:1.625rem;flex:none}
 /* 아이콘까지 baseline 으로 묶으면 SVG 의 기준선이 아래 모서리라 글자가 위로 밀린다. */
 .hd-mode-t{display:flex;align-items:baseline;gap:0.5rem;white-space:nowrap}
@@ -81,17 +76,27 @@
 .hm b.bad{color:#c01d27}
 /* 종과 로고는 하는 일이 다르다 — 하나는 누르는 자리, 하나는 읽는 표식이다.
    붙여 두면 로고까지 눌러 보게 된다. 사이를 벌려 둘을 갈라 놓는다. */
-.hd-right{flex:none;display:flex;align-items:center;gap:0.875rem;padding:0 0.75rem 0 0.25rem}
+.hd-right{flex:none;display:flex;align-items:center;gap:0.875rem;padding:0 0.75rem 0 0.5rem}
 .hd-bell{position:relative;width:3.25rem;height:3.25rem;min-height:0;flex:none;padding:0;display:grid;place-items:center;
   border:0;background:transparent;color:var(--ink);cursor:pointer}
 .hd-bell svg{width:2rem;height:2rem}
 .hd-bell i{position:absolute;top:1px;right:1px;min-width:1.125rem;height:1.125rem;padding:0 0.25rem;border-radius:0.5625rem;
   background:#c01d27;color:#fff;font-size:0.65625rem;font-weight:700;font-style:normal;display:grid;place-items:center}
-/* 오른쪽 끝은 제품 로고 — 레퍼런스가 로고를 두는 자리다. 2단 락업이라
-   헤더 높이(4rem)에 맞춰 세로를 잡고 가로는 비율로 따라간다.
-   위아래 2px 만 남기고 칸을 채운다 — 작게 두면 여백만 넓어 비어 보인다. */
-.wm{display:block;height:3.75rem;width:auto;flex:none}
-.app[data-w="sm"] .wm{height:2.75rem}
+/* 로고는 파란 색면 안, 화면 맨 왼쪽이다. 2단 락업이라 세로를 잡고 가로는
+   비율로 따라간다. 색면 높이(4rem) 안에서 위아래 숨 쉴 자리를 남긴다. */
+.wm{display:block;height:2.875rem;width:auto;flex:none}
+.app[data-w="sm"] .wm{height:2.25rem}
+/* ── 오른쪽 끝: 시계 · 알림 · 계정 ── */
+.hd-clock{display:flex;flex-direction:column;align-items:flex-end;gap:2px;white-space:nowrap;
+  font-variant-numeric:tabular-nums}
+.hd-clock small{font-size:0.71875rem;font-weight:700;letter-spacing:.04em;color:var(--gt)}
+.hd-clock b{font-size:1rem;font-weight:700;letter-spacing:-.01em;color:var(--ink)}
+/* 계정 — 이니셜 동그라미 + 등급. 누르면 말풍선이 뜬다. */
+.hd-acc{display:flex;align-items:center;gap:0.5rem;height:2.875rem;min-height:0;padding:0 0.625rem 0 0.375rem;
+  border:0;border-radius:var(--rr);background:transparent;cursor:pointer}
+.hd-acc i{width:2.25rem;height:2.25rem;flex:none;border-radius:50%;background:var(--deep);color:#fff;
+  display:grid;place-items:center;font-style:normal;font-size:0.9375rem;font-weight:800}
+.hd-acc em{font-style:normal;font-size:0.8125rem;font-weight:700;color:var(--gt);white-space:nowrap}
 .app[data-w="md"] .hd-meta .hm:first-child{display:none}
 
 /* 종료 오버레이 */
@@ -110,6 +115,6 @@
  .rail-nav button:hover:not(.on){background:#6a6a6a}
  .rail-exit:hover{background:#6a6a6a}
  .rail-grip:hover{background:#6a6a6a}
- .rail-acc:hover em{color:#fff}
  .hd-bell:hover{background:#eaeaea}
+ .hd-acc:hover{background:#eaeaea}
 }
