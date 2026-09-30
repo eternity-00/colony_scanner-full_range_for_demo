@@ -32,18 +32,29 @@
 /* 네 줄 고정. 여기 값은 「최소」이고, 표가 height:100% 로 늘어나며 남는 높이를
    줄들이 나눠 갖는다. 이 값이 크면 네 줄이 안 들어가 세 줄로 접힌다. */
 .runs td{height:3.5rem;padding-top:0;padding-bottom:0}
-.runs td>button{min-height:2.5rem;padding:0.375rem 1rem;font-size:0.8125rem;font-weight:700}
+.runs td>button{min-height:2.75rem;padding:0.375rem 1.125rem;font-size:0.9375rem;font-weight:700}
+/*
+ * 표 글자를 한 단계 키운다. 줄 높이가 3.5rem(56px) 이라 자리는 이미 있었고,
+ * 13px 는 장갑 낀 손으로 허리를 굽혀 보는 화면에서 작다.
+ * 여기(.runs)에만 준다 — 이벤트 로그와 이력 화면은 한 줄에 담을 칸이 더
+ * 많아 같이 키우면 가로로 넘친다.
+ */
+.runs table{font-size:0.9375rem}
+.runs th{font-size:0.9375rem}
+.runs td,.runs th{padding-left:0.875rem;padding-right:0.875rem}
 /* 회차·Well 번호는 색면을 두르지 않는다. 같은 표 안의 전송 배지가 색으로
    말하고 있어서, 번호까지 물들이면 어느 색이 상태를 뜻하는지 흐려진다.
    두 칸 다 숫자라 등폭으로 세워 자릿수가 바뀌어도 줄이 흔들리지 않는다. */
 .runs .runno,.runs .wellno{display:inline-block;min-width:1.25rem;padding:0;border-radius:0;
-  background:transparent;color:var(--ink);font-size:0.9375rem;
+  background:transparent;color:var(--ink);font-size:1.0625rem;
   font-variant-numeric:tabular-nums;text-align:left}
 /* 한 회차가 Well 여섯 줄로 펼쳐지므로 회차 숫자가 같은 값으로 연달아 선다.
    회차만 굵게 두면 그 덩어리가 어디서 끊기는지가 먼저 보이고, Well 번호는
    그 안의 순번이라 한 단계 가벼운 것이 읽는 차례와 맞다. */
 .runs .runno{font-weight:800}
 .runs .wellno{font-weight:500}
+/* 전송 배지도 표 글자에 맞춰 올린다. */
+.runs .badge{font-size:0.875rem;padding:0.3125rem 0.625rem}
 .runs .pager{padding-top:0.625rem}
 
 .titleline{display:flex;align-items:baseline;gap:0.5625rem;min-width:0}
