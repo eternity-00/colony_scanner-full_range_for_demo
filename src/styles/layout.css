@@ -43,6 +43,16 @@
   box-shadow:6px 0 22px #0b203a1f;
   transform:translateX(-100%);transition:transform .18s cubic-bezier(.4,0,.2,1)}
 .rail.on{transform:translateX(0)}
+/*
+ * 접혀 있을 때도 판이 있다는 표시. 화면 왼쪽 가장자리에 그림자를 깐다 —
+ * 숨은 판이 밖에서 드리우는 그늘이다. 손잡이 하나만 있으면 그게 무엇인지
+ * 모르지만, 가장자리가 어두우면 「저 너머에 뭔가 있다」가 먼저 읽힌다.
+ * 손잡이가 설 26px 자리에 딱 맞춘다.
+ */
+.app:before{content:'';position:fixed;z-index:44;left:0;top:0;bottom:0;width:1.625rem;
+  pointer-events:none;
+  background:linear-gradient(90deg,#0b203a30 0%,#0b203a14 40%,#0b203a00 100%)}
+
 /* 판 밖을 눌러 닫는 가림막. 어둡게 덮지 않는다 — 뒤의 본문이 그대로 보여야
    무엇을 보다가 메뉴를 열었는지가 끊기지 않는다. */
 .rail-scrim{position:fixed;inset:0;z-index:45;background:#00000014}
@@ -51,7 +61,7 @@
   width:1.625rem;height:4.25rem;min-height:0;padding:0;display:grid;place-items:center;
   border:1px solid var(--line);border-left:0;border-radius:0 0.75rem 0.75rem 0;
   background:#f7f8f9;color:var(--gt);
-  box-shadow:4px 0 14px #0b203a1a;cursor:pointer;
+  box-shadow:5px 0 18px #0b203a33;cursor:pointer;
   transition:left .18s cubic-bezier(.4,0,.2,1)}
 .rail-grip.on{left:8.25rem}
 .rail-grip svg{width:0.9375rem;height:0.9375rem}
