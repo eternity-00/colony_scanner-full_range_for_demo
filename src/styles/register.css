@@ -8,6 +8,10 @@
 /* 투입 시각은 고르는 값이 아니라 기록되는 값이라, 무엇이 찍힐지만 보여준다. */
 .register-layout aside dd em{display:block;font-style:normal;font-size:0.71875rem;
   font-weight:500;color:var(--gt);margin-top:1px}
+/* 이름이 넉 자를 넘지 않는 줄들이라 전역 7.5rem 짜리 이름 칸은 절반이 빈다.
+   비는 만큼 이름과 값이 멀어져 한 쌍으로 안 읽힌다. 칸을 줄여 붙이고,
+   남은 폭은 값이 가져간다 — 「등록을 마쳐야…」가 두 줄로 접히던 자리다. */
+.register-layout aside dl{grid-template-columns:5rem 1fr;column-gap:0.625rem}
 
 /* 선택된 수납 위치 — 중립 슬레이트. 초록은 이 화면에서 '이미 찬 칸'을 뜻하고
    파랑은 아래 실행 버튼이 쓰므로, 의미가 겹치지 않는 색을 쓴다.
