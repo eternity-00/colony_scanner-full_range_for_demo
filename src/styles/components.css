@@ -51,11 +51,19 @@
 /* 좁을 때 카드 여백을 줄인다 (원본 미디어쿼리 자리) */
 .app[data-w="sm"] .card,.app[data-w="md"] .card{padding:0.8125rem}
 
-.pager{display:flex;align-items:center;justify-content:flex-end;gap:0.5rem;padding-top:0.75rem}
+/*
+ * 이전/다음은 표 한가운데에 둔다. 오른쪽 끝에 붙여 두면 손이 한쪽으로만
+ * 가고, 13인치 화면에서는 왼손으로 누르기 어렵다. 가운데면 어느 손이든 같다.
+ *
+ * 왼쪽 「총 N매」를 그대로 둔 채 가운데를 잡으려면 칸이 필요하다 —
+ * 양옆에 같은 폭(minmax(0,1fr))을 깔고 그 사이에 단추 둘을 놓는다.
+ * 글자 길이가 달라져도 단추는 안 움직인다.
+ */
+.pager{display:grid;grid-template-columns:minmax(0,1fr) auto auto minmax(0,1fr);
+  align-items:center;gap:0.5rem;padding-top:0.75rem}
 .pager button{min-height:2.5rem;padding:0.4375rem 1.375rem;font-size:0.9375rem;font-weight:800;border:1px solid var(--blue);color:var(--blue);background:#fff;border-radius:var(--rr)}
 .pager button:disabled{border-color:var(--line);color:#9a9a9a;background:#eaeaea}
-.pager span{font-weight:700;color:var(--gt)}
-.pager span{margin-right:auto}
+.pager span{justify-self:start;font-weight:700;color:var(--gt);white-space:nowrap}
 .error-text{color:#c01d27}
 /*
  * 관리자 권한 자동 해제 예고 — 계정 말풍선과 같은 자리에 붙인다.
