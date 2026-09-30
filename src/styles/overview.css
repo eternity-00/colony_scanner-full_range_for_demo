@@ -70,8 +70,11 @@
 .head-next b{font-size:0.9375rem;font-weight:800;letter-spacing:-.02em;color:var(--gt);font-variant-numeric:tabular-nums}
 /* 시각이 없을 때의 --:-- 는 값이 아니라 빈칸이다. 굵기를 800 → 500 으로
    낮춰 줄이 가늘어지게 하고 색도 한 단계 흐리게 둔다 — 같은 굵기로 두면
-   빈칸이 실제 시각보다 진해 보인다. */
-.head-next b.idle{color:#8f8f8f;font-weight:500}
+   빈칸이 실제 시각보다 진해 보인다.
+   1px 내리는 것은 글자 모양 때문이다. 기준선을 맞추면 15px 짜리 붙임표(-)의
+   가운데가 10.5px 짜리 NEXT 의 가운데보다 조금 위에 온다 — 숫자였다면
+   기준선이 맞는 자리인데, 붙임표는 밑선에 닿지 않는 글자다. */
+.head-next b.idle{color:#8f8f8f;font-weight:500;position:relative;top:1px}
 
 /* 배지: 평상시엔 중립 회색, 촬영 중·점검 필요만 꽉 찬 색면 + 흰 글씨 */
 .scanner .badge{border:1px solid #d2d2d2;border-radius:2px;padding:0.3125rem 0.625rem;
