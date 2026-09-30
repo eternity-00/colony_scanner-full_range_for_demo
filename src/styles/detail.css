@@ -37,8 +37,13 @@
    말하고 있어서, 번호까지 물들이면 어느 색이 상태를 뜻하는지 흐려진다.
    두 칸 다 숫자라 등폭으로 세워 자릿수가 바뀌어도 줄이 흔들리지 않는다. */
 .runs .runno,.runs .wellno{display:inline-block;min-width:1.25rem;padding:0;border-radius:0;
-  background:transparent;color:var(--ink);font-size:0.9375rem;font-weight:800;
+  background:transparent;color:var(--ink);font-size:0.9375rem;
   font-variant-numeric:tabular-nums;text-align:left}
+/* 한 회차가 Well 여섯 줄로 펼쳐지므로 회차 숫자가 같은 값으로 연달아 선다.
+   회차만 굵게 두면 그 덩어리가 어디서 끊기는지가 먼저 보이고, Well 번호는
+   그 안의 순번이라 한 단계 가벼운 것이 읽는 차례와 맞다. */
+.runs .runno{font-weight:800}
+.runs .wellno{font-weight:500}
 .runs .pager{padding-top:0.625rem}
 
 .titleline{display:flex;align-items:baseline;gap:0.5625rem;min-width:0}
