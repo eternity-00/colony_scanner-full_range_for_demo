@@ -70,10 +70,21 @@
   transition:left .18s cubic-bezier(.4,0,.2,1)}
 .rail-grip.on{left:8.25rem}
 .rail-grip svg{width:0.9375rem;height:0.9375rem}
-/* 판의 머리 — 이름 한 낱말. 아래 칸들과 선으로 가른다. */
-.rail-title{flex:none;width:calc(100% - 1.5rem);padding:0.875rem 0 0.625rem;text-align:center;
-  border-bottom:1px solid var(--line);
-  font-size:0.9375rem;font-weight:800;letter-spacing:.14em;color:#8a949c}
+/*
+ * 판의 머리 — 이름 한 낱말을 옅은 면에 얹는다. 가는 선 하나로만 가르니
+ * 머리가 칸들과 같은 바닥에 떠 있어 밋밋했다. 바탕을 한 톤 내리면 머리와
+ * 칸이 면으로 갈려 판이 두 켜로 읽힌다.
+ *
+ * 면은 판 폭을 다 쓴다(선을 그을 때처럼 안쪽으로 물리지 않는다) — 가장자리가
+ * 비면 면이 아니라 또 하나의 칸으로 보인다. 위 모서리는 판의 둥글림을 그대로
+ * 따라간다(.rail 의 overflow:hidden).
+ *
+ * 글자는 #5b656d. 옅은 면 위에서 5.1:1 이라 읽히고, 원래 쓰던 #8a949c 는
+ * 3.8:1 로 모자랐다 — 흰 바닥일 때는 되던 색이 면을 깔면서 안 되게 됐다.
+ */
+.rail-title{flex:none;width:100%;padding:0.875rem 0 0.75rem;text-align:center;
+  background:#eceff2;border-bottom:1px solid var(--line);
+  font-size:0.9375rem;font-weight:800;letter-spacing:.14em;color:#5b656d}
 /* 칸 사이를 벌린다. 카드끼리 붙어 있으면 여섯이 한 덩이로 보여 어디까지가
    한 칸인지 손가락이 헷갈린다 — 8 → 14px. */
 /* 위아래 여백은 칸 사이보다 넓게 둔다. 같으면 첫 칸이 MENU 선에, 끝 칸이
