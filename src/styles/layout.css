@@ -26,20 +26,21 @@
  * 118px 로 넓어져도 본문은 한 픽셀도 줄지 않는다. 그러니 가장 읽기 쉬운
  * 쪽을 고르지 않을 이유가 없다.
  *
- * 오른쪽 변을 크게 둥글린다(폭의 절반). 왼쪽은 화면 끝에 붙은 직선,
- * 오른쪽은 한 번에 도는 곡선 — 판이 가장자리에서 밀려 나온 조각으로
- * 읽히고, 손잡이는 그 곡선에서 튀어나온 꼭지가 된다.
+ * 바탕판은 두지 않는다. 칸 여섯이 이미 흰 카드라, 그 뒤에 또 흰 판을 깔면
+ * 흰 것 위에 흰 것이 겹치고 모양을 고민할 테두리만 늘어난다. 판을 지우면
+ * 덮는 면이 없어 본문이 그대로 비친다 — 메뉴는 잠깐 지나가는 곳이다.
  *
- * 비스듬히 깎아 봤더니 칸은 네모인데 판만 사선이라 둘이 따로 놀았다.
- * 곡선은 칸의 둥근 모서리와 같은 말이라 그 어긋남이 없다.
+ * 대신 화면 끝에 6px 파란 띠를 세운다. 판이 없어도 「여기가 메뉴 자리」라는
+ * 표시가 남고, 띠 · 칸 · 손잡이가 한 줄로 이어져 흩어져 보이지 않는다.
  */
 .rail{position:fixed;z-index:46;left:0;top:50%;width:7.375rem;max-height:calc(100vh - 1.75rem);
   display:flex;flex-direction:column;align-items:center;
-  background:#f7f8f9;border:1px solid var(--line);border-left:0;
-  border-radius:0 3.6875rem 3.6875rem 0;
-  box-shadow:6px 0 22px #0b203a1f;
+  background:none;border:0;
   transform:translate(-100%,-50%);transition:transform .18s cubic-bezier(.4,0,.2,1)}
 .rail.on{transform:translate(0,-50%)}
+/* 화면 끝의 파란 띠. 판을 대신해 「여기가 메뉴 자리」를 말한다. */
+.rail:before{content:'';position:absolute;left:0;top:0;bottom:0;width:0.375rem;
+  background:var(--blue);border-radius:0 0.25rem 0.25rem 0}
 /* 판 밖을 눌러 닫는 가림막. 어둡게 덮지 않는다 — 뒤의 본문이 그대로 보여야
    무엇을 보다가 메뉴를 열었는지가 끊기지 않는다. */
 .rail-scrim{position:fixed;inset:0;z-index:45;background:#00000014}
@@ -53,18 +54,18 @@
 .rail-grip.on{left:7.375rem}
 .rail-grip svg{width:0.9375rem;height:0.9375rem}
 .rail-nav{width:100%;flex:none;display:flex;flex-direction:column;
-  align-items:center;gap:0.5625rem;padding:1.875rem 0;overflow-y:auto}
+  align-items:center;gap:0.625rem;padding:1.25rem 0;overflow-y:auto}
 /* 흰 둥근 네모에 파란 아이콘 + 이름. 아이콘은 그림이라 3:1 이면 되므로
    #4a7b96 로 두고, 글자는 4.5:1 이 필요해 #3f6a80 으로 한 단계 짙게 쓴다. */
 .rail-nav button{width:5.875rem;height:4.625rem;min-height:0;flex:none;padding:0;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.25rem;
   border:1px solid var(--line);border-radius:1.375rem;background:#fff;color:var(--blue);cursor:pointer;
-  box-shadow:0 1px 2px #0b203a12}
+  box-shadow:0 3px 12px #0b203a24}
 .rail-nav button svg{width:1.9375rem;height:1.9375rem}
 .rail-nav button span{font-size:0.84375rem;font-weight:800;color:#3f6a80;white-space:nowrap}
 /* 고른 것은 색면이 아니라 테두리 두 겹으로 띄운다. 밝은 판에서 하나만 색으로
    채우면 그 자리에 무게가 쏠려, 「지금 화면」이 아니라 「눌러야 할 것」으로 보인다. */
-.rail-nav button.on{border:2px solid var(--blue);box-shadow:0 0 0 4px #4a7b961f}
+.rail-nav button.on{border:2px solid var(--blue);box-shadow:0 3px 12px #0b203a24,0 0 0 4px #4a7b961f}
 
 /* ── 헤더 ── */
 .shell>header{height:4rem;flex:none;display:flex;align-items:stretch;background:#fff;border-bottom:1px solid var(--g3)}
