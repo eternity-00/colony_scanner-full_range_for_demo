@@ -54,8 +54,9 @@ export function JobCard({device: d, state, send, openDetail}: Props) {
 
         <div className="jtags">
           <span className="wellbadge">
-            {/* 값이 없을 때의 줄표는 짧은 것(–)을 쓴다. 긴 줄표(—)는 좁은 칩 안에서 선처럼 보인다. */}
-            WELL <b>{well ?? '–'}</b> / {WELLS}
+            {/* 값이 없을 때의 줄표는 짧은 것(–)을 쓴다. 긴 줄표(—)는 좁은 칩 안에서 선처럼 보인다.
+                숫자와 달리 줄표는 밑선에 닿지 않아 자리가 어긋난다 — idle 로 따로 잡는다. */}
+            WELL <b className={well ? '' : 'idle'}>{well ?? '–'}</b> / {WELLS}
           </span>
           {/* 퍼센트는 빼 둔다. 바로 옆 머리 줄이 어느 단계인지를 이미 말하고,
               숫자가 250ms 마다 바뀌면 그 옆에서 읽어야 할 상태 글자가 흔들린다. */}
