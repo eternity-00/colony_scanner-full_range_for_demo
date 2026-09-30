@@ -63,8 +63,11 @@
    그 안의 순번이라 한 단계 가벼운 것이 읽는 차례와 맞다. */
 .runs .runno{font-weight:800}
 .runs .wellno{font-weight:500}
-/* 전송 배지도 표 글자에 맞춰 올린다. */
-.runs .badge{font-size:0.875rem;padding:0.3125rem 0.625rem}
+/* 전송 배지와 촬영 영상 칸의 알림(촬영 실패·보존기간 경과)은 같은 줄에서
+   나란히 서는 칩이라 키를 맞춘다. 전에는 32px 과 25px 로 서로 달라
+   한쪽이 눌린 것처럼 보였다. */
+.runs .badge,.runs .shotcount{height:2rem;padding:0 0.625rem;font-size:0.875rem;
+  display:inline-flex;align-items:center;box-sizing:border-box}
 .runs .pager{padding-top:0.625rem}
 
 .titleline{display:flex;align-items:center;gap:0.75rem;min-width:0}
