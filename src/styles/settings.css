@@ -74,3 +74,25 @@
 /* 「현재 설정 기준」 왼쪽에 붙는 부연 — 회차보다 장수가 저장량을 말해 준다. */
 .calc span{display:flex;flex-direction:column;gap:2px}
 .calc span em{font-style:normal;font-size:0.71875rem;font-weight:500;color:var(--gt)}
+
+/*
+ * ───── 개발용 트리거 (배포 전 제거) ─────
+ * 이 묶음과 features/settings/DebugPanel.tsx, server/controller.mjs 의
+ * simPlate 를 함께 지우면 흔적이 남지 않는다.
+ */
+.dbg-pick{display:grid;grid-template-columns:repeat(4,1fr);gap:0.5rem}
+.dbg-pick button{min-height:3rem;font-size:0.9375rem;font-weight:800}
+.dbg-pick .selected{background:var(--blue);border-color:var(--blue);color:#fff}
+.dbg-now{margin:0;padding:0.5rem 0.75rem;background:#f5f5f5;border-radius:var(--rr);
+  font-size:0.8125rem;font-weight:700;color:var(--gt)}
+.dbg-h{margin:0.375rem 0 -0.125rem;font-size:0.8125rem;font-weight:800;letter-spacing:.06em;color:var(--gt)}
+.dbg-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem}
+/* 손가락으로 누르는 자리라 키를 넉넉히 준다. 무엇이 바뀌는지를 버튼 안에
+   적어 두면 누르기 전에 고를 수 있다. */
+.dbg-b{display:flex;flex-direction:column;align-items:flex-start;gap:2px;
+  min-height:3.75rem;padding:0.5rem 0.75rem;text-align:left;white-space:normal}
+.dbg-b b{font-size:0.9375rem;font-weight:800;color:var(--ink)}
+.dbg-b em{font-style:normal;font-size:0.71875rem;font-weight:500;color:var(--gt);line-height:1.3}
+/* 되돌리는 쪽은 색을 달리해 짝이 보이게 한다. */
+.dbg-b.undo{background:#f5f5f5;border-color:#c8c8c8}
+.dbg-said{margin:0;font-size:0.8125rem;font-weight:700;color:var(--blue)}
