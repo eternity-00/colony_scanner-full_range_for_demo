@@ -91,8 +91,6 @@
 .shotcount.fail{background:#c01d27;border-color:#c01d27;color:#fff}
 .shotcount.gone{background:#e6e6e6;border-color:var(--line);color:var(--gt)}
 
-.thumb1{width:2.75rem;height:2.75rem;padding:0;border:1px solid #cccccc;border-radius:2px;overflow:hidden;background:#eaeaea;display:block}
-.thumb1 img{width:100%;height:100%;object-fit:cover;display:block}
 
 /*
  * 마우스가 있는 화면에서만 hover 를 준다.
@@ -101,5 +99,4 @@
  */
 @media (hover:hover) and (pointer:fine){
  .backbtn:hover{background:#eaeaea;border-color:#8f8f8f;color:var(--blue)}
- .thumb1:hover{border-color:var(--blue);box-shadow:inset 0 0 0 1px var(--blue)}
 }

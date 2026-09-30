@@ -3,7 +3,7 @@ import type {ImageState, Plate, Run} from '../../api/types.ts';
 import {RUN_ROW_HEIGHT_REM, WELLS} from '../../config/defines.ts';
 import {Badge} from '../../shared/Badge.tsx';
 import {fmt} from '../../utils/datetime.ts';
-import {imgSrc, shots} from '../../utils/plate.ts';
+import {shots} from '../../utils/plate.ts';
 import {rootFontPx} from '../../utils/viewport.ts';
 
 interface Props {
@@ -110,7 +110,6 @@ export function RunsTable({plate, onView, fill = false}: Props) {
               <th>시각</th>
               <th>전송</th>
               <th>촬영 영상</th>
-              <th />
             </tr>
           </thead>
           <tbody>
@@ -128,21 +127,19 @@ export function RunsTable({plate, onView, fill = false}: Props) {
                     {row.transferred ? '전송 완료' : '미전송'}
                   </Badge>
                 </td>
+                {/*
+                  * 미리보기 그림은 44px 이라 무엇이 찍혔는지 알아볼 수 없었고,
+                  * 그 옆에 같은 일을 하는 「보기」가 또 있었다. 한 칸으로 합친다.
+                  * 볼 것이 없는 줄은 왜 없는지(촬영 실패 · 보존기간 경과)를 적는다.
+                  */}
                 <td>
                   {row.state === 'held' && row.image ? (
-                    <button className="thumb1" onClick={() => onView(row.run, row.well - 1)}>
-                      <img src={imgSrc(row.image)} alt={`Well ${row.well}`} />
-                    </button>
+                    <button onClick={() => onView(row.run, row.well - 1)}>보기</button>
                   ) : (
                     <span className={`shotcount ${row.state === 'failed' ? 'fail' : 'gone'}`}>
                       {row.state === 'failed' ? '촬영 실패' : '보존기간 경과'}
                     </span>
                   )}
-                </td>
-                <td>
-                  <button disabled={!row.image} onClick={() => onView(row.run, row.well - 1)}>
-                    보기
-                  </button>
                 </td>
               </tr>
             ))}
