@@ -56,8 +56,10 @@
 .rail-title{flex:none;width:calc(100% - 1.5rem);padding:1.0625rem 0 0.75rem;text-align:center;
   border-bottom:1px solid var(--line);
   font-size:0.75rem;font-weight:800;letter-spacing:.14em;color:#8a949c}
+/* 칸 사이를 벌린다. 카드끼리 붙어 있으면 여섯이 한 덩이로 보여 어디까지가
+   한 칸인지 손가락이 헷갈린다 — 8 → 14px. */
 .rail-nav{width:100%;flex:none;display:flex;flex-direction:column;
-  align-items:center;gap:0.5rem;padding:1rem 0 1.25rem;overflow-y:auto}
+  align-items:center;gap:0.875rem;padding:1.125rem 0 1.375rem;overflow-y:auto}
 /* 흰 둥근 네모에 파란 아이콘 + 이름. 아이콘은 그림이라 3:1 이면 되므로
    #4a7b96 로 두고, 글자는 4.5:1 이 필요해 #3f6a80 으로 한 단계 짙게 쓴다. */
 .rail-nav button{width:6.75rem;height:5.5rem;min-height:0;flex:none;padding:0;
