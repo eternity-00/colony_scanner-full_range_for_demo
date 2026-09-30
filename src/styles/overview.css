@@ -7,29 +7,28 @@
  * 먹고 있었고, 회수량의 대부분은 줄을 얇게 만든 게 아니라 두 줄을 한 줄로 합친 데서 나온다.
  */
 /*
- * 요약 줄은 40 → 28px 이다. 네 칸이 이어 붙은 색 띠 한 줄(S4).
+ * 요약 줄은 40 → 26px 이다. 흰 면도 테두리도 없이 색 칩과 글자만 남겼다(A3).
  *
- * 흰 면·테두리·아이콘 칩을 빼고 남은 높이는 아래 스캐너 카드가 가져간다
- * (620 → 632px). 대신 눈에 띄는 일은 색면이 통째로 맡는다 — 칩 하나만
- * 물들이는 것보다 칸 전체가 색인 쪽이 훨씬 멀리서 읽힌다.
- *
- * 다만 이 꼴은 급하지 않은 값(빈 슬롯)도 같은 목소리로 말한다. 매일 보는
- * 화면에서 눈이 무뎌지면, 0 인 칸을 죽이는 쪽(S3)을 얹는 것이 다음 수다.
+ * 면과 테두리는 자리를 먹으면서 정작 시선을 끄는 힘이 약하다. 눈에 띄는 일은
+ * 꽉 찬 색 칩 네 개가 맡고, 칸을 가르는 일도 칩이 맡는다 — 칩이 줄의 시작마다
+ * 서 있으면 세로선이 없어도 어디서 끊기는지가 보인다.
+ * 되돌려준 14px 은 아래 스캐너 카드가 가져간다(620 → 634px).
  */
-.overview-head{flex:none;display:flex;align-items:center;gap:0.875rem;height:1.75rem;padding:0;justify-content:flex-start}
-/* 네 칸이 한 덩이라 모서리는 띠의 양 끝에만 둔다. */
-.stats{display:flex;align-items:center;gap:0;min-width:0;border-radius:var(--rr);overflow:hidden}
-.stat{display:flex;align-items:center;gap:0.375rem;height:1.75rem;padding:0 0.875rem;white-space:nowrap;color:#fff}
-/* 흰 글씨가 올라가는 면이라 전부 4.5:1 이상으로 맞춘 톤이다.
-   반출 대기의 주황은 #a8720d 에서 4.16:1 이라 한 단계 어둡게 했다. */
-.stat.wait{background:#96660b}
-.stat.slot{background:#5b7285}
-.stat.send{background:#5c636e}
-.stat.fault{background:#c01d27}
-.stat small{font-size:0.75rem;font-weight:600;color:#fff}
-.stat b{font-size:1.0625rem;font-weight:800;letter-spacing:-.02em;line-height:1;color:#fff;
+.overview-head{flex:none;display:flex;align-items:center;gap:0.875rem;height:1.625rem;padding:0;justify-content:flex-start}
+.stats{display:flex;align-items:center;gap:0.25rem;min-width:0}
+.stat{display:flex;align-items:center;gap:0.375rem;height:1.625rem;padding:0 0.625rem;white-space:nowrap}
+.stat:first-child{padding-left:0}
+.stat small{font-size:0.75rem;font-weight:600;color:var(--gt)}
+.stat b{font-size:1.0625rem;font-weight:800;letter-spacing:-.02em;line-height:1;color:var(--ink);
   font-variant-numeric:tabular-nums}
-.stat b em{font-style:normal;font-size:0.6875rem;font-weight:600;color:#fff;margin-left:2px}
+.stat b em{font-style:normal;font-size:0.6875rem;font-weight:600;color:var(--gt);margin-left:2px}
+/* 아이콘 칩은 꽉 찬 색면 + 흰 아이콘. 흰 글씨가 올라가므로 전부 깊은 톤이다. */
+.stat-ic{width:1.375rem;height:1.375rem;flex:none;border-radius:2px;display:grid;place-items:center;color:#fff}
+.stat-ic svg{width:0.8125rem;height:0.8125rem}
+.stat-ic.wait{background:#a8720d}
+.stat-ic.slot{background:#5b7285}
+.stat-ic.send{background:#5c636e}
+.stat-ic.fault{background:#c01d27}
 .overview-head .legend{margin-left:auto}
 
 .scanner-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0.75rem;flex:1;min-height:0}

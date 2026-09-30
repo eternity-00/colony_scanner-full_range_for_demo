@@ -3,7 +3,7 @@ import {SLOTS_PER_DEVICE} from '../../config/defines.ts';
 import {WellLegend} from '../../shared/Legend.tsx';
 import {active, plateBad, pending, totalRuns} from '../../utils/plate.ts';
 
-/** 칸 이름. 급한 두 칸(wait·fault)만 숫자에 색이 붙는다. */
+/** 칩 색면 톤 — 흰 아이콘이 올라가므로 전부 깊은 톤이다. */
 type Tone = 'wait' | 'slot' | 'send' | 'fault';
 
 interface Stat {
@@ -11,6 +11,8 @@ interface Stat {
   label: string;
   value: number;
   unit: string;
+  /** 칩 안의 그림. 24 격자, 선 굵기 2. */
+  path: string;
 }
 
 /**
@@ -33,18 +35,21 @@ export function StatBar({state}: {state: AppState}) {
       label: '반출 대기',
       value: plates.filter(p => p.runs.length >= need).length,
       unit: '매',
+      path: 'M12 3v10M8 9l4 4 4-4M4 20h16',
     },
     {
       key: 'slot',
       label: '빈 슬롯',
       value: SLOTS_PER_DEVICE * state.devices.length - plates.length,
       unit: '칸',
+      path: 'M4 4h16v16H4zM12 8.5v7M8.5 12h7',
     },
     {
       key: 'send',
       label: '미전송',
       value: plates.reduce((a, p) => a + pending(p), 0),
       unit: '건',
+      path: 'M12 19V7M6.5 12.5L12 7l5.5 5.5M4 4h16',
     },
     {
       // 장비가 아니라 플레이트를 센다. 장비 고장은 분석자가 할 수 있는 일이
@@ -54,6 +59,7 @@ export function StatBar({state}: {state: AppState}) {
       label: '문제 발생',
       value: plates.filter(plateBad).length,
       unit: '매',
+      path: 'M12 4.5l8.5 15h-17zM12 10v4M12 17h.01',
     },
   ];
 
@@ -61,7 +67,19 @@ export function StatBar({state}: {state: AppState}) {
     <div className="overview-head">
       <div className="stats">
         {stats.map(s => (
-          <span className={`stat ${s.key}`} key={s.key}>
+          <span className="stat" key={s.key}>
+            <i className={`stat-ic ${s.key}`} aria-hidden="true">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d={s.path} />
+              </svg>
+            </i>
             <small>{s.label}</small>
             <b>
               {s.value}
