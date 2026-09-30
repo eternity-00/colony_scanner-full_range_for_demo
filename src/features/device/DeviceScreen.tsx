@@ -178,10 +178,10 @@ export function DeviceScreen({state, send}: Props) {
             </button>
           </>
         )}
+        {/* 촬영 화면의 「촬영 큐」와 같은 그림 — 둘 다 오른쪽 서랍에 목록을 편다. */}
         <button className="ghost cal-btn" onClick={() => setLogOpen(true)}>
           <Stroke>
-            <path d="M8 6h13M8 12h13M8 18h13" />
-            <path d="M3 6h.01M3 12h.01M3 18h.01" />
+            <path d="M4 7h16M4 12h16M4 17h10" />
           </Stroke>
           이벤트 로그
         </button>
