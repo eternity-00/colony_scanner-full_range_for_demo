@@ -24,19 +24,43 @@ export function JobCard({device: d, state, send, openDetail}: Props) {
     <section className="card job">
       <div className="row between">
         <h2>{d.name}</h2>
-        {/* 진행 단계는 머리 줄에 한 줄로 눕힌다. 아래를 비워 사진이 그만큼 커진다. */}
-        <div className="stages line">
-          {stages.map((label, i) => (
-            <div
-              key={label}
-              className={
-                !job ? '' : i < job.step ? 'done' : i === job.step && job.status === 'running' ? 'now' : ''
-              }
-            >
-              <i />
-              <span>{label}</span>
-            </div>
-          ))}
+        {/*
+          * 진행 단계는 머리 줄에 눕힌다. 아래를 비워 사진이 그만큼 커진다.
+          * 글자 넷을 고르게 깔고 그 아래 가는 선이 찬다 — 점과 이음선을 쓰면
+          * 대기일 때 넷이 모두 같은 회색이라 줄이 통째로 흐려 보였다.
+          *
+          * 채우는 폭은 회차가 아니라 단계로 센다. 지나온 단계는 다 찬 것으로,
+          * 지금 도는 단계는 절반으로 친다 — 단계 안에서 얼마나 왔는지는
+          * 장비가 말해 주지 않으므로 가운데로 두는 편이 덜 거짓말이다.
+          */}
+        <div className="stagebar">
+          <div className="st-lbl">
+            {stages.map((label, i) => (
+              <span
+                key={label}
+                className={
+                  !job
+                    ? ''
+                    : i < job.step
+                      ? 'done'
+                      : i === job.step && job.status === 'running'
+                        ? 'now'
+                        : ''
+                }
+              >
+                {label}
+              </span>
+            ))}
+          </div>
+          <div className="st-bar">
+            <i
+              style={{
+                width: job
+                  ? `${Math.min(100, ((job.step + (job.status === 'running' ? 0.5 : 0)) / stages.length) * 100)}%`
+                  : 0,
+              }}
+            />
+          </div>
         </div>
         <div className="jtags">
           <span className="wellbadge">
