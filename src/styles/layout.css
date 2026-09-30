@@ -23,9 +23,11 @@
 .rail-acc em{font-style:normal;font-size:0.625rem;font-weight:600;color:#d5d5d5}
 /* 시계도 레일에 둔다 — 헤더에서 한 칸을 되찾는다. 초까지 여덟 자가 4rem 안에
    들어가야 하고, 등폭 숫자라 초가 바뀌어도 자리가 흔들리지 않는다. */
-.rail-clock{width:4.5rem;flex:none;padding:0 0 0.6875rem;text-align:center;line-height:1.35;
-  border-bottom:1px solid #6d6d6d;font-size:0.625rem;font-weight:600;color:#d5d5d5;font-variant-numeric:tabular-nums}
-.rail-clock b{display:block;font-size:0.6875rem;font-weight:700;letter-spacing:-.02em;color:#fff}
+.rail-clock{width:4.5rem;flex:none;padding:0 0 0.6875rem;text-align:center;line-height:1.3;white-space:nowrap;
+  border-bottom:1px solid #6d6d6d;font-size:0.6875rem;font-weight:600;color:#d5d5d5;font-variant-numeric:tabular-nums}
+/* 초까지 여덟 자가 4.5rem 안에 들어가야 한다. 등폭 숫자에 자간을 조금 당겨
+   13px 까지 키웠다 — 여기서 더 키우면 줄이 접힌다. */
+.rail-clock b{display:block;font-size:0.8125rem;font-weight:700;letter-spacing:-.04em;color:#fff}
 /* .rail 이 align-items:center 라, 레일 폭을 채우려면 여기서 스스로 늘려야 한다. */
 .rail-nav{width:100%;align-self:stretch;flex:1;min-height:0;display:flex;flex-direction:column;
   align-items:stretch;gap:1rem;padding:1rem 0;overflow-y:auto}
