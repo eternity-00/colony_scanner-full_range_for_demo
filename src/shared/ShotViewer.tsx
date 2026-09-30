@@ -71,9 +71,7 @@ export function ShotViewer({target, onClose}: Props) {
         * 프로그램의 몫이다. 적어 두지 않으면 장비 앞에서 판정을 기다리게 된다.
         * 글자는 흐리게 — 읽고 나면 다시 볼 줄이 아니다.
         */}
-      <p className="shot-note">
-        촬영 여부를 눈으로 확인하는 화면입니다. 콜로니 집계와 분석은 PC 프로그램에서 하세요.
-      </p>
+      <p className="shot-note">미리보기입니다. 정확한 집계는 PC 프로그램에서 확인하세요.</p>
     </Modal>
   );
 }
