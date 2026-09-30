@@ -131,19 +131,7 @@
 .hm-clock b{font-size:1rem}
 /* 종과 로고는 하는 일이 다르다 — 하나는 누르는 자리, 하나는 읽는 표식이다.
    붙여 두면 로고까지 눌러 보게 된다. 사이를 벌려 둘을 갈라 놓는다. */
-/* 오른쪽 끝도 파란 색면이다. 왼쪽 색면을 좌우로 뒤집은 꼴 — 위쪽 변이
-   28px 안에서 시작해 아래로 벌어진다. 두 색면이 값 줄을 양쪽에서 받치는
-   모양이 되어, 가운데 흰 자리가 「읽는 곳」으로 또렷해진다.
-   기운 만큼 왼쪽 여백을 더 줘 종이 사선에 닿지 않게 한다. */
-.hd-right{flex:none;display:flex;align-items:center;gap:0.875rem;padding:0 1rem 0 2.375rem;
-  background:var(--blue);color:#fff;
-  clip-path:polygon(1.75rem 0,100% 0,100% 100%,0 100%)}
-/* 색면 위라 종과 계정을 흰 선·흰 글자로 뒤집는다. */
-.hd-right .hd-bell{color:#fff}
-/* 빨간 배지가 파란 면에 바로 닿으면 경계가 흐리다. 흰 테로 떼어 놓는다. */
-.hd-right .hd-bell i{box-shadow:0 0 0 2px var(--blue)}
-.hd-right .hd-acc i{background:#fff;color:var(--blue)}
-.hd-right .hd-acc em{color:#fff}
+.hd-right{flex:none;display:flex;align-items:center;gap:0.875rem;padding:0 0.75rem 0 0.5rem}
 .hd-bell{position:relative;width:3.25rem;height:3.25rem;min-height:0;flex:none;padding:0;display:grid;place-items:center;
   border:0;background:transparent;color:var(--ink);cursor:pointer}
 .hd-bell svg{width:2rem;height:2rem}
@@ -178,6 +166,6 @@
  .rail-nav button:hover:not(.on){background:#eef1f3;border-color:#c8ced3}
  .rail-grip:hover{background:#eef1f3}
  .rail-exit:hover{background:#eef1f3;color:var(--gt)}
- .hd-bell:hover{background:#ffffff26}
- .hd-acc:hover{background:#ffffff26}
+ .hd-bell:hover{background:#eaeaea}
+ .hd-acc:hover{background:#eaeaea}
 }
