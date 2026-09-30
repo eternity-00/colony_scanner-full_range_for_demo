@@ -27,10 +27,16 @@
 /* 줄에서 실제로 읽는 건 숫자 하나다. 줄 높이(26px)가 허락하는 만큼 키운다 —
    26px 줄에 22px 글자면 위아래가 2px 씩 남는다. 라벨은 그대로 두어야
    무엇의 숫자인지가 숫자에 묻히지 않는다. */
-.stat b{display:inline-flex;align-items:baseline;font-size:1.375rem;font-weight:800;letter-spacing:-.02em;
+.stat b{display:inline-flex;align-items:center;font-size:1.375rem;font-weight:800;letter-spacing:-.02em;
   line-height:1;color:var(--ink);font-variant-numeric:tabular-nums}
-/* 단위는 숫자의 기준선에 맞춘다. 그냥 inline 으로 두면 22px 글자 속
-   11px 글자가 제 몫의 줄 높이를 들고 와 줄이 3px 삐져나왔다. */
+/*
+ * 단위는 줄의 한가운데에 둔다. 숫자의 기준선(baseline)에 맞추면 22px 글자의
+ * 밑선을 따라가느라 옆의 라벨(「반출 대기」)보다 3px 아래로 내려앉는다.
+ * 여기서 한 줄로 읽히는 건 「반출 대기 17 매」이므로, 기준은 숫자가 아니라
+ * 그 줄이다.
+ * 줄 높이도 못박는다 — 그냥 inline 으로 두면 22px 글자 속 11px 글자가
+ * 제 몫의 줄 높이를 들고 와 줄이 3px 삐져나왔다.
+ */
 .stat b em{font-style:normal;font-size:0.6875rem;font-weight:600;line-height:1;color:var(--gt);margin-left:2px}
 /* 아이콘 칩은 꽉 찬 색면 + 흰 아이콘. 흰 글씨가 올라가므로 전부 깊은 톤이다. */
 .stat-ic{width:1.375rem;height:1.375rem;flex:none;border-radius:2px;display:grid;place-items:center;color:#fff}
