@@ -71,7 +71,7 @@ export const ADMIN_ACTION: Record<string, string> = {
  * 마지막 자리는 파이에 올린 횟수다. 파이에 올릴 때마다 하나씩 올린다.
  * 파이에 무엇이 도는지 화면만 보고 알 수 있어야 해서 붙인 값이다.
  */
-export const APP_VERSION = 'v1.6.0';
+export const APP_VERSION = 'v1.6.1';
 
 /** 장비 오류 코드의 한글 이름. 사용자에게 "무엇이 고장났는지"를 말해주기 위한 것이다. */
 export const FAULT_LABEL: Record<string, string> = {
