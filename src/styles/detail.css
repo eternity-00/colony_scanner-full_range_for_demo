@@ -33,7 +33,12 @@
    줄들이 나눠 갖는다. 이 값이 크면 네 줄이 안 들어가 세 줄로 접힌다. */
 .runs td{height:3.5rem;padding-top:0;padding-bottom:0}
 .runs td>button{min-height:2.5rem;padding:0.375rem 1rem;font-size:0.8125rem;font-weight:700}
-.runs .runno{display:inline-grid;place-items:center;width:1.625rem;height:1.625rem;border-radius:2px;background:var(--blue);color:#fff;font-size:0.8125rem;font-weight:800}
+/* 회차·Well 번호는 색면을 두르지 않는다. 같은 표 안의 전송 배지가 색으로
+   말하고 있어서, 번호까지 물들이면 어느 색이 상태를 뜻하는지 흐려진다.
+   두 칸 다 숫자라 등폭으로 세워 자릿수가 바뀌어도 줄이 흔들리지 않는다. */
+.runs .runno,.runs .wellno{display:inline-block;min-width:1.25rem;padding:0;border-radius:0;
+  background:transparent;color:var(--ink);font-size:0.9375rem;font-weight:800;
+  font-variant-numeric:tabular-nums;text-align:left}
 .runs .pager{padding-top:0.625rem}
 
 .titleline{display:flex;align-items:baseline;gap:0.5625rem;min-width:0}
@@ -68,7 +73,6 @@
 
 .thumb1{width:2.75rem;height:2.75rem;padding:0;border:1px solid #cccccc;border-radius:2px;overflow:hidden;background:#eaeaea;display:block}
 .thumb1 img{width:100%;height:100%;object-fit:cover;display:block}
-.wellno{display:inline-grid;place-items:center;width:1.5rem;height:1.5rem;border-radius:2px;background:#4e8f47;color:#fff;font-size:0.78125rem;font-weight:800}
 
 /*
  * 마우스가 있는 화면에서만 hover 를 준다.

@@ -106,7 +106,7 @@ export function RunsTable({plate, onView, fill = false}: Props) {
           <thead>
             <tr>
               <th>회차</th>
-              <th>Well</th>
+              <th>Well 번호</th>
               <th>시각</th>
               <th>전송</th>
               <th>촬영 영상</th>
