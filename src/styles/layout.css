@@ -55,16 +55,17 @@
 .hd-mode>svg{width:1.625rem;height:1.625rem;flex:none}
 /* 아이콘까지 baseline 으로 묶으면 SVG 의 기준선이 아래 모서리라 글자가 위로 밀린다. */
 .hd-mode-t{display:flex;align-items:baseline;gap:0.5rem;white-space:nowrap}
-.hd-mode-t b{font-size:1.28125rem;font-weight:700;letter-spacing:.04em}
-.hd-mode-t em{font-style:normal;font-size:0.90625rem;font-weight:600;letter-spacing:.04em}
+/* 지금 보는 화면 이름이라 헤더에서 가장 굵다 — 700 → 800. */
+.hd-mode-t b{font-size:1.375rem;font-weight:800;letter-spacing:.04em}
+.hd-mode-t em{font-style:normal;font-size:0.96875rem;font-weight:600;letter-spacing:.04em}
 /* 여기에는 장비 전체에 하나뿐인 값만 둔다(Header.tsx 주석). */
 .hd-meta{flex:1;min-width:0;display:flex;align-items:center;gap:1.625rem;padding:0 1.25rem;overflow:hidden}
 .hm{flex:none;display:flex;flex-direction:column;gap:2px;white-space:nowrap}
 /* 값 사이를 세로선으로 가른다. 라벨/값이 두 줄이라 간격만으로는 어디까지가
    한 쌍인지 흐려진다. 선은 글자 높이만큼만 — 헤더 끝까지 그으면 칸처럼 보인다. */
 .hm+.hm{padding-left:1.625rem;border-left:1px solid var(--g3)}
-.hm small{font-size:0.65625rem;font-weight:700;letter-spacing:.08em;color:var(--gt)}
-.hm b{font-size:0.84375rem;font-weight:700;letter-spacing:-.01em;color:var(--ink);font-variant-numeric:tabular-nums}
+.hm small{font-size:0.75rem;font-weight:700;letter-spacing:.06em;color:var(--gt)}
+.hm b{font-size:0.9375rem;font-weight:700;letter-spacing:-.01em;color:var(--ink);font-variant-numeric:tabular-nums}
 .hm b.bad{color:#c01d27}
 /* 종과 로고는 하는 일이 다르다 — 하나는 누르는 자리, 하나는 읽는 표식이다.
    붙여 두면 로고까지 눌러 보게 된다. 사이를 벌려 둘을 갈라 놓는다. */
