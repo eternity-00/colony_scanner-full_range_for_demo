@@ -43,6 +43,72 @@ export function Rail({tab, isAdmin, onSelect, onExit}: Props) {
     return () => document.removeEventListener('keydown', fn);
   }, [open]);
 
+  /*
+   * 가장자리를 밀어도 열린다.
+   *
+   * 손잡이는 26px 이라 조준해야 닿는다. 화면 왼쪽 끝 어디를 잡아 오른쪽으로
+   * 밀어도 열리게 하면, 손잡이는 「여기에 뭔가 있다」는 표시로만 남고 실제로는
+   * 아무 데나 밀면 된다. 열린 뒤에는 판을 왼쪽으로 밀어 닫는다.
+   *
+   * 가로로 민 것만 센다(|dx| > |dy|). 세로로 끄는 것은 목록을 넘기는
+   * 동작이라 dragscroll 이 맡는다 — 둘이 같은 손짓을 두고 다투면 안 된다.
+   */
+  useEffect(() => {
+    /** 화면 왼쪽에서 이 안쪽을 잡아야 「가장자리에서 민 것」으로 본다. */
+    const EDGE = 56;
+    /** 이만큼 밀어야 연다/닫는다. 스쳐 지나간 손가락에 열리지 않을 만큼. */
+    const GO = 44;
+    let x0 = 0;
+    let y0 = 0;
+    let dir = 0;
+
+    const swallow = (e: Event) => {
+      e.stopPropagation();
+      e.preventDefault();
+    };
+
+    const down = (e: PointerEvent) => {
+      const el = e.target as Element | null;
+      if (e.button !== 0) {
+        dir = 0;
+        return;
+      }
+      const inRail = !!el?.closest?.('.rail, .rail-grip');
+      dir = !open && e.clientX <= EDGE ? 1 : open && inRail ? -1 : 0;
+      x0 = e.clientX;
+      y0 = e.clientY;
+    };
+
+    const move = (e: PointerEvent) => {
+      if (!dir) return;
+      const dx = e.clientX - x0;
+      const dy = e.clientY - y0;
+      if (Math.abs(dx) < GO || Math.abs(dy) >= Math.abs(dx)) return;
+      const want = dir === 1 ? dx > 0 : dx < 0;
+      dir = 0;
+      if (!want) return;
+      setOpen(dx > 0);
+      // 민 뒤에 따라오는 click 한 번을 삼킨다 — 밀었을 뿐인데 손을 뗀 자리의
+      // 항목이 눌리면 화면이 엉뚱한 데로 간다.
+      document.addEventListener('click', swallow, {capture: true, once: true});
+    };
+
+    const up = () => {
+      dir = 0;
+    };
+
+    document.addEventListener('pointerdown', down, {passive: true});
+    document.addEventListener('pointermove', move, {passive: true});
+    document.addEventListener('pointerup', up, {passive: true});
+    document.addEventListener('pointercancel', up, {passive: true});
+    return () => {
+      document.removeEventListener('pointerdown', down);
+      document.removeEventListener('pointermove', move);
+      document.removeEventListener('pointerup', up);
+      document.removeEventListener('pointercancel', up);
+    };
+  }, [open]);
+
   const go = (key: TabKey) => {
     onSelect(key);
     setOpen(false);
@@ -97,6 +163,7 @@ export function Rail({tab, isAdmin, onSelect, onExit}: Props) {
         className={`rail-grip ${open ? 'on' : ''}`}
         onClick={() => setOpen(v => !v)}
         aria-label={open ? '메뉴 접기' : '메뉴 펼치기'}
+        title={open ? '접기 (왼쪽으로 밀어도 됩니다)' : '펼치기 (가장자리를 밀어도 됩니다)'}
         aria-expanded={open}
       >
         <svg
