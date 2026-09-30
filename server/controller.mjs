@@ -56,61 +56,6 @@ export class Controller extends EventEmitter {
  async schedule(){if(this.scheduling||this.holdUntil>Date.now())return;this.scheduling=true;try{for(const d of this.adapter.devices){if(!d.connected||d.doorOpen||d.fault||busy(d))continue;const p=this.db.plates.find(p=>p.deviceId===d.id&&!p.removedAt&&!p.paused&&p.runs.length<Math.floor(this.db.routine.days*24/this.db.routine.cycleHours)&&this.nextAt(p)<=Date.now());if(p)await this.execute({requestId:randomUUID(),command:'capture',deviceId:d.id,args:{plateId:p.id}},'scheduler');}}catch(error){this.log('WARN',`자동 촬영 시작 실패 · ${error.message}`);}finally{this.scheduling=false;}}
  imageSet(){this.imgSeq=(this.imgSeq||0)+1;return Array.from({length:6},(_,i)=>`well-${((this.imgSeq+i)%9)+1}.png`);}
 
- /*
-  * ───── 개발용 트리거 (배포 전 제거) ─────
-  *
-  * LCD 앞에서 손으로 만들기 어려운 상태를 한 번에 만든다. 촬영 실패는 실제로
-  * 실패가 날 때까지 기다려야 하고, 반출 대기는 배양 기간이 다 지나야 뜬다.
-  * 화면이 그 상태에서 어떻게 보이는지 확인하려면 열두 시간을 기다릴 수는 없다.
-  *
-  * 데이터만 바꾼다 — 장비 쪽 상태(연결·도어·오류)는 이미 sim.input 이 맡는다.
-  * 지우려면 이 메서드와 sim.plate 분기, 그리고 화면의 DebugPanel 을 지우면 된다.
-  */
- needRuns(){return Math.max(1,Math.floor(this.db.routine.days*24/this.db.routine.cycleHours));}
- livePlates(){return this.db.plates.filter(p=>!p.removedAt);}
- makeRun(n,{ok=true,sent=true}={}){
-  return ok
-   ?{n,at:Date.now(),imageState:'held',images:this.imageSet(),image:null,transferred:sent,error:null}
-   :{n,at:Date.now(),imageState:'failed',images:null,image:null,transferred:false,error:'개발용 트리거로 만든 실패'};
- }
- simPlate(kind,deviceId){
-  const live=this.livePlates();
-  // 고른 스캐너가 있으면 그 안에서, 없으면 아무 데서나 고른다.
-  const pick=list=>{const s=deviceId?list.filter(p=>p.deviceId===deviceId):list;return s[0]||list[0]||null;};
-  const need=this.needRuns();
-  if(kind==='seed'){
-   // 네 스캐너에 상태가 다른 플레이트를 하나씩 놓는다 — 정상 · 미전송 · 촬영 실패 · 반출 대기.
-   const kinds=['normal','pending','failed','done'];let made=0;
-   for(const d of this.adapter.devices){
-    const used=new Set(live.filter(p=>p.deviceId===d.id).map(p=>p.slot));
-    for(const k of kinds){
-     let slot=1;while(slot<=24&&used.has(slot))slot++;if(slot>24)continue;used.add(slot);
-     const p={id:`PL-${randomUUID().slice(0,8).toUpperCase()}`,deviceId:d.id,slot,registeredAt:Date.now()-3*3600000,removedAt:null,paused:false,runs:[]};
-     if(k==='normal')p.runs.push(this.makeRun(1));
-     if(k==='pending'){p.runs.push(this.makeRun(1,{sent:false}));p.runs.push(this.makeRun(2,{sent:false}));}
-     if(k==='failed'){p.runs.push(this.makeRun(1));p.runs.push(this.makeRun(2,{ok:false}));}
-     if(k==='done')for(let n=1;n<=need;n++)p.runs.push(this.makeRun(n));
-     this.db.plates.push(p);made++;
-    }
-   }
-   this.holdUntil=Date.now()+REGISTER_HOLD_MS;
-   this.log('WARN',`[개발용] 표본 플레이트 ${made}매 생성`);return {made};
-  }
-  if(kind==='clear'){
-   let n=0;for(const p of live){p.runs.filter(r=>r.imageState==='held').forEach(r=>this.expire(r));p.removedAt=Date.now();n++;}
-   this.holdUntil=0;this.log('WARN',`[개발용] 플레이트 ${n}매 반출`);return {removed:n};
-  }
-  const p=pick(live);assert(p,'NO_PLATE','수납 중인 플레이트가 없습니다. 먼저 「표본 채우기」를 누르세요.',404);
-  // 만들어 둔 상태를 볼 틈을 준다. 자동 촬영이 곧바로 한 회차를 성공시키면
-  // 방금 만든 실패가 「마지막 회차」에서 밀려나 화면에서 사라진다.
-  if(kind!=='due')this.holdUntil=Date.now()+REGISTER_HOLD_MS;
-  if(kind==='failed'){p.runs.push(this.makeRun(p.runs.length+1,{ok:false}));this.log('WARN',`[개발용] ${p.id} · 촬영 실패 1건`);}
-  else if(kind==='pending'){for(let i=0;i<2;i++)p.runs.push(this.makeRun(p.runs.length+1,{sent:false}));this.log('WARN',`[개발용] ${p.id} · 미전송 2건`);}
-  else if(kind==='done'){while(p.runs.length<need)p.runs.push(this.makeRun(p.runs.length+1));this.log('WARN',`[개발용] ${p.id} · 배양 종료(${p.runs.length}/${need}회차)`);}
-  else if(kind==='due'){p.registeredAt=Date.now()-(this.db.routine.delay*60000+p.runs.length*this.db.routine.cycleHours*3600000)-60000;this.holdUntil=0;this.log('WARN',`[개발용] ${p.id} · 다음 촬영 시각 도래`);}
-  else assert(false,'UNKNOWN_TRIGGER','지원하지 않는 트리거입니다.',400);
-  return {plateId:p.id};
- }
  onEvent(e){
   this.io('RX',e.type,e.deviceId,e.requestId,e);
   if(e.type==='job.completed'||e.type==='job.failed'){
@@ -175,7 +120,6 @@ export class Controller extends EventEmitter {
     assert(Number.isFinite(args.temperature)&&args.temperature>=4&&args.temperature<=55&&Number.isFinite(args.co2)&&args.co2>=0&&args.co2<=20,'INVALID_ENV','온도 4~55℃, CO₂ 0~20%를 입력하세요.',400);
     await this.adapter.environment?.(args,requestId);if(!this.adapter.environment)for(const d of this.adapter.devices){d.targetTemperature=args.temperature;d.targetCo2=args.co2;}this.log('INFO','환경 목표값 변경');
    }else if(command==='sim.input')await this.adapter.inject(deviceId,args,requestId);
-   else if(command==='sim.plate')result=this.simPlate(args.kind,deviceId||null);
    else await this.adapter.command(deviceId,command,args,requestId);
    const ack={requestId,accepted:true,command,deviceId,...result};
    this.io('RX','ACK',deviceId,requestId,ack);this.db.receipts.unshift({requestId,fingerprint,result:ack});this.db.receipts=this.db.receipts.slice(0,300);this.persist();this.publish();return ack;

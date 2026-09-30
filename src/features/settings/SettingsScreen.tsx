@@ -13,8 +13,6 @@ import {Modal} from '../../shared/Modal.tsx';
 import {NumberPad} from '../../shared/NumberPad.tsx';
 import {Toggle} from '../../shared/Toggle.tsx';
 import {download} from '../../utils/download.ts';
-// ── 개발용 트리거 (배포 전 제거) ──
-import {DebugPanel} from './DebugPanel.tsx';
 
 interface Props {
   state: AppState;
@@ -26,7 +24,7 @@ interface Props {
   onExit: () => void;
 }
 
-type SectionKey = 'login' | 'routine' | 'environment' | 'network' | 'backup' | 'info' | 'debug';
+type SectionKey = 'login' | 'routine' | 'environment' | 'network' | 'backup' | 'info';
 
 /**
  * [키, 라벨, 관리자 전용 여부]
@@ -40,8 +38,6 @@ const NAV: readonly (readonly [SectionKey, string, boolean])[] = [
   ['network', '유선 통신', false],
   ['backup', '로그 · 백업', false],
   ['info', '장비 정보', false],
-  // ── 개발용 트리거 (배포 전 제거) ──
-  ['debug', '개발용 트리거', false],
 ];
 
 interface RoutineField {
@@ -371,8 +367,6 @@ export function SettingsScreen({state, send, operator, setOperator, onRole,
         </div>
       </section>
     ),
-    // ── 개발용 트리거 (배포 전 제거) ──
-    debug: <DebugPanel state={state} send={send} />,
   };
 
   return (
