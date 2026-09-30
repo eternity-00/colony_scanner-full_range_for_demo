@@ -10,6 +10,12 @@ interface Props {
 }
 
 const KO = new Map(TABS.map(([key, ko]) => [key, ko]));
+/*
+ * 판에 적는 짧은 이름. 「사용자 설정」은 94px 칸을 넘어 모서리 밖으로 삐져
+ * 나간다. 여기서는 어차피 설정이 하나뿐이라 두 글자면 헷갈릴 일이 없다.
+ * 화면 이름(헤더·aria-label)은 긴 쪽을 그대로 쓴다.
+ */
+const SHORT: Partial<Record<TabKey, string>> = {settings: '설정'};
 
 /**
  * 좌측 레일 (v1.6) — 본문 위에 떠 있는 판.
@@ -60,6 +66,9 @@ export function Rail({tab, isAdmin, onSelect, onExit}: Props) {
               tabIndex={open ? 0 : -1}
             >
               <TabIcon tab={key} />
+              {/* 이름을 그림 아래 적는다. 아이콘만 두면 처음 쓰는 사람은
+                  눌러 봐야 알고, 판이 덮는 방식이라 폭은 공짜다. */}
+              <span>{SHORT[key] ?? KO.get(key)}</span>
             </button>
           ))}
         </div>
