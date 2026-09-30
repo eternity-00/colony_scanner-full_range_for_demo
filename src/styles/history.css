@@ -8,8 +8,17 @@
 .hist-table .table-wrap table.fillrows{height:100%}
 .hist-table tbody tr{height:auto}
 .hist-table tbody td{height:2.75rem;padding-top:0;padding-bottom:0}
-.hist-table tbody td button{min-height:1.875rem;padding:0.25rem 0.75rem;font-size:0.75rem}
 .hist-table tbody td .badge{white-space:nowrap}
+/*
+ * 표 글자만 한 단계 키운다 — 줄 높이(44px)와 칸 폭은 그대로다.
+ * 칸이 여덟이라 상세 이력만큼 키우면 가로로 넘치고, 13px 는 허리를
+ * 굽혀 보는 화면에서 작다. 그 사이 15px 가 들어간다.
+ */
+.hist-table table{font-size:0.9375rem}
+.hist-table th{font-size:0.9375rem}
+.hist-table tbody td button{min-height:1.875rem;padding:0.25rem 0.875rem;font-size:0.875rem}
+.hist-table tbody td .badge{font-size:0.875rem}
+.hist-table .pager span{font-size:0.9375rem}
 
 .filters .ghost-btn{border:1px solid var(--line);background:#fff;color:var(--gt);font-weight:700}
 
