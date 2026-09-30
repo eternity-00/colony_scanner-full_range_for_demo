@@ -28,6 +28,10 @@ sleep 1
 BIN=$(command -v chromium || command -v chromium-browser || true)
 [ -n "$BIN" ] || { echo '크로뮴이 없습니다.' >&2; exit 1; }
 
+# 화면은 하나뿐이다. 다른 버전의 키오스크가 떠 있으면 두 전체화면 창이 겹쳐
+# 쌓여, 누를 때마다 엉뚱한 쪽이 앞으로 나온다. 창만 닫는다 — 서버는 그대로 둔다.
+pkill -f 'user-data-dir=/tmp/colony-v6' 2>/dev/null || true
+
 wait_for() {
   n=0
   until curl -fsS "$1" >/dev/null 2>&1; do
