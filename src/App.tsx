@@ -236,7 +236,7 @@ export default function App() {
           state={state}
           tab={visible}
           clock={hms(state.serverTime)}
-          day={ymd(state.serverTime).slice(5)}
+          day={ymd(state.serverTime)}
           operator={operator}
           onAccount={() => setUserCard(true)}
           onDevice={() => setTab('device')}

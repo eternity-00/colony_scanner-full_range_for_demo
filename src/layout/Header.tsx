@@ -10,7 +10,7 @@ interface Props {
   tab: TabKey;
   /** 08:40:29 */
   clock: string;
-  /** 09-30 */
+  /** 2026-09-30 */
   day: string;
   operator: string;
   /** 계정 칩을 눌렀을 때 — 말풍선을 연다. */
@@ -89,15 +89,15 @@ export function Header({state, tab, clock, day, operator, onAccount, onDevice, o
             {linked} / {devices.length}
           </b>
         </span>
-      </span>
-
-      <span className="hd-right">
-        {/* 초가 바뀌는 줄이라 세로선을 두지 않고 읽는 값들과 떨어뜨린다. */}
-        <span className="hd-clock">
+        {/* 날짜·시각도 장비에 하나뿐인 값이라 같은 줄에 둔다. 전에는 알림 종
+            옆에 따로 있었는데, 읽는 값이 둘로 갈려 눈이 두 번 움직였다. */}
+        <span className="hm hm-clock">
           <small>{day}</small>
           <b>{clock}</b>
         </span>
+      </span>
 
+      <span className="hd-right">
         {/* 알림은 장비 문제 건수다. 0 이면 숫자를 붙이지 않는다 — 없는 것을
             0 으로 적으면 눈이 한 번 더 확인해야 한다.
             목록은 화면을 덮는 팝업이 아니라 종 밑에 붙는 말풍선이다 — 읽는
