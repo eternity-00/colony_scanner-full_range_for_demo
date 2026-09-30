@@ -1,11 +1,12 @@
 import {useEffect, useState} from 'react';
-import {TABS, tabsFor, type TabKey} from '../config/defines.ts';
+import {APP_VERSION, TABS, tabsFor, type TabKey} from '../config/defines.ts';
 import {TabIcon} from '../shared/TabIcon.tsx';
 
 interface Props {
   tab: TabKey;
   isAdmin: boolean;
   onSelect: (tab: TabKey) => void;
+  onExit: () => void;
 }
 
 const KO = new Map(TABS.map(([key, ko]) => [key, ko]));
@@ -32,10 +33,11 @@ const SHORT: Partial<Record<TabKey, string>> = {settings: '설정'};
  * 계정과 시계는 헤더로 올렸다. 판이 숨는 순간 그 둘도 같이 사라지는데,
  * 지금 몇 시인지와 누가 쓰고 있는지는 늘 보여야 하는 값이다.
  *
- * 버전과 종료는 사용자 설정으로 내려보냈다. 하루에 한 번 쓸까 말까 한
- * 것들이 화면을 옮길 때마다 지나가는 판에 있을 이유가 없다.
+ * 판의 발치에 종료와 버전을 흐리게 둔다. 메뉴 칸과는 가는 선으로 가른다 —
+ * 하루에 한 번 쓸까 말까 한 것이라 칸을 주지는 않되, 사용자 설정까지
+ * 들어가지 않고도 닿게 한다.
  */
-export function Rail({tab, isAdmin, onSelect}: Props) {
+export function Rail({tab, isAdmin, onSelect, onExit}: Props) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -143,6 +145,28 @@ export function Rail({tab, isAdmin, onSelect}: Props) {
             </button>
           ))}
         </div>
+
+        {/*
+          * 판의 발치. 가는 선 하나로 메뉴와 가르고, 종료와 버전을 흐리게 둔다.
+          * 하루에 한 번 쓸까 말까 한 것이라 칸을 주지는 않되, 사용자 설정까지
+          * 들어가지 않고도 닿게 한다. 실수로 눌려도 확인 팝업이 받는다.
+          */}
+        <span className="rail-foot">
+          <button
+            className="rail-exit"
+            onClick={onExit}
+            aria-label="가상 머신 종료"
+            title="가상 머신 종료"
+            tabIndex={open ? 0 : -1}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 4h5v16h-5" />
+              <path d="M10 12H3" />
+              <path d="M6 8l-4 4 4 4" />
+            </svg>
+          </button>
+          <em>{APP_VERSION.replace(/^v/, '')}</em>
+        </span>
       </nav>
 
       {/*

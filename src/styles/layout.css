@@ -53,13 +53,22 @@
 .rail-grip.on{left:8.25rem}
 .rail-grip svg{width:0.9375rem;height:0.9375rem}
 /* 판의 머리 — 이름 한 낱말. 아래 칸들과 선으로 가른다. */
-.rail-title{flex:none;width:calc(100% - 1.5rem);padding:1.0625rem 0 0.75rem;text-align:center;
+.rail-title{flex:none;width:calc(100% - 1.5rem);padding:0.875rem 0 0.625rem;text-align:center;
   border-bottom:1px solid var(--line);
   font-size:0.75rem;font-weight:800;letter-spacing:.14em;color:#8a949c}
 /* 칸 사이를 벌린다. 카드끼리 붙어 있으면 여섯이 한 덩이로 보여 어디까지가
    한 칸인지 손가락이 헷갈린다 — 8 → 14px. */
 .rail-nav{width:100%;flex:none;display:flex;flex-direction:column;
-  align-items:center;gap:0.875rem;padding:1.125rem 0 1.375rem;overflow-y:auto}
+  align-items:center;gap:0.625rem;padding:0.875rem 0 0.625rem;overflow-y:auto}
+/* 판의 발치 — 가는 선으로 메뉴와 가르고 흐리게 둔다. 메뉴 칸과 같은 무게로
+   두면 「종료」가 일곱 번째 화면처럼 보인다. */
+.rail-foot{flex:none;width:calc(100% - 2rem);display:flex;align-items:center;justify-content:center;
+  gap:0.5rem;padding:0.625rem 0 0.75rem;border-top:1px solid var(--line)}
+.rail-foot em{font-style:normal;font-size:0.6875rem;font-weight:700;color:#a8b0b7;
+  font-variant-numeric:tabular-nums}
+.rail-exit{width:2rem;height:2rem;min-height:0;flex:none;padding:0;display:grid;place-items:center;
+  border:0;border-radius:var(--rr);background:transparent;color:#a8b0b7;cursor:pointer}
+.rail-exit svg{width:1.125rem;height:1.125rem}
 /* 흰 둥근 네모에 파란 아이콘 + 이름. 아이콘은 그림이라 3:1 이면 되므로
    #4a7b96 로 두고, 글자는 4.5:1 이 필요해 #3f6a80 으로 한 단계 짙게 쓴다. */
 .rail-nav button{width:6.75rem;height:5.5rem;min-height:0;flex:none;padding:0;
@@ -149,6 +158,7 @@
 @media (hover:hover) and (pointer:fine){
  .rail-nav button:hover:not(.on){background:#eef1f3;border-color:#c8ced3}
  .rail-grip:hover{background:#eef1f3}
+ .rail-exit:hover{background:#eef1f3;color:var(--gt)}
  .hd-bell:hover{background:#eaeaea}
  .hd-acc:hover{background:#eaeaea}
 }

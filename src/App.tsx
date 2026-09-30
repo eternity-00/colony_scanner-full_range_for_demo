@@ -230,7 +230,7 @@ export default function App() {
 
   return (
     <div className="app" data-w={layoutWidth}>
-      <Rail tab={visible} isAdmin={isAdmin} onSelect={setTab} />
+      <Rail tab={visible} isAdmin={isAdmin} onSelect={setTab} onExit={() => setExitAsk(true)} />
       <div className="shell">
         <Header
           state={state}
