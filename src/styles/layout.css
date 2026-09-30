@@ -57,15 +57,17 @@
    무엇을 보다가 메뉴를 열었는지가 끊기지 않는다. */
 .rail-scrim{position:fixed;inset:0;z-index:45;background:#00000014}
 /*
- * 손잡이 — 헤더 색면과 같은 파랑. 판과 같은 밝은 색으로 뒀더니 회색 그늘
- * 위의 회색 조각이라 누르는 것인지 알 수 없었다. 화면에서 이것 하나만
- * 색이 있으면 「여기를 눌러라」가 설명 없이 읽힌다.
+ * 손잡이 — 중간 회색(#7f888f). 판과 같은 밝은 회색으로 뒀더니 회색 그늘
+ * 위의 회색 조각이라 누르는 것인지 알 수 없었다. 한 단계 내려 어둡게 하면
+ * 그늘 위에서도 떨어져 나오고, 파랑처럼 시선을 먼저 가져가지도 않는다 —
+ * 본문을 보다가 필요할 때만 찾으면 되는 자리다.
+ * 흰 화살표는 이 바탕에서 3.6:1 로, 그림에 필요한 3:1 을 넘는다.
  */
 .rail-grip{position:fixed;z-index:47;left:0;top:50%;margin-top:-2.125rem;
   width:1.625rem;height:4.25rem;min-height:0;padding:0;display:grid;place-items:center;
   border:0;border-radius:0 0.75rem 0.75rem 0;
-  background:var(--blue);color:#fff;
-  box-shadow:5px 0 18px #0b203a40;cursor:pointer;
+  background:#7f888f;color:#fff;
+  box-shadow:5px 0 18px #0b203a33;cursor:pointer;
   transition:left .18s cubic-bezier(.4,0,.2,1)}
 .rail-grip.on{left:8.25rem}
 .rail-grip svg{width:0.9375rem;height:0.9375rem}
@@ -178,7 +180,7 @@
  */
 @media (hover:hover) and (pointer:fine){
  .rail-nav button:hover:not(.on){background:#eef1f3;border-color:#c8ced3}
- .rail-grip:hover{background:#3f6a80}
+ .rail-grip:hover{background:#6b747b}
  .rail-exit:hover{background:#eef1f3;color:var(--gt)}
  .hd-bell:hover{background:#eaeaea}
  .hd-acc:hover{background:#eaeaea}
