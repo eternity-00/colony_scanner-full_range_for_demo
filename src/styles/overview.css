@@ -1,8 +1,6 @@
 /* 현황 화면 — 통계·범례 한 줄 + 스캐너 4대 카드 */
 
-/* 요약 줄이 아래 경계선을 달고 나서는 사이 간격을 줄인다 — 선이 이미
-   둘을 갈라 놓으므로 빈 자리까지 벌릴 이유가 없다. */
-.overview{height:100%;display:flex;flex-direction:column;gap:0.5rem}
+.overview{height:100%;display:flex;flex-direction:column;gap:0.75rem}
 
 /*
  * 통계와 범례를 한 줄에 둔다. 세 줄짜리 타일 4개 + 별도 범례 줄이 본문의 17% 를
@@ -16,15 +14,15 @@
  * 서 있으면 세로선이 없어도 어디서 끊기는지가 보인다.
  * 되돌려준 14px 은 아래 스캐너 카드가 가져간다(620 → 634px).
  */
-/* 아래에 가는 선 하나. 요약 줄은 면도 테두리도 없어 카드 밭과 바로 붙는데,
-   선이 하나 있으면 「여기까지가 머리」라는 경계가 생긴다. 굵기는 1px.
-   색은 #c8c8c8 — 카드 테두리색(#e0e0e0)을 그대로 쓰면 회색 바탕(#efefef)
-   위에서 대비가 1.1 밖에 안 나와 있는지도 모른다. */
-.overview-head{flex:none;display:flex;align-items:center;gap:0.875rem;height:2.125rem;
-  padding:0 0 0.5rem;justify-content:flex-start;border-bottom:1px solid #c8c8c8}
-.stats{display:flex;align-items:center;gap:0.25rem;min-width:0}
-.stat{display:flex;align-items:center;gap:0.375rem;height:1.625rem;padding:0 0.625rem;white-space:nowrap}
+.overview-head{flex:none;display:flex;align-items:center;gap:0.875rem;height:1.625rem;padding:0;justify-content:flex-start}
+/* 칸과 칸 사이에 가는 세로선. 칩이 줄의 시작을 말하긴 하지만, 네 쌍이
+   같은 간격으로 늘어서면 어디까지가 한 쌍인지가 흐려진다. 색은 #c8c8c8 —
+   카드 테두리색(#e0e0e0)은 회색 바탕(#efefef) 위에서 대비가 1.1 밖에
+   안 나와 선이 있는지도 모른다. 글자 높이만큼만 긋는다. */
+.stats{display:flex;align-items:center;gap:0;min-width:0}
+.stat{display:flex;align-items:center;gap:0.375rem;height:1.625rem;padding:0 0.875rem;white-space:nowrap}
 .stat:first-child{padding-left:0}
+.stat+.stat{border-left:1px solid #c8c8c8}
 .stat small{font-size:0.75rem;font-weight:600;color:var(--gt)}
 /* 줄에서 실제로 읽는 건 숫자 하나다. 줄 높이(26px)가 허락하는 만큼 키운다 —
    26px 줄에 22px 글자면 위아래가 2px 씩 남는다. 라벨은 그대로 두어야
