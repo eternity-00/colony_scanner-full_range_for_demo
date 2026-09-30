@@ -199,19 +199,22 @@
    오른쪽에 스크롤 막대가 설 자리를 비워 둔다 — 값이 막대에 닿아 있으면
    글자가 잘린 것처럼 보이고, 막대를 잡으려다 줄이 눌린다. */
 .alert-list{margin:0;padding:0 0.625rem 0 0;list-style:none;display:flex;flex-direction:column;
-  max-height:23rem;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;touch-action:pan-y;
+  max-height:26rem;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;touch-action:pan-y;
   overscroll-behavior:contain}
 .alert-list li{border-bottom:1px solid #eaeaea}
 .alert-list li:last-child{border-bottom:0}
 /* 줄 전체가 버튼이다 — 손가락이 큰 사람이 글자를 조준하지 않아도 된다.
    폭은 딱 100% 다. 예전에는 음수 여백으로 양옆까지 번지게 했는데, 목록이
    스크롤 상자라 그만큼 가로로 넘쳐 버렸다. */
+/* 손가락으로 고르는 줄이라 40px 로는 조준해야 눌린다. 56px 로 올린다 —
+   LCD 앞에서 장갑을 낀 채 누르는 자리다. 그만큼 한 화면에 덜 들어가지만
+   목록은 끌어서 넘길 수 있다(dragscroll). */
 .alert-list button{display:flex;align-items:baseline;justify-content:space-between;gap:0.75rem;
-  width:100%;min-height:0;margin:0;padding:0.625rem 0;
+  width:100%;min-height:3.5rem;margin:0;padding:0.75rem 0.25rem;
   border:0;border-radius:var(--rr);background:transparent;text-align:left;cursor:pointer}
 /* 누를 수 없는 줄(분석자에게 장비 오류)도 흐려지면 안 된다 — 읽어야 하는 정보다. */
 .alert-list button:disabled{cursor:default;opacity:1}
-.alert-list b{font-size:0.875rem;font-weight:800;color:var(--ink);white-space:nowrap}
+.alert-list b{font-size:0.9375rem;font-weight:800;color:var(--ink);white-space:nowrap}
 /* 아직 안 본 줄에 점 하나. 흐리게 하는 대신 표시를 더하는 쪽을 골랐다 —
    흐려지면 읽어야 할 글자의 대비가 같이 떨어진다.
    점이 없는 줄에도 자리는 남긴다. 안 그러면 눌러서 점이 사라질 때마다
@@ -220,7 +223,7 @@
   margin-right:0.4375rem;vertical-align:0.125rem;border-radius:50%;background:transparent}
 .alert-list .fresh b::before{background:#c01d27}
 .alert-list .fresh.done b::before{background:#a8720d}
-.alert-list span{font-size:0.8125rem;font-weight:700;text-align:right;white-space:nowrap}
+.alert-list span{font-size:0.875rem;font-weight:700;text-align:right;white-space:nowrap}
 /* 색이 뜻을 나눈다 — 고장·손봐야 할 것은 빨강, 다 찍혀 꺼내면 되는 것은 앰버. */
 .alert-list .device span,.alert-list .plate span{color:#c01d27}
 .alert-list .done span{color:#a8720d}
