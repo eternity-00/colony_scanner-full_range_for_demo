@@ -75,6 +75,15 @@
 .calc span{display:flex;flex-direction:column;gap:2px}
 .calc span em{font-style:normal;font-size:0.71875rem;font-weight:500;color:var(--gt)}
 
+/* 장비 정보 맨 아래의 종료 줄. 위험한 동작이라 값 목록과 선으로 가르고,
+   무엇이 끊기는지를 적어 둔다. */
+.quit{display:flex;align-items:center;gap:1rem;margin-top:0.875rem;padding-top:0.875rem;
+  border-top:1px solid var(--g3)}
+.quit p{margin:0;flex:1;min-width:0}
+.quit b{display:block;font-size:0.9375rem;font-weight:800;color:var(--ink)}
+.quit em{display:block;margin-top:2px;font-style:normal;font-size:0.8125rem;color:var(--gt);line-height:1.4}
+.quit button{flex:none;min-height:3rem;padding:0 1.5rem;font-size:0.9375rem;font-weight:800}
+
 /*
  * ───── 개발용 트리거 (배포 전 제거) ─────
  * 이 묶음과 features/settings/DebugPanel.tsx, server/controller.mjs 의

@@ -45,7 +45,7 @@
 .rail-grip.on{left:7.375rem}
 .rail-grip svg{width:0.9375rem;height:0.9375rem}
 .rail-nav{width:100%;flex:none;display:flex;flex-direction:column;
-  align-items:center;gap:0.5625rem;padding:1.25rem 0 1rem;overflow-y:auto}
+  align-items:center;gap:0.5625rem;padding:1.25rem 0;overflow-y:auto}
 /* 흰 둥근 네모에 파란 아이콘 + 이름. 아이콘은 그림이라 3:1 이면 되므로
    #4a7b96 로 두고, 글자는 4.5:1 이 필요해 #3f6a80 으로 한 단계 짙게 쓴다. */
 .rail-nav button{width:5.875rem;height:4.625rem;min-height:0;flex:none;padding:0;
@@ -57,12 +57,6 @@
 /* 고른 것은 색면이 아니라 테두리 두 겹으로 띄운다. 밝은 판에서 하나만 색으로
    채우면 그 자리에 무게가 쏠려, 「지금 화면」이 아니라 「눌러야 할 것」으로 보인다. */
 .rail-nav button.on{border:2px solid var(--blue);box-shadow:0 0 0 4px #4a7b961f}
-.rail-ver{flex:none;padding-bottom:0.5rem;font-size:0.65625rem;font-weight:700;color:#9aa3ab;
-  font-variant-numeric:tabular-nums}
-.rail-exit{width:3.25rem;height:3.25rem;min-height:0;flex:none;margin-bottom:1.125rem;padding:0;
-  display:grid;place-items:center;
-  border:1px solid var(--line);border-radius:50%;background:#fff;color:#8a949c;cursor:pointer}
-.rail-exit svg{width:1.4375rem;height:1.4375rem}
 
 /* ── 헤더 ── */
 .shell>header{height:4rem;flex:none;display:flex;align-items:stretch;background:#fff;border-bottom:1px solid var(--g3)}
@@ -131,7 +125,6 @@
  */
 @media (hover:hover) and (pointer:fine){
  .rail-nav button:hover:not(.on){background:#eef1f3;border-color:#c8ced3}
- .rail-exit:hover{background:#eef1f3;border-color:#c8ced3}
  .rail-grip:hover{background:#eef1f3}
  .hd-bell:hover{background:#eaeaea}
  .hd-acc:hover{background:#eaeaea}

@@ -211,6 +211,7 @@ export default function App() {
     device: <DeviceScreen state={state} send={execute} />,
     settings: (
       <SettingsScreen
+        onExit={() => setExitAsk(true)}
         state={state}
         send={execute}
         operator={operator}
@@ -229,12 +230,7 @@ export default function App() {
 
   return (
     <div className="app" data-w={layoutWidth}>
-      <Rail
-        tab={visible}
-        isAdmin={isAdmin}
-        onSelect={setTab}
-        onExit={() => setExitAsk(true)}
-      />
+      <Rail tab={visible} isAdmin={isAdmin} onSelect={setTab} />
       <div className="shell">
         <Header
           state={state}

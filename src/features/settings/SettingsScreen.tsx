@@ -2,6 +2,7 @@ import {useState, type ReactNode} from 'react';
 import type {AppState, Routine} from '../../api/types.ts';
 import {
   ADMIN_IDLE_LIMIT_SEC,
+  APP_VERSION,
   MAX_INCUBATION_DAYS,
   SLOTS_PER_DEVICE,
   WELLS,
@@ -21,6 +22,8 @@ interface Props {
   operator: string;
   setOperator: (name: string) => void;
   onRole: () => void;
+  /** 가상 머신 종료. 레일에 있던 것을 여기로 내렸다. */
+  onExit: () => void;
 }
 
 type SectionKey = 'login' | 'routine' | 'environment' | 'network' | 'backup' | 'info' | 'debug';
@@ -87,7 +90,9 @@ const ROUTINE_FIELDS: readonly RoutineField[] = [
   },
 ];
 
-export function SettingsScreen({state, send, operator, setOperator, onRole}: Props) {
+export function SettingsScreen({state, send, operator, setOperator, onRole,
+  onExit,
+}: Props) {
   const [section, setSection] = useState<SectionKey>('login');
   const [routine, setRoutine] = useState<Routine>(state.routine);
   /** 키패드를 열어 둔 항목. null 이면 닫혀 있다. */
@@ -340,7 +345,7 @@ export function SettingsScreen({state, send, operator, setOperator, onRole}: Pro
         <h2>장비 정보</h2>
         <dl>
           <dt>LCD 앱</dt>
-          <dd>v1.2.0</dd>
+          <dd>{APP_VERSION}</dd>
           <dt>장비 엔진</dt>
           <dd>외부 프로세스 · 8790</dd>
           <dt>스캐너</dt>
@@ -350,6 +355,20 @@ export function SettingsScreen({state, send, operator, setOperator, onRole}: Pro
           <dt>시리얼</dt>
           <dd>CC-DEMO-260915</dd>
         </dl>
+        {/*
+          * 가상 머신 종료. 레일에 있던 것을 여기로 내렸다 — 하루에 한 번
+          * 쓸까 말까 한 것이 화면을 옮길 때마다 지나가는 판에 있을 이유가 없고,
+          * 잘못 눌리면 촬영이 끊긴다. 장비 정보 아래가 제자리다.
+          */}
+        <div className="quit">
+          <p>
+            <b>가상 머신 종료</b>
+            <em>데모를 끝내고 바탕화면으로 돌아갑니다. 진행 중인 촬영은 중단됩니다.</em>
+          </p>
+          <button className="outline-danger" onClick={onExit}>
+            종료
+          </button>
+        </div>
       </section>
     ),
     // ── 개발용 트리거 (배포 전 제거) ──
