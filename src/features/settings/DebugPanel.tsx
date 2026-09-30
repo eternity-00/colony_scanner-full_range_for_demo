@@ -132,11 +132,16 @@ export function DebugPanel({state, send}: Props) {
   const device = state.devices.find(d => d.id === deviceId);
   const plates = active(state).filter(p => p.deviceId === deviceId);
 
+  /*
+   * App 의 send 는 서버가 거부해도 던지지 않는다 — 오류 토스트를 띄우고 null 을
+   * 돌려준다. 그래서 결과가 null 이면 「보냈습니다」가 아니라 「거부됐다」로
+   * 적어야 한다. 그러지 않으면 눌렀는데 아무 일도 없는 이유를 여기서 알 수 없다.
+   */
   const fire = async (t: Trig) => {
     setSaid(`${t.label} …`);
     try {
-      await t.run(send, deviceId);
-      setSaid(`${t.label} · 보냈습니다`);
+      const done = await t.run(send, deviceId);
+      setSaid(done ? `${t.label} · 적용됐습니다` : `${t.label} · 서버가 거부했습니다 (알림 확인)`);
     } catch (e) {
       setSaid(`${t.label} · ${e instanceof Error ? e.message : '실패'}`);
     }

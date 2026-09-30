@@ -2,8 +2,8 @@ import {useState, type ReactNode} from 'react';
 import type {AppState} from '../../api/types.ts';
 import type {SendCommand} from '../../config/defines.ts';
 import {Badge} from '../../shared/Badge.tsx';
-import {LogTable} from '../../shared/LogTable.tsx';
 import {Modal} from '../../shared/Modal.tsx';
+import {fmt} from '../../utils/datetime.ts';
 import {status, tempAbnormal, tone} from '../../utils/plate.ts';
 
 interface Props {
@@ -187,10 +187,39 @@ export function DeviceScreen({state, send}: Props) {
         </button>
       </section>
 
+      {/*
+        * 이벤트 로그는 화면을 덮는 팝업이 아니라 오른쪽에서 밀려 나오는 서랍이다.
+        * 촬영 화면의 큐와 같은 꼴이라 손이 따로 배울 것이 없고, 뒤의 장비 카드가
+        * 그대로 보여 「무엇을 보다가 로그를 열었는지」가 끊기지 않는다.
+        *
+        * 표가 아니라 메시지 줄로 그린다. 시각·종류·내용 세 칸으로 나누면 좁은
+        * 서랍에서 내용이 잘리는데, 여기서 읽어야 하는 건 문장 그 자체다.
+        */}
       {logOpen && (
-        <Modal wide title="이벤트 로그" onClose={() => setLogOpen(false)}>
-          <LogTable logs={state.logs} />
-        </Modal>
+        <>
+          <div className="drawer-scrim" onClick={() => setLogOpen(false)} />
+          <aside className="log-drawer" role="dialog" aria-label="이벤트 로그">
+            <div className="drawer-head">
+              <b>이벤트 로그 · {state.logs.length}건</b>
+              <button className="drawer-x" onClick={() => setLogOpen(false)} aria-label="닫기">
+                ×
+              </button>
+            </div>
+            {state.logs.length ? (
+              state.logs.slice(0, 80).map(row => (
+                <div key={row.id} className={`lrow ${row.level.toLowerCase()}`}>
+                  <span className="lv">{row.level}</span>
+                  <span className="lmain">
+                    <b>{row.message}</b>
+                    <small>{fmt(row.at)}</small>
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p className="queue-empty muted">남은 기록이 없습니다.</p>
+            )}
+          </aside>
+        </>
       )}
 
       {ask && (
