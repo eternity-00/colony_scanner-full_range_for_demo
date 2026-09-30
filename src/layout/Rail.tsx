@@ -122,6 +122,9 @@ export function Rail({tab, isAdmin, onSelect}: Props) {
       {open && <div className="rail-scrim" role="presentation" onMouseDown={() => setOpen(false)} />}
 
       <nav className={`rail ${open ? 'on' : ''}`} aria-hidden={!open}>
+        {/* 판의 머리. 무엇을 여는 판인지 한 낱말로 못박는다 — 열었을 때
+            칸 여섯만 떠 있으면 「이게 메뉴인지 도구인지」가 한 박자 늦는다. */}
+        <span className="rail-title">MENU</span>
         <div className="rail-nav">
           {tabsFor(isAdmin).map(([key]) => (
             <button
