@@ -6,9 +6,9 @@
 /*
  * 진행 단계 — 머리 줄에 눕힌 「번호 동그라미 + 글자」.
  *
- * 선은 두 군데에 있다. 번호와 제 글자 사이(짧은 선)는 둘이 한 쌍임을
- * 말하고, 단계와 단계 사이(긴 선)는 순서를 말한다. 둘을 같은 굵기로
- * 두면 줄 전체가 끊김 없이 이어져 「거쳐 가는 길」로 읽힌다.
+ * 선은 두 군데에 있다. 번호와 제 글자 사이, 그리고 단계와 단계 사이.
+ * 길이(20px)와 양옆 틈(4px)을 똑같이 맞춘다 — 하나만 길거나 글자에
+ * 붙어 있으면 줄이 들쭉날쭉해 보인다.
  *
  * 색이 바뀌는 전환(transition)은 두지 않는다. 250ms 마다 상태가 들어오는
  * 화면이라 칸마다 애니메이션이 겹치면 무엇이 지금인지 흐려진다.
@@ -17,19 +17,19 @@
  * 흰 바탕의 글자로 써도 3.93:1 이라 둘 다 4.5:1 에 못 미친다.
  */
 .stagebar{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:0;overflow:hidden}
-.stagebar>div{flex:none;display:flex;align-items:center;position:relative;padding-left:1.5rem}
+.stagebar>div{flex:none;display:flex;align-items:center;position:relative;padding-left:1.75rem}
 .stagebar>div:first-child{padding-left:0}
 /* 단계와 단계 사이 */
-.stagebar>div:before{content:'';position:absolute;left:0;top:50%;width:1.5rem;height:2px;
+.stagebar>div:before{content:'';position:absolute;left:0.25rem;top:50%;width:1.25rem;height:2px;
   margin-top:-1px;background:#d2d2d2}
 .stagebar>div:first-child:before{display:none}
-.stagebar i{width:1.25rem;height:1.25rem;flex:none;border-radius:50%;background:#fff;
+.stagebar i{width:1.4375rem;height:1.4375rem;flex:none;border-radius:50%;background:#fff;
   border:2px solid #d2d2d2;display:grid;place-items:center;position:relative;z-index:1;
-  font-style:normal;font-size:0.6875rem;font-weight:800;color:#a0a0a0;line-height:1}
+  font-style:normal;font-size:0.75rem;font-weight:800;color:#a0a0a0;line-height:1}
 /* 번호와 제 글자 사이 */
-.stagebar span{position:relative;padding-left:1.375rem;font-size:0.8125rem;font-weight:700;
+.stagebar span{position:relative;padding-left:1.75rem;font-size:0.9375rem;font-weight:700;
   color:#a0a0a0;white-space:nowrap}
-.stagebar span:before{content:'';position:absolute;left:0.25rem;top:50%;width:0.75rem;height:2px;
+.stagebar span:before{content:'';position:absolute;left:0.25rem;top:50%;width:1.25rem;height:2px;
   margin-top:-1px;background:#d2d2d2}
 /* 지나온 단계 — 꽉 찬 원 */
 .stagebar .done i{background:#3f7a3a;border-color:#3f7a3a;color:#fff}
@@ -48,9 +48,13 @@
 .run-bar{display:flex;align-items:center;justify-content:space-between;gap:0.75rem;flex:none}
 .run-tabs{display:flex;gap:0.375rem;flex-wrap:wrap}
 .run-tabs .rt{display:inline-flex;align-items:center;gap:0.4375rem;min-height:2.875rem;padding:0 1.125rem;border:1px solid var(--line);border-radius:var(--rr);background:#fff;color:var(--gt);font-size:0.875rem;font-weight:800}
-.run-tabs .rt i{width:0.5625rem;height:0.5625rem;border-radius:50%;background:#8f8f8f;flex:none}
+.run-tabs .rt i{width:0.6875rem;height:0.6875rem;border-radius:50%;background:#8f8f8f;flex:none}
 .run-tabs .rt.good i{background:#5aa153}.run-tabs .rt.bad i{background:#d6202b}.run-tabs .rt.warn i{background:#d99009}.run-tabs .rt.info i{background:#5c636e}
 .run-tabs .rt.sel{background:var(--blue);border-color:var(--blue);color:#fff}
+/* 고른 탭은 파란 색면이라 상태색 점이 바탕에 묻힌다. 흰 점으로 바꾼다 —
+   여기서 알아야 하는 건 「지금 보는 탭」이고, 그 장비의 상태는 바로 아래
+   카드의 배지가 말한다. */
+.run-tabs .rt.sel i{background:#fff}
 .run-right{display:flex;align-items:center;gap:0.625rem;flex:none}
 /* 목록을 여는 버튼. 색면으로 두면 스캐너 탭의 선택 상태와 같은 무게가 되어
    「지금 여기」로 읽힌다. 흰 면에 줄 세 개로 목록임을 말한다. */
@@ -72,10 +76,12 @@
    상태 배지보다 키가 커진다. 높이를 못박고 가운데로 정렬한다. */
 /* 두 칩의 높이를 맞춘다 — WELL 칩 안의 큰 숫자가 baseline 정렬에서 키를 키운다. */
 .jtags{display:flex;align-items:center;gap:0.5rem}
-.jtags>*{height:1.75rem;padding-top:0;padding-bottom:0}
+.jtags>*{height:2.125rem;padding-top:0;padding-bottom:0}
+/* 상태 배지는 머리 줄에서 유일하게 색으로 말하는 칸이라 넉넉히 둔다. */
+.jtags .badge{font-size:0.875rem;padding:0 0.8125rem}
 /* 테두리 없이 글자만. 네모를 두르면 누르는 것으로 보이는데, 이건 읽는 값이다. */
-.wellbadge{display:inline-flex;align-items:center;gap:0.25rem;font-size:0.78125rem;font-weight:700;color:var(--gt);padding:0 0.375rem}
-.wellbadge b{font-size:1rem;font-weight:800;color:var(--gt);line-height:1}
+.wellbadge{display:inline-flex;align-items:center;gap:0.3125rem;font-size:0.875rem;font-weight:700;color:var(--gt);padding:0 0.375rem}
+.wellbadge b{font-size:1.1875rem;font-weight:800;color:var(--gt);line-height:1}
 
 /* 촬영 카드 재배치: 카메라 좌 · 버튼 우 · 진행바 하단 */
 .cam-row{flex:1;min-height:0;display:flex;gap:0.75rem}
