@@ -19,6 +19,10 @@
 .hist-table tbody td button{min-height:1.875rem;padding:0.25rem 0.875rem;font-size:0.875rem}
 .hist-table tbody td .badge{font-size:0.875rem}
 .hist-table .pager span{font-size:0.9375rem}
+/* 표에서 한 줄을 덜어 낸 자리를 단추가 가져간다. 페이지를 넘기는 일은 이
+   화면에서 가장 자주 누르는 동작이라 표의 줄 하나와 바꿀 값어치가 있다. */
+.hist-table .pager{padding-top:1rem}
+.hist-table .pager button{min-height:3.5rem;padding:0.5rem 2.25rem;font-size:1rem}
 /*
  * 칸 여덟이 가로 폭을 나눠 가지면서 값과 값 사이가 넓게 벌어졌고, 값 너비가
  * 머리글과 다른 칸(영상·회차)은 축이 어긋나 보였다. 전부 가운데로 세운다 —
