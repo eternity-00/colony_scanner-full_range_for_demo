@@ -19,9 +19,16 @@
 .hist-table tbody td button{min-height:1.875rem;padding:0.25rem 0.875rem;font-size:0.875rem}
 .hist-table tbody td .badge{font-size:0.875rem}
 .hist-table .pager span{font-size:0.9375rem}
-/* 한 자리 수만 담기는 칸. 왼쪽 정렬이면 값이 머리글 왼쪽 끝에 붙어
-   두 글자짜리 머리글과 축이 어긋나 보인다. 둘 다 가운데로 세운다. */
-.hist-table th.cnum,.hist-table td.cnum{text-align:center}
+/*
+ * 칸 여덟이 가로 폭을 나눠 가지면서 값과 값 사이가 넓게 벌어졌고, 값 너비가
+ * 머리글과 다른 칸(영상·회차)은 축이 어긋나 보였다. 전부 가운데로 세운다 —
+ * 머리글 아래에 값이 오고, 벌어진 자리도 좌우로 고르게 나뉜다.
+ * 이 표는 읽는 값만 담고 문장이 없어서 왼쪽 정렬을 지킬 이유가 없다.
+ */
+.hist-table th,.hist-table td{text-align:center}
+/* 좌우 끝 칸만 가장자리 쪽으로 붙인다. 표 테두리와 값 사이가 지나치게
+   벌어지면 줄이 어디서 시작하고 끝나는지가 흐려진다. */
+.hist-table th:first-child,.hist-table td:first-child{text-align:left}
 
 .filters .ghost-btn{border:1px solid var(--line);background:#fff;color:var(--gt);font-weight:700}
 

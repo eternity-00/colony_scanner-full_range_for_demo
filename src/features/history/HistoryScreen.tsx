@@ -165,7 +165,7 @@ export function HistoryScreen({state, openDetail, openPlateViewer}: Props) {
                 <th>회차</th>
                 <th>투입 시각</th>
                 <th>다음 촬영</th>
-                <th className="cnum">영상</th>
+                <th>영상</th>
                 <th>전송</th>
                 <th />
               </tr>
@@ -182,9 +182,7 @@ export function HistoryScreen({state, openDetail, openPlateViewer}: Props) {
                   </td>
                   <td>{fmt(p.registeredAt)}</td>
                   <td>{p.removedAt ? '–' : fmt(nextAt(state, p))}</td>
-                  {/* 한 자리 숫자라 왼쪽 정렬이면 두 글자짜리 머리글 아래에서
-                      비뚤어져 보인다. 머리글과 값을 같이 가운데로 세운다. */}
-                  <td className="cnum">{p.runs.filter(r => r.imageState === 'held').length}</td>
+                  <td>{p.runs.filter(r => r.imageState === 'held').length}</td>
                   <td>
                     {/*
                       * 아직 한 번도 안 찍은 플레이트는 보낼 것이 없어서 미전송 0 이 된다.
