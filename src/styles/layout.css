@@ -79,10 +79,13 @@
    「여기가 지금 보는 화면」이라는 표시지 지시가 아니다. 깎이는 폭만큼 오른쪽
    여백을 더 줘서 글자가 사선에 닿지 않게 한다. */
 /* 파란 색면 하나에 로고와 화면 이름을 함께 담는다. 둘을 따로 두면 파란
-   덩어리가 둘이 되어 어느 쪽이 「지금 화면」인지 흐려진다. */
-.hd-mode{flex:none;display:flex;align-items:center;gap:1rem;padding:0 1.5rem 0 1.25rem;
+   덩어리가 둘이 되어 어느 쪽이 「지금 화면」인지 흐려진다.
+   오른쪽 변을 통째로 비스듬히 세운다 — 모서리만 깎으면 네모가 살짝 이 빠진
+   것으로 보이는데, 변 전체가 기울면 한 덩이가 비스듬히 놓인 것으로 읽힌다.
+   기운 만큼 오른쪽 여백을 더 줘 글자가 사선에 닿지 않게 한다. */
+.hd-mode{flex:none;display:flex;align-items:center;gap:1rem;padding:0 2.375rem 0 1.25rem;
   background:var(--blue);color:#fff;
-  clip-path:polygon(0 0,100% 0,100% calc(100% - 1.125rem),calc(100% - 1.125rem) 100%,0 100%)}
+  clip-path:polygon(0 0,100% 0,calc(100% - 1.75rem) 100%,0 100%)}
 /* 로고와 화면 이름을 가르는 선. 색면 위라 흰색을 옅게 깐다. */
 .hd-bar{width:1px;height:2.375rem;flex:none;background:#ffffff59}
 .hd-mode>svg{width:1.625rem;height:1.625rem;flex:none}
