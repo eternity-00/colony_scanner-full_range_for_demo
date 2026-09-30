@@ -51,6 +51,13 @@ const Stroke = ({children}: {children: ReactNode}) => (
 export function DeviceScreen({state, send}: Props) {
   const [calibration, setCalibration] = useState<CalibrationKind>('camera');
   const [logOpen, setLogOpen] = useState(false);
+  /*
+   * 확인을 받는 팝업. 예전에는 window.confirm 을 그대로 썼는데, 그건
+   * 브라우저가 그리는 창이라 「127.0.0.1:8787 says」와 Cancel/OK 가 영어로
+   * 뜨고 키오스크 화면에서 혼자 다른 옷을 입는다. 손가락으로 누르기에도
+   * 작다. 다른 화면과 같은 Modal 로 받는다.
+   */
+  const [ask, setAsk] = useState<{what: string; danger?: boolean; run: () => void} | null>(null);
 
   const faulted = state.devices.filter(d => d.fault || d.doorOpen);
   // 피드백 2.2 — 촬영·광학 파라미터 변경은 관리자만.
@@ -115,7 +122,10 @@ export function DeviceScreen({state, send}: Props) {
                 className="da clear"
                 disabled={!d.fault || d.doorOpen}
                 onClick={() =>
-                  window.confirm('오류 상태를 해제하시겠습니까?') && send('clearError', d.id)
+                  setAsk({
+                    what: `${d.name}의 오류 상태를 해제하시겠습니까?`,
+                    run: () => void send('clearError', d.id),
+                  })
                 }
               >
                 <Stroke>{ACTION_ICON.clear}</Stroke>
@@ -157,8 +167,11 @@ export function DeviceScreen({state, send}: Props) {
             <button
               className="outline-danger cal-btn"
               onClick={() =>
-                window.confirm('전체 스캐너를 재초기화하시겠습니까?') &&
-                Promise.all(state.devices.map(d => send('reset', d.id)))
+                setAsk({
+                  what: '스캐너 4대를 모두 재초기화합니다. 진행 중인 촬영은 중단됩니다.',
+                  danger: true,
+                  run: () => void Promise.all(state.devices.map(d => send('reset', d.id))),
+                })
               }
             >
               전체 스캐너 재초기화
@@ -177,6 +190,21 @@ export function DeviceScreen({state, send}: Props) {
       {logOpen && (
         <Modal wide title="이벤트 로그" onClose={() => setLogOpen(false)}>
           <LogTable logs={state.logs} />
+        </Modal>
+      )}
+
+      {ask && (
+        <Modal
+          title="확인"
+          confirmLabel={ask.danger ? '재초기화' : '해제'}
+          danger={ask.danger}
+          onConfirm={() => {
+            ask.run();
+            setAsk(null);
+          }}
+          onClose={() => setAsk(null)}
+        >
+          <p>{ask.what}</p>
         </Modal>
       )}
     </div>
