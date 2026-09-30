@@ -19,6 +19,9 @@
 .hist-table tbody td button{min-height:1.875rem;padding:0.25rem 0.875rem;font-size:0.875rem}
 .hist-table tbody td .badge{font-size:0.875rem}
 .hist-table .pager span{font-size:0.9375rem}
+/* 한 자리 수만 담기는 칸. 왼쪽 정렬이면 값이 머리글 왼쪽 끝에 붙어
+   두 글자짜리 머리글과 축이 어긋나 보인다. 둘 다 가운데로 세운다. */
+.hist-table th.cnum,.hist-table td.cnum{text-align:center}
 
 .filters .ghost-btn{border:1px solid var(--line);background:#fff;color:var(--gt);font-weight:700}
 
