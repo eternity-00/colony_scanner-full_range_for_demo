@@ -36,7 +36,7 @@
 .rail{position:fixed;z-index:46;left:0;top:0.875rem;bottom:0.875rem;width:8.25rem;
   display:flex;flex-direction:column;align-items:center;
   background:#f7f8f9;border:1px solid var(--line);border-left:0;
-  border-radius:0 1.25rem 1.25rem 0;overflow:hidden;
+  border-radius:0 1.25rem 1.25rem 0;
   box-shadow:6px 0 22px #0b203a1f;
   transform:translateX(-100%);transition:transform .18s cubic-bezier(.4,0,.2,1)}
 .rail.on{transform:translateX(0)}
@@ -52,18 +52,10 @@
   transition:left .18s cubic-bezier(.4,0,.2,1)}
 .rail-grip.on{left:8.25rem}
 .rail-grip svg{width:0.9375rem;height:0.9375rem}
-/*
- * 판의 머리 — 파란 띠. 헤더의 색면과 같은 파랑이라 판이 그 헤더에서
- * 이어져 나온 것으로 읽힌다. 가는 선 하나로 가르던 것보다 판이 어디서
- * 시작하는지가 분명하다.
- *
- * 오른쪽 위 모서리는 판의 둥글림을 그대로 따라간다(.rail 의 overflow:hidden
- * 이 맞춰 잘라 준다). 아래쪽에는 한 단 더 짙은 선을 깔아 띠가 그냥 끝나지
- * 않고 눌린 것처럼 보이게 한다.
- */
-.rail-title{flex:none;width:100%;padding:0.9375rem 0 0.8125rem;text-align:center;
-  background:var(--blue);border-bottom:2px solid #3f6a80;
-  font-size:0.8125rem;font-weight:800;letter-spacing:.18em;color:#fff}
+/* 판의 머리 — 이름 한 낱말. 아래 칸들과 선으로 가른다. */
+.rail-title{flex:none;width:calc(100% - 1.5rem);padding:0.875rem 0 0.625rem;text-align:center;
+  border-bottom:1px solid var(--line);
+  font-size:0.9375rem;font-weight:800;letter-spacing:.14em;color:#8a949c}
 /* 칸 사이를 벌린다. 카드끼리 붙어 있으면 여섯이 한 덩이로 보여 어디까지가
    한 칸인지 손가락이 헷갈린다 — 8 → 14px. */
 /* 위아래 여백은 칸 사이보다 넓게 둔다. 같으면 첫 칸이 MENU 선에, 끝 칸이
