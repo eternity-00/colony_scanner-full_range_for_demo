@@ -4,23 +4,43 @@
 .cam-shot img{width:100%;height:100%;object-fit:contain;display:block}
 
 /*
- * 진행 단계 — 머리 줄에 눕힌 「글자 넷 + 가는 진행선」.
+ * 진행 단계 — 머리 줄에 눕힌 「번호 동그라미 + 글자」.
+ *
+ * 선은 두 군데에 있다. 번호와 제 글자 사이(짧은 선)는 둘이 한 쌍임을
+ * 말하고, 단계와 단계 사이(긴 선)는 순서를 말한다. 둘을 같은 굵기로
+ * 두면 줄 전체가 끊김 없이 이어져 「거쳐 가는 길」로 읽힌다.
  *
  * 색이 바뀌는 전환(transition)은 두지 않는다. 250ms 마다 상태가 들어오는
  * 화면이라 칸마다 애니메이션이 겹치면 무엇이 지금인지 흐려진다.
  *
- * 초록은 글자와 선이 서로 다른 톤이다 — 선은 그림이라 3:1 이면 되지만
- * 글자는 4.5:1 이 필요해 #4e8f47(3.93:1) 로는 모자란다.
+ * 초록은 #3f7a3a 하나만 쓴다. #4e8f47 은 흰 글자를 얹으면 3.93:1,
+ * 흰 바탕의 글자로 써도 3.93:1 이라 둘 다 4.5:1 에 못 미친다.
  */
-.stagebar{flex:1;min-width:0;max-width:30rem;display:flex;flex-direction:column;
-  justify-content:center;gap:0.375rem}
-.stagebar .st-lbl{display:flex;width:100%}
-.stagebar .st-lbl span{flex:1;min-width:0;text-align:center;font-size:0.8125rem;font-weight:700;
-  color:#a0a0a0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.stagebar .st-lbl .done{color:var(--gt)}
-.stagebar .st-lbl .now{color:#3f7a3a;font-weight:800}
-.stagebar .st-bar{height:0.25rem;border-radius:2px;background:#ebebeb;overflow:hidden}
-.stagebar .st-bar i{display:block;height:100%;background:#4e8f47;border-radius:2px}
+.stagebar{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:0;overflow:hidden}
+.stagebar>div{flex:none;display:flex;align-items:center;position:relative;padding-left:1.5rem}
+.stagebar>div:first-child{padding-left:0}
+/* 단계와 단계 사이 */
+.stagebar>div:before{content:'';position:absolute;left:0;top:50%;width:1.5rem;height:2px;
+  margin-top:-1px;background:#d2d2d2}
+.stagebar>div:first-child:before{display:none}
+.stagebar i{width:1.25rem;height:1.25rem;flex:none;border-radius:50%;background:#fff;
+  border:2px solid #d2d2d2;display:grid;place-items:center;position:relative;z-index:1;
+  font-style:normal;font-size:0.6875rem;font-weight:800;color:#a0a0a0;line-height:1}
+/* 번호와 제 글자 사이 */
+.stagebar span{position:relative;padding-left:1.375rem;font-size:0.8125rem;font-weight:700;
+  color:#a0a0a0;white-space:nowrap}
+.stagebar span:before{content:'';position:absolute;left:0.25rem;top:50%;width:0.75rem;height:2px;
+  margin-top:-1px;background:#d2d2d2}
+/* 지나온 단계 — 꽉 찬 원 */
+.stagebar .done i{background:#3f7a3a;border-color:#3f7a3a;color:#fff}
+.stagebar .done span{color:var(--gt)}
+.stagebar .done:before,.stagebar .done span:before{background:#3f7a3a}
+/* 지금 도는 단계 — 테두리만 있는 원.
+   앞 단계에서 여기로 건너온 선까지 초록이다. 거기까지는 이미 지나온 길이라
+   회색으로 두면 다 끝낸 단계와 지금 사이에 빈 칸이 생긴 것처럼 보인다. */
+.stagebar .now i{background:#fff;border-color:#3f7a3a;color:#3f7a3a}
+.stagebar .now span{color:#3f7a3a;font-weight:800}
+.stagebar .now:before,.stagebar .now span:before{background:#3f7a3a}
 .app[data-w="sm"] .stagebar{display:none}
 
 /* 화면 안에 꽉 맞춰 스크롤 없음 */

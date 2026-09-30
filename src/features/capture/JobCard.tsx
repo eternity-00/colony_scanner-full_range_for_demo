@@ -26,42 +26,32 @@ export function JobCard({device: d, state, send, openDetail}: Props) {
         <h2>{d.name}</h2>
         {/*
           * 진행 단계는 머리 줄에 눕힌다. 아래를 비워 사진이 그만큼 커진다.
-          * 글자 넷을 고르게 깔고 그 아래 가는 선이 찬다 — 점과 이음선을 쓰면
-          * 대기일 때 넷이 모두 같은 회색이라 줄이 통째로 흐려 보였다.
           *
-          * 채우는 폭은 회차가 아니라 단계로 센다. 지나온 단계는 다 찬 것으로,
-          * 지금 도는 단계는 절반으로 친다 — 단계 안에서 얼마나 왔는지는
-          * 장비가 말해 주지 않으므로 가운데로 두는 편이 덜 거짓말이다.
+          * 동그라미 안에 1~4 를 적는다. 대기일 때는 색이 하나도 없는데,
+          * 숫자가 있으면 「넷을 거친다」가 색 없이도 읽힌다.
+          * 지나온 단계는 꽉 찬 원, 지금 도는 단계는 테두리만 있는 원이다 —
+          * 색 하나로 둘을 가르면 색을 못 가리는 눈에는 같아 보인다.
           */}
         <div className="stagebar">
-          <div className="st-lbl">
-            {stages.map((label, i) => (
-              <span
-                key={label}
-                className={
-                  !job
-                    ? ''
-                    : i < job.step
-                      ? 'done'
-                      : i === job.step && job.status === 'running'
-                        ? 'now'
-                        : ''
-                }
-              >
-                {label}
-              </span>
-            ))}
-          </div>
-          <div className="st-bar">
-            <i
-              style={{
-                width: job
-                  ? `${Math.min(100, ((job.step + (job.status === 'running' ? 0.5 : 0)) / stages.length) * 100)}%`
-                  : 0,
-              }}
-            />
-          </div>
+          {stages.map((label, i) => (
+            <div
+              key={label}
+              className={
+                !job
+                  ? ''
+                  : i < job.step
+                    ? 'done'
+                    : i === job.step && job.status === 'running'
+                      ? 'now'
+                      : ''
+              }
+            >
+              <i>{i + 1}</i>
+              <span>{label}</span>
+            </div>
+          ))}
         </div>
+
         <div className="jtags">
           <span className="wellbadge">
             {/* 값이 없을 때의 줄표는 짧은 것(–)을 쓴다. 긴 줄표(—)는 좁은 칩 안에서 선처럼 보인다. */}
