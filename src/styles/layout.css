@@ -12,45 +12,57 @@
 .shell>main{flex:1;min-height:0;padding:1rem 1rem 1rem 2.625rem;overflow:auto}
 .app[data-w="sm"] .shell>main,.app[data-w="md"] .shell>main{padding:0.75rem 0.75rem 0.75rem 2.375rem}
 
-/* ── 좌측 레일 (v1.6 · 떠 있는 판) ──
+/* ── 좌측 레일 (v1.6 · 떠 있는 밝은 판) ──
  *
  * 본문 옆에 붙어 자리를 먹던 것을 띄워 본문 위로 덮는다. 그래서 본문 자리가
  * 고정된다 — 판이 들어오고 나가도 아래 내용이 움직이지 않는다.
- * 늘 비워 두는 것은 손잡이가 설 26px 뿐이다(.shell 의 왼쪽 여백).
+ * 늘 비워 두는 것은 손잡이가 설 26px 뿐이다(main 의 왼쪽 여백).
+ *
+ * 판은 밝다. 짙은 판은 회색 바탕에 흰 카드가 깔린 이 화면에서 덩어리로
+ * 떨어져 나와 시선을 먼저 가져갔다. 메뉴는 목적지가 아니라 지나가는 곳이라
+ * 카드와 같은 재료로 두어 「얹힌 한 겹」으로 읽히게 한다.
+ *
+ * 오른쪽 아래를 비스듬히 깎는다. 본문이 판 뒤로 이어져 보여, 화면을 가르는
+ * 벽이 아니라 올려놓은 조각이 된다.
+ * 깎으면 box-shadow 는 같이 잘리므로 filter:drop-shadow 를 쓴다 — 그림자가
+ * 잘린 모양을 그대로 따라간다.
  */
-/* 판은 내용만큼만 높다. 화면 높이를 꽉 채우면 아이콘 여섯 개 위아래로 빈
-   자리가 길게 남아, 덮개가 아니라 벽처럼 보인다. 세로 가운데에 세워
-   손잡이와 같은 높이에 둔다 — 누른 자리에서 그대로 자라난 것으로 읽힌다. */
-.rail{position:fixed;z-index:46;left:0;top:50%;width:4.625rem;max-height:calc(100vh - 1.75rem);
+.rail{position:fixed;z-index:46;left:0;top:50%;width:6.125rem;max-height:calc(100vh - 1.75rem);
   display:flex;flex-direction:column;align-items:center;
-  background:var(--deep);border-radius:0 1.375rem 1.375rem 0;
-  box-shadow:5px 0 20px #00000033;
+  background:#f7f8f9;border:1px solid var(--line);border-left:0;border-radius:0 1.25rem 0 0;
+  clip-path:polygon(0 0,100% 0,100% calc(100% - 3.25rem),0 100%);
+  filter:drop-shadow(5px 0 16px #0b203a26);
   transform:translate(-100%,-50%);transition:transform .18s cubic-bezier(.4,0,.2,1)}
 .rail.on{transform:translate(0,-50%)}
 /* 판 밖을 눌러 닫는 가림막. 어둡게 덮지 않는다 — 뒤의 본문이 그대로 보여야
    무엇을 보다가 메뉴를 열었는지가 끊기지 않는다. */
 .rail-scrim{position:fixed;inset:0;z-index:45;background:#00000014}
-/* 손잡이 — 판의 오른쪽 모서리에 걸린다. 판이 빠지면 이것만 남는다. */
-.rail-grip{position:fixed;z-index:47;left:0;top:50%;margin-top:-2.375rem;
-  width:1.625rem;height:4.75rem;min-height:0;padding:0;display:grid;place-items:center;
-  border:0;border-radius:0 0.75rem 0.75rem 0;background:var(--deep);color:#fff;
-  box-shadow:3px 0 12px #00000026;cursor:pointer;
+/* 손잡이 — 판과 같은 밝은 색이라 판에서 자라난 혹으로 읽힌다. */
+.rail-grip{position:fixed;z-index:47;left:0;top:50%;margin-top:-2.125rem;
+  width:1.625rem;height:4.25rem;min-height:0;padding:0;display:grid;place-items:center;
+  border:1px solid var(--line);border-left:0;border-radius:0 0.75rem 0.75rem 0;
+  background:#f7f8f9;color:var(--gt);
+  box-shadow:4px 0 14px #0b203a1a;cursor:pointer;
   transition:left .18s cubic-bezier(.4,0,.2,1)}
-.rail-grip.on{left:4.625rem}
-.rail-grip svg{width:1rem;height:1rem}
+.rail-grip.on{left:6.125rem}
+.rail-grip svg{width:0.9375rem;height:0.9375rem}
 .rail-nav{width:100%;flex:none;display:flex;flex-direction:column;
-  align-items:center;gap:0.75rem;padding:1.125rem 0 0.875rem;overflow-y:auto}
-/* 떠 있는 판에서는 아이콘을 동그라미로 둔다. 판이 이미 네모라, 그 안에서
-   또 네모로 고른 것을 표시하면 모서리가 겹쳐 어디까지가 버튼인지 흐려진다. */
-.rail-nav button{width:2.875rem;height:2.875rem;min-height:0;flex:none;padding:0;display:grid;place-items:center;
-  border:1px solid #6d6d6d;border-radius:50%;background:transparent;color:#dcdcdc;cursor:pointer}
-.rail-nav button svg{width:1.5rem;height:1.5rem}
-.rail-nav button.on{background:#fff;border-color:#fff;color:var(--deep)}
-.rail-ver{flex:none;padding-bottom:0.5rem;font-size:0.59375rem;font-weight:700;color:#bdbdbd;
+  align-items:center;gap:0.875rem;padding:1.25rem 0 1rem;overflow-y:auto}
+/* 흰 동그라미에 파란 아이콘. 아이콘은 그림이라 3:1 이면 되므로 #4a7b96 로 둔다. */
+.rail-nav button{width:3.75rem;height:3.75rem;min-height:0;flex:none;padding:0;display:grid;place-items:center;
+  border:1px solid var(--line);border-radius:50%;background:#fff;color:var(--blue);cursor:pointer;
+  box-shadow:0 1px 2px #0b203a12}
+.rail-nav button svg{width:1.875rem;height:1.875rem}
+/* 고른 것은 색면이 아니라 테두리 두 겹으로 띄운다. 밝은 판에서 하나만 색으로
+   채우면 그 자리에 무게가 쏠려, 「지금 화면」이 아니라 「눌러야 할 것」으로 보인다. */
+.rail-nav button.on{border:2px solid var(--blue);box-shadow:0 0 0 4px #4a7b961f}
+.rail-ver{flex:none;padding-bottom:0.5rem;font-size:0.65625rem;font-weight:700;color:#9aa3ab;
   font-variant-numeric:tabular-nums}
-.rail-exit{width:2.625rem;height:2.625rem;min-height:0;flex:none;margin-bottom:1rem;padding:0;display:grid;place-items:center;
-  border:1px solid #7a7a7a;border-radius:50%;background:transparent;color:#efefef;cursor:pointer}
-.rail-exit svg{width:1.1875rem;height:1.1875rem}
+/* 깎인 모서리를 피해 위로 올려 둔다. */
+.rail-exit{width:2.875rem;height:2.875rem;min-height:0;flex:none;margin-bottom:2.125rem;padding:0;
+  display:grid;place-items:center;
+  border:1px solid var(--line);border-radius:50%;background:#fff;color:#8a949c;cursor:pointer}
+.rail-exit svg{width:1.3125rem;height:1.3125rem}
 
 /* ── 헤더 ── */
 .shell>header{height:4rem;flex:none;display:flex;align-items:stretch;background:#fff;border-bottom:1px solid var(--g3)}
@@ -118,9 +130,9 @@
  * 남는다. 화면을 옮겨도 그 자리에 새로 그려진 버튼이 눌린 것처럼 옅게 떠 있었다.
  */
 @media (hover:hover) and (pointer:fine){
- .rail-nav button:hover:not(.on){background:#6a6a6a}
- .rail-exit:hover{background:#6a6a6a}
- .rail-grip:hover{background:#6a6a6a}
+ .rail-nav button:hover:not(.on){background:#eef1f3;border-color:#c8ced3}
+ .rail-exit:hover{background:#eef1f3;border-color:#c8ced3}
+ .rail-grip:hover{background:#eef1f3}
  .hd-bell:hover{background:#eaeaea}
  .hd-acc:hover{background:#eaeaea}
 }
