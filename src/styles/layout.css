@@ -88,7 +88,10 @@
   clip-path:polygon(0 0,100% 0,calc(100% - 1.75rem) 100%,0 100%)}
 /* 로고와 화면 이름을 가르는 선. 색면 위라 흰색을 옅게 깐다. */
 .hd-bar{width:1px;height:2.375rem;flex:none;background:#ffffff59}
-.hd-mode>svg{width:1.625rem;height:1.625rem;flex:none}
+/* 화면 이름 옆 아이콘. 파란 색면 위의 흰 선이라 얇으면 묻힌다 —
+   크기와 선 굵기를 같이 올린다(굵기는 stroke-width 로, SVG 안이 아니라
+   여기서 준다 — 레일의 같은 아이콘은 흰 바탕이라 그대로 둔다). */
+.hd-mode>svg{width:1.9375rem;height:1.9375rem;flex:none;stroke-width:2.2}
 /* 아이콘까지 baseline 으로 묶으면 SVG 의 기준선이 아래 모서리라 글자가 위로 밀린다. */
 .hd-mode-t{display:flex;align-items:baseline;gap:0.5rem;white-space:nowrap}
 /* 지금 보는 화면 이름이라 헤더에서 가장 굵다 — 700 → 800. */
