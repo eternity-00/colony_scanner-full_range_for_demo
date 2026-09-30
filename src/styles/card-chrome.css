@@ -27,10 +27,11 @@
 .modal:not(.wide) .actions{margin:1.25rem -1.5rem -1.5rem;padding:0.9375rem 1.5rem;
   justify-content:center;background:#f5f5f5;border-top:1px solid var(--g3);
   border-radius:0 0 var(--rr) var(--rr)}
-/* 닫기 ×는 머리글 띠 위에 얹히므로 면을 가지고 있어야 눌리는 것으로 보인다. */
-.modal:not(.wide)>.modal-x{top:0.8125rem;right:0.8125rem;width:2.375rem;height:2.375rem;
-  display:grid;place-items:center;border:1px solid var(--line);border-radius:var(--rr);
-  background:#fff;color:var(--gt);line-height:1}
+/* 닫기 ×는 어느 팝업에서나 같은 꼴이다 — 44px 짜리 누를 면에 글자만.
+   네모를 두르면 글자 하나를 닫는 일에 비해 덩치가 커 보인다. */
+.modal:not(.wide)>.modal-x{top:0.6875rem;right:0.6875rem;width:2.75rem;height:2.75rem;
+  display:grid;place-items:center;border:0;border-radius:var(--rr);
+  background:transparent;color:var(--gt);line-height:1}
 
 /* 뜰 때 한 번만 — 어디에서 나타났는지 눈이 따라가게 한다. */
 @keyframes modal-in{from{opacity:0;transform:translateY(0.5rem)}to{opacity:1;transform:none}}

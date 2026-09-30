@@ -43,7 +43,8 @@
 .modal-bg{position:fixed;inset:0;z-index:30;background:#0d163799;display:grid;place-items:center}
 .modal{position:relative;width:32.5rem;max-width:90vw;max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain;background:#fff;border-radius:var(--rr);padding:1.5rem;box-shadow:0 24px 60px #0005}
 .modal>h2{margin-bottom:0.75rem}
-.modal-x{position:absolute;right:0.875rem;top:0.75rem;border:0;font-size:1.5rem;padding:0;width:2.625rem}
+.modal-x{position:absolute;right:0.6875rem;top:0.6875rem;border:0;font-size:1.4375rem;padding:0;
+  width:2.75rem;height:2.75rem;min-height:0;display:grid;place-items:center;background:transparent;line-height:1}
 .modal .card{padding:0;border:0;margin-top:0.875rem}
 .modal .table-wrap{max-height:16.25rem}
 
@@ -80,7 +81,7 @@
 /* ── 영상 뷰어 모달 ── */
 .modal.wide{width:53.75rem;max-width:94vw;height:86vh;max-height:86vh;display:flex;flex-direction:column;overflow:hidden;padding:0}
 .modal.wide>h2{position:sticky;top:0;z-index:1;margin:0;padding:1.25rem 4rem 1rem 1.5rem;background:#fff;border-bottom:1px solid var(--g3);border-radius:var(--rr) var(--rr) 0 0;flex:none}
-.modal.wide>.modal-x{position:absolute;top:0.875rem;right:1rem;z-index:5;width:2.5rem;height:2.5rem;border-radius:var(--rr);background:#fff;border:1px solid var(--line);color:var(--gt);font-size:1.5rem;line-height:1;display:grid;place-items:center}
+.modal.wide>.modal-x{position:absolute;top:0.75rem;right:0.75rem;z-index:5;width:2.75rem;height:2.75rem;border-radius:var(--rr);background:transparent;border:0;color:var(--gt);font-size:1.4375rem;line-height:1;display:grid;place-items:center}
 .modal.wide>.shot-meta{flex:none;margin:1rem 1.5rem 0}
 .modal.wide>.well-set{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain;padding:0.875rem 1.5rem 1.25rem;margin:0;align-content:start}
 .shot-meta{display:flex;align-items:center;gap:0.625rem;flex-wrap:wrap;margin:2px 0 0.875rem;padding-bottom:0.875rem;border-bottom:1px solid #e6e6e6}
@@ -137,7 +138,7 @@
  */
 @media (hover:hover) and (pointer:fine){
  .pager button:hover:not(:disabled){background:var(--blue);color:#fff}
- .modal.wide>.modal-x:hover{background:#eaeaea;border-color:#8f8f8f;color:var(--blue)}
+ .modal.wide>.modal-x:hover{background:#eaeaea;color:var(--blue)}
  .keypad button:hover{background:#eaeaea;border-color:#8f8f8f}
  .pad-presets button:hover{background:#eaeaea;border-color:#8f8f8f}
 }
@@ -188,8 +189,10 @@
 .alert-pop::after{top:calc(-0.5rem + 1px);border-bottom:0.5rem solid #fff}
 .pop-empty{margin:0;font-size:0.84375rem;color:var(--gt)}
 /* 줄 수가 많아도 다 볼 수 있게 스크롤한다. 접어서 「외 N건」으로 두면 그 안에
-   무엇이 들었는지 알 길이 없다. */
-.alert-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;
+   무엇이 들었는지 알 길이 없다.
+   오른쪽에 스크롤 막대가 설 자리를 비워 둔다 — 값이 막대에 닿아 있으면
+   글자가 잘린 것처럼 보이고, 막대를 잡으려다 줄이 눌린다. */
+.alert-list{margin:0;padding:0 0.625rem 0 0;list-style:none;display:flex;flex-direction:column;
   max-height:23rem;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;touch-action:pan-y;
   overscroll-behavior:contain}
 .alert-list li{border-bottom:1px solid #eaeaea}
