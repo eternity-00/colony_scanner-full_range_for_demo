@@ -57,5 +57,7 @@
 /* 등록 트레이 — 현황처럼 네모에 가깝게 채움 */
 .register-layout>section .tray{flex:1;min-height:0;width:100%;max-width:none;
   grid-auto-rows:minmax(0,1fr);gap:0.4375rem;background:#fff;border:1px solid var(--g3);border-radius:var(--rr);padding:0.625rem}
-.register-layout>section .tray .tray-row{align-items:stretch;gap:0.4375rem;grid-template-columns:2.125rem repeat(3,minmax(0,1fr))}
+.register-layout>section .tray .tray-row{align-items:stretch;gap:0.4375rem;grid-template-columns:2.25rem repeat(3,minmax(0,1fr))}
+/* 상세와 같은 꼴 — 12 → 14px, 가운데 정렬(detail.css 주석 참조). */
+.register-layout .tier{text-align:center;padding-right:0;font-size:0.875rem}
 .register-layout .registration .cell{height:auto;min-height:0;font-size:1rem;font-weight:800}
