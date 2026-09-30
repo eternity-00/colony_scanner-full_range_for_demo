@@ -86,9 +86,8 @@
 .hd-mode{flex:none;display:flex;align-items:center;gap:1rem;padding:0 2.375rem 0 1.25rem;
   background:var(--blue);color:#fff;
   clip-path:polygon(0 0,100% 0,calc(100% - 1.75rem) 100%,0 100%)}
-/* 로고와 화면 이름을 가르는 선. 색면 위라 흰색을 옅게 깐다.
-   색면의 오른쪽 변·값 줄의 구분선과 같은 24도로 눕힌다. */
-.hd-bar{width:1px;height:4.375rem;flex:none;background:#ffffff59;transform:rotate(24deg)}
+/* 로고와 화면 이름을 가르는 선. 색면 위라 흰색을 옅게 깐다. */
+.hd-bar{width:1px;height:2.375rem;flex:none;background:#ffffff59}
 .hd-mode>svg{width:1.625rem;height:1.625rem;flex:none}
 /* 아이콘까지 baseline 으로 묶으면 SVG 의 기준선이 아래 모서리라 글자가 위로 밀린다. */
 .hd-mode-t{display:flex;align-items:baseline;gap:0.5rem;white-space:nowrap}
@@ -96,19 +95,14 @@
 .hd-mode-t b{font-size:1.375rem;font-weight:800;letter-spacing:.04em}
 .hd-mode-t em{font-style:normal;font-size:0.96875rem;font-weight:600;letter-spacing:.04em}
 /* 여기에는 장비 전체에 하나뿐인 값만 둔다(Header.tsx 주석). */
-.hd-meta{flex:1;min-width:0;display:flex;align-items:center;gap:1.25rem;padding:0 1.25rem;overflow:hidden}
+.hd-meta{flex:1;min-width:0;display:flex;align-items:center;gap:1.625rem;padding:0 1.25rem;overflow:hidden}
 .hm{flex:none;display:flex;flex-direction:column;gap:2px;white-space:nowrap}
-/* 값 사이를 선으로 가른다. 라벨/값이 두 줄이라 간격만으로는 어디까지가
-   한 쌍인지 흐려진다. 선은 글자 높이만큼만 — 헤더 끝까지 그으면 칸처럼 보인다.
-   왼쪽 색면의 오른쪽 변이 24도 기울어 있으므로 이 선들도 같은 각도로 눕힌다.
-   같은 줄 안에서 한쪽만 비스듬하면 그 하나가 실수처럼 보인다. */
-/* 헤더 높이를 끝에서 끝까지 가른다. 24도로 누우면 길이가 그만큼 더 필요하다 —
-   64px 을 채우려면 64/cos24 = 70px. 그러면 가로로 70·sin24 = 28px 을 먹는데,
-   이건 왼쪽 색면의 기울기(28px)와 같은 값이다. 같은 각도·같은 폭이라
-   헤더 전체가 한 번에 기운 것으로 읽힌다. */
-.hm+.hm{position:relative;padding-left:2.25rem}
-.hm+.hm:before{content:'';position:absolute;left:0.5rem;top:50%;width:1px;height:4.375rem;
-  margin-top:-2.1875rem;background:var(--g3);transform:rotate(24deg)}
+/* 값 사이를 곧은 세로선으로 가른다. 라벨/값이 두 줄이라 간격만으로는
+   어디까지가 한 쌍인지 흐려진다. 선은 글자 높이만큼만 — 헤더 끝까지 그으면
+   칸처럼 보인다.
+   사선은 왼쪽 색면의 오른쪽 변 하나만 쓴다. 선까지 다 눕혀 봤더니 헤더가
+   통째로 기운 무늬가 되어, 읽어야 할 값보다 무늬가 먼저 보였다. */
+.hm+.hm{padding-left:1.625rem;border-left:1px solid var(--g3)}
 .hm small{font-size:0.75rem;font-weight:700;letter-spacing:.06em;color:var(--gt)}
 .hm b{font-size:0.9375rem;font-weight:700;letter-spacing:-.01em;color:var(--ink);font-variant-numeric:tabular-nums}
 .hm b.bad{color:#c01d27}
