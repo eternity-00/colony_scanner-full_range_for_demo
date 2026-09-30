@@ -12,10 +12,10 @@
 .detail-page>.stack>.card:first-of-type{flex:none}
 
 .infogrid{display:grid;grid-template-columns:repeat(5,1fr);gap:0.4375rem}
-.ig{background:#fff;border:1px solid var(--g3);border-radius:var(--rr);padding:0.4375rem 0.5625rem;display:flex;flex-direction:column;gap:2px;min-width:0}
-.ig small{font-size:0.65625rem;font-weight:700;color:var(--gt);letter-spacing:.2px}
-.ig b{font-size:0.84375rem;font-weight:800;color:var(--gt);letter-spacing:-.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ig b em{font-style:normal;font-size:0.75rem;font-weight:700;color:var(--gt)}
+.ig{background:#fff;border:1px solid var(--g3);border-radius:var(--rr);padding:0.5rem 0.625rem;display:flex;flex-direction:column;gap:2px;min-width:0}
+.ig small{font-size:0.75rem;font-weight:700;color:var(--gt);letter-spacing:.06em}
+.ig b{font-size:0.9375rem;font-weight:800;color:var(--gt);letter-spacing:-.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ig b em{font-style:normal;font-size:0.8125rem;font-weight:700;color:var(--gt)}
 .ig b.warnv{color:#a8720d}
 .ig b.badv{color:#c01d27}
 .ig b.okv{color:#4e8f47}
@@ -57,8 +57,24 @@
 .runs .badge{font-size:0.875rem;padding:0.3125rem 0.625rem}
 .runs .pager{padding-top:0.625rem}
 
-.titleline{display:flex;align-items:baseline;gap:0.5625rem;min-width:0}
-.titleline em{font-style:normal;font-size:0.8125rem;font-weight:800;color:#fff;background:var(--blue);border:1px solid var(--blue);border-radius:2px;padding:2px 0.5rem;white-space:nowrap}
+.titleline{display:flex;align-items:center;gap:0.75rem;min-width:0}
+.titleline h2{font-weight:800;letter-spacing:-.3px;white-space:nowrap}
+/*
+ * 플레이트 ID. 파란 색면을 두르고 있었는데, 그건 이 화면에서 「고른 것」을
+ * 뜻하는 색이라 ID 가 누를 수 있는 것처럼 보였다. 면을 없애고 세로선으로
+ * 자리만 가른다 — 헤더의 값 쌍이 쓰는 것과 같은 선이다.
+ *
+ * ID 는 사람이 읽는 이름이 아니라 대조하는 기호다. 등폭 숫자에 자간을 조금
+ * 벌려, 옆 사람이 부르는 것을 한 글자씩 짚어 갈 수 있게 한다.
+ */
+.titleline em{position:relative;font-style:normal;font-size:0.9375rem;font-weight:700;
+  letter-spacing:.04em;color:var(--gt);background:none;border:0;border-radius:0;
+  padding-left:0.875rem;white-space:nowrap;font-variant-numeric:tabular-nums}
+.titleline em:before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);
+  width:1px;height:1.25em;background:var(--line)}
+/* 머리 줄의 상태 배지 — 이 화면에서 가장 먼저 봐야 하는 값이라 넉넉히 둔다. */
+.detail-page>.stack>.card:first-of-type>.row.between>.badge{font-size:1rem;font-weight:800;
+  padding:0.5rem 1rem;border-radius:var(--rr)}
 .runs>.row.between{align-items:center;padding-bottom:0;margin-bottom:0.4375rem;border-bottom:0}
 .runs>.row.between h3{margin:0}
 .runs>.row.between h3{font-size:1rem;font-weight:800;letter-spacing:-.3px}
@@ -73,12 +89,10 @@
 .detail-page .tier{text-align:center;padding-right:0;font-size:0.875rem}
 .detail-page .cell{height:auto;min-height:0;font-size:1rem;font-weight:800}
 
-/* 머리 줄은 낮추되 뒤로 가기는 누르기 쉬운 크기를 지킨다. */
-.backbtn{width:2.5rem;height:2.5rem;min-height:0;flex:none;padding:0;font-size:1.25rem;font-weight:800;line-height:1;border:1px solid var(--line);border-radius:var(--rr);background:#fff;color:var(--gt)}
+/* 머리 줄은 낮게 둔다 — 아래 값 줄과 버튼이 자리를 더 써야 한다. */
 .detail-page>.stack>.card:first-of-type{padding:0.625rem 0.8125rem 0.75rem}
 .detail-page>.stack>.card:first-of-type>.row.between{margin-bottom:0.625rem}
-.detail-page .titleline h2{font-size:1.0625rem}
-.titleline{align-items:center}
+.detail-page .titleline h2{font-size:1.3125rem}
 
 /* 한 줄로 눕힌다. 두 줄이면 제목 줄 높이를 이 칩 하나가 끌어올린다. */
 .holdcnt{flex:none;display:inline-flex;align-items:baseline;gap:0.4375rem;height:2rem;white-space:nowrap;
@@ -98,5 +112,4 @@
  * 남는다. 화면을 옮겨도 그 자리에 새로 그려진 버튼이 눌린 것처럼 옅게 떠 있었다.
  */
 @media (hover:hover) and (pointer:fine){
- .backbtn:hover{background:#eaeaea;border-color:#8f8f8f;color:var(--blue)}
 }

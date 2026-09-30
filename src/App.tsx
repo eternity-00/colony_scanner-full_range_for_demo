@@ -187,7 +187,6 @@ export default function App() {
         slot={detail.slot}
         setSlot={(deviceId, slot) => setDetail({deviceId, slot})}
         send={execute}
-        setTab={setTab}
         openRegister={openRegister}
         openViewer={openViewer}
       />

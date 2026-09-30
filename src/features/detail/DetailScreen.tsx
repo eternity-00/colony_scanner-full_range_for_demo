@@ -1,5 +1,5 @@
 import type {AppState, Plate, Run} from '../../api/types.ts';
-import type {SendCommand, TabKey} from '../../config/defines.ts';
+import type {SendCommand} from '../../config/defines.ts';
 import {ActIcon} from '../../shared/ActIcon.tsx';
 import {Badge} from '../../shared/Badge.tsx';
 import {Tray} from '../../shared/Tray.tsx';
@@ -13,7 +13,6 @@ interface Props {
   slot: number;
   setSlot: (deviceId: number, slot: number) => void;
   send: SendCommand;
-  setTab: (tab: TabKey) => void;
   openRegister: (deviceId: number) => void;
   openViewer: (plate: Plate, run: Run, wellIndex: number) => void;
 }
@@ -24,7 +23,6 @@ export function DetailScreen({
   slot,
   setSlot,
   send,
-  setTab,
   openRegister,
   openViewer,
 }: Props) {
@@ -60,10 +58,9 @@ export function DetailScreen({
       <div className="stack">
         <section className="card stack">
           <div className="row between">
+            {/* 되돌아가는 단추는 뺐다 — 레일의 홈이 늘 같은 자리에 있고,
+                이 화면은 「어디서 왔는지」가 아니라 「무엇을 보는지」를 말한다. */}
             <div className="titleline">
-              <button className="backbtn" onClick={() => setTab('overview')} aria-label="현황으로">
-                ←
-              </button>
               <h2>
                 {device.name} · {pos(slot)}
               </h2>
