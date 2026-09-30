@@ -58,8 +58,10 @@
   font-size:0.75rem;font-weight:800;letter-spacing:.14em;color:#8a949c}
 /* 칸 사이를 벌린다. 카드끼리 붙어 있으면 여섯이 한 덩이로 보여 어디까지가
    한 칸인지 손가락이 헷갈린다 — 8 → 14px. */
+/* 위아래 여백은 칸 사이보다 넓게 둔다. 같으면 첫 칸이 MENU 선에, 끝 칸이
+   발치 선에 붙어 선이 칸의 일부처럼 보인다. */
 .rail-nav{width:100%;flex:none;display:flex;flex-direction:column;
-  align-items:center;gap:0.625rem;padding:0.875rem 0 0.625rem;overflow-y:auto}
+  align-items:center;gap:0.625rem;padding:1.25rem 0 1.125rem;overflow-y:auto}
 /* 판의 발치 — 가는 선으로 메뉴와 가르고 흐리게 둔다. 메뉴 칸과 같은 무게로
    두면 「종료」가 일곱 번째 화면처럼 보인다. */
 .rail-foot{flex:none;width:calc(100% - 2rem);display:flex;align-items:center;justify-content:center;
