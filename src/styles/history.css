@@ -1,6 +1,10 @@
 /* 이력 화면 — 필터 바 + 표 */
 
+/* 고르는 자리라 누르기 좋게 둔다. 아래 페이저에서 덜어 온 만큼을 여기가 쓴다 —
+   페이지를 넘기는 건 한 손가락이면 되지만, 고르는 건 조준이 필요하다. */
 .filters{display:flex;gap:0.75rem}
+.filters select{min-height:3.25rem;font-size:1.0625rem;font-weight:700}
+.filters button{min-height:3.25rem;font-size:1rem;font-weight:800;padding:0.5rem 1.25rem}
 
 .hist-page{display:flex;flex-direction:column;gap:0.75rem;height:100%;min-height:0}
 .hist-table{flex:1;min-height:0;display:flex;flex-direction:column;gap:0}
@@ -21,8 +25,8 @@
 .hist-table .pager span{font-size:0.9375rem}
 /* 표에서 한 줄을 덜어 낸 자리를 단추가 가져간다. 페이지를 넘기는 일은 이
    화면에서 가장 자주 누르는 동작이라 표의 줄 하나와 바꿀 값어치가 있다. */
-.hist-table .pager{padding-top:1rem}
-.hist-table .pager button{min-height:3.5rem;padding:0.5rem 2.25rem;font-size:1rem}
+.hist-table .pager{padding-top:0.75rem}
+.hist-table .pager button{min-height:3.125rem;padding:0.5rem 2rem;font-size:0.9375rem}
 /*
  * 칸 여덟이 가로 폭을 나눠 가지면서 값과 값 사이가 넓게 벌어졌고, 값 너비가
  * 머리글과 다른 칸(영상·회차)은 축이 어긋나 보였다. 전부 가운데로 세운다 —
