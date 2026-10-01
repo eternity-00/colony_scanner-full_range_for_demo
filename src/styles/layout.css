@@ -36,10 +36,12 @@
 /* 화면 위에서 아래까지 꽉 채운다. 위아래를 띄우면 그 틈으로 본문이 비쳐
    판이 떠 있는 게 아니라 잘려 있는 것으로 보인다. 오른쪽 모서리만 둥글려
    가장자리에서 밀려 나온 한 덩이로 남긴다. */
-.rail{position:fixed;z-index:46;left:0;top:0;bottom:0;width:8.25rem;
-  display:flex;flex-direction:column;align-items:center;
-  background:#f7f8f9;border:1px solid var(--line);border-left:0;
-  border-radius:0 1.25rem 1.25rem 0;overflow:hidden;
+.rail{position:fixed;z-index:46;left:0;top:0;bottom:0;
+  /* 판 너비는 헤더의 구분선에서 끝난다 — 자세한 셈은 .rail-title 참고. */
+  --menu-w:11.1875rem;width:var(--menu-w);
+  display:flex;flex-direction:column;align-items:stretch;
+  background:#f7f8f9;border:1px solid var(--line);border-left:0;border-top:0;
+  border-radius:0 0.375rem 0.375rem 0;
   box-shadow:6px 0 22px #0b203a1f;
   transform:translateX(-100%);transition:transform .18s cubic-bezier(.4,0,.2,1)}
 .rail.on{transform:translateX(0)}
@@ -64,27 +66,36 @@
  */
 .rail-grip{position:fixed;z-index:47;left:0;top:50%;margin-top:-2.125rem;
   width:1.625rem;height:4.25rem;min-height:0;padding:0;display:grid;place-items:center;
-  border:1px solid var(--line);border-left:0;border-radius:0 0.75rem 0.75rem 0;
+  border:1px solid var(--line);border-left:0;border-radius:0 0.375rem 0.375rem 0;
   background:#fff;color:var(--gt);
   box-shadow:5px 0 18px #0b203a26;cursor:pointer;
   transition:left .18s cubic-bezier(.4,0,.2,1)}
-.rail-grip.on{left:8.25rem}
+.rail-grip.on{left:11.1875rem}
 .rail-grip svg{width:0.9375rem;height:0.9375rem}
 /*
- * 판의 머리 — 이름 한 낱말을 옅은 면에 얹는다. 가는 선 하나로만 가르니
- * 머리가 칸들과 같은 바닥에 떠 있어 밋밋했다. 바탕을 한 톤 내리면 머리와
- * 칸이 면으로 갈려 판이 두 켜로 읽힌다.
+ * 판의 머리 — 헤더의 파란 색면을 그대로 이어받는다.
  *
- * 면은 판 폭을 다 쓴다(선을 그을 때처럼 안쪽으로 물리지 않는다) — 가장자리가
- * 비면 면이 아니라 또 하나의 칸으로 보인다. 위 모서리는 판의 둥글림을 그대로
- * 따라간다(.rail 의 overflow:hidden).
+ * 판 전체가 헤더의 구분선(.hd-bar)에서 끝난다. 거기까지가 헤더에서 로고가 서
+ * 있던 자리라, 판을 열면 MENU 가 그 자리를 대신 차지하고 그 오른쪽의 「현황」은
+ * 건드리지 않는다. 머리만 넓히고 아래를 좁게 두면 띠 하나가 판 위에 따로
+ * 얹힌 것처럼 보인다 — 판과 머리가 같은 폭이어야 한 덩어리로 읽힌다.
  *
- * 글자는 #5b656d. 옅은 면 위에서 5.1:1 이라 읽히고, 원래 쓰던 #8a949c 는
- * 3.8:1 로 모자랐다 — 흰 바닥일 때는 되던 색이 면을 깔면서 안 되게 됐다.
+ * 폭 11.1875rem = 헤더 왼쪽 여백 1.25rem + 로고 8.9375rem + 사이 1rem.
+ * 높이 3.9375rem = 헤더 4rem 에서 아래 선 1px 을 뺀 값. 그 선은 여기서도 그어
+ * 헤더의 선과 한 줄로 잇는다.
+ *
+ * 흰 글자는 #4a7b96 위에서 4.63:1 이라 읽힌다. 모서리는 깎지 않는다 — 헤더와
+ * 같은 면인 척해야 하는데 머리만 둥글면 거기서 면이 끊긴다.
  */
-.rail-title{flex:none;width:100%;padding:0.875rem 0 0.75rem;text-align:center;
-  background:#eceff2;border-bottom:1px solid var(--line);
-  font-size:0.9375rem;font-weight:800;letter-spacing:.14em;color:#5b656d}
+.rail-title{flex:none;width:100%;height:3.9375rem;
+  display:flex;align-items:center;justify-content:center;
+  /* 헤더 파랑과 같은 색상각에서 밝기만 내린 남색. 새 색을 들이지 않으면서
+     「MENU」와 「현황」이 다른 것이라는 게 읽힌다. 흰 글자 7.33:1.
+     초록·주황·빨강·하늘색은 트레이의 Well 상태가 이미 쓰고 있어 못 쓴다. */
+  background:#3a5a6e;border-bottom:1px solid var(--g3);border-radius:0;
+  font-size:1.375rem;font-weight:800;letter-spacing:.22em;color:#fff}
+/* letter-spacing 은 마지막 글자 뒤에도 붙는다 — 그만큼 왼쪽으로 당겨 가운데를 맞춘다. */
+.rail-title{text-indent:.22em}
 /* 칸 사이를 벌린다. 카드끼리 붙어 있으면 여섯이 한 덩이로 보여 어디까지가
    한 칸인지 손가락이 헷갈린다 — 8 → 14px. */
 /* 위아래 여백은 칸 사이보다 넓게 둔다. 같으면 첫 칸이 MENU 선에, 끝 칸이
@@ -93,18 +104,19 @@
   align-items:center;justify-content:center;gap:0.5rem;padding:0.75rem 0 0.625rem;overflow-y:auto}
 /* 판의 발치 — 가는 선으로 메뉴와 가르고 흐리게 둔다. 메뉴 칸과 같은 무게로
    두면 「종료」가 일곱 번째 화면처럼 보인다. */
-.rail-foot{flex:none;width:calc(100% - 2rem);display:flex;align-items:center;justify-content:center;
+.rail-foot{flex:none;width:calc(100% - 2rem);margin-inline:auto;display:flex;align-items:center;justify-content:center;
   gap:0.5rem;padding:0.625rem 0 0.75rem;border-top:1px solid var(--line)}
 .rail-foot em{font-style:normal;font-size:0.6875rem;font-weight:700;color:#a8b0b7;
   font-variant-numeric:tabular-nums}
 .rail-exit{width:2rem;height:2rem;min-height:0;flex:none;padding:0;display:grid;place-items:center;
-  border:0;border-radius:var(--rr);background:transparent;color:#a8b0b7;cursor:pointer}
+  border:0;border-radius:0.375rem;background:transparent;color:#a8b0b7;cursor:pointer}
 .rail-exit svg{width:1.125rem;height:1.125rem}
-/* 흰 둥근 네모에 파란 아이콘 + 이름. 아이콘은 그림이라 3:1 이면 되므로
+/* 흰 네모에 파란 아이콘 + 이름. 판·손잡이·칸 모두 6px 만 깎는다 — 둥근 느낌을
+   빼되 모서리가 날로 서지는 않게. 아이콘은 그림이라 3:1 이면 되므로
    #4a7b96 로 두고, 글자는 4.5:1 이 필요해 #3f6a80 으로 한 단계 짙게 쓴다. */
-.rail-nav button{width:6.75rem;height:5rem;min-height:0;flex:none;padding:0;
+.rail-nav button{width:calc(var(--menu-w) - 1.5rem);height:5rem;min-height:0;flex:none;padding:0;
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.3125rem;
-  border:1px solid var(--line);border-radius:1.5rem;background:#fff;color:var(--blue);cursor:pointer;
+  border:1px solid var(--line);border-radius:0.375rem;background:#fff;color:var(--blue);cursor:pointer;
   box-shadow:0 1px 2px #0b203a12}
 .rail-nav button svg{width:2.125rem;height:2.125rem}
 .rail-nav button span{font-size:0.9375rem;font-weight:800;color:#3f6a80;white-space:nowrap}
