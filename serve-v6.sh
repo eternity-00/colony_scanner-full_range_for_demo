@@ -12,6 +12,11 @@ export VIRTUAL_ENGINE_PORT=8890
 export VIRTUAL_ENGINE_URL=http://127.0.0.1:8890
 export PORT=8888
 export HOST=0.0.0.0
+# 여기서 띄운 서버를 나중에 run-v6.sh 가 그대로 물려받는다(이미 떠 있으면 새로
+# 띄우지 않는다). 이 값이 없으면 그 키오스크의 종료 버튼이 창을 못 닫는다.
+# COLONY_PROFILE 로 v6 창만 닫으므로 웹으로 보는 쪽에는 영향이 없다.
+export COLONY_KIOSK=1
+export COLONY_PROFILE=/tmp/colony-v6-chromium
 
 wait_for() {
   n=0
