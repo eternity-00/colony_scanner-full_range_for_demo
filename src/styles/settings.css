@@ -23,7 +23,7 @@
 .fi i{font-style:normal;font-size:0.8125rem;font-weight:700;color:var(--gt);background:#eaeaea;
   border:1px solid var(--line);border-left:1px solid var(--line);border-radius:0 var(--rr) var(--rr) 0;
   height:100%;width:3.375rem;flex:none;display:flex;align-items:center;justify-content:center}
-.calc{display:flex;align-items:baseline;justify-content:space-between;margin-top:0.875rem;padding:0.8125rem 1rem;
+.calc{display:flex;align-items:center;justify-content:space-between;margin-top:0.875rem;padding:0.8125rem 1rem;
   background:#fff;border:1px solid var(--g3);border-radius:var(--rr)}
 .calc span{font-size:0.78125rem;font-weight:600;color:var(--gt)}
 .calc b{font-size:1.625rem;font-weight:800;letter-spacing:-.02em;color:var(--blue)}
