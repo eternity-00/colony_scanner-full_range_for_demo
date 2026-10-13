@@ -159,7 +159,7 @@ export function OverviewScreen({state, send, openDetail, openRegister, onDevice,
           ))}
         </div>
 
-        {/* 장비 앞에 선 사람이 맨 먼저 하는 두 가지. 홈에서 가장 큰 버튼이다. */}
+        {/* 장비 앞에 선 사람이 맨 먼저 하는 두 가지(피드백 6). 바로 들어가는 입구다. */}
         <div className="home-acts">
           <button className="home-act primary" onClick={() => openRegister(device.id)} disabled={!free}>
             <ActIcon name="plus" />

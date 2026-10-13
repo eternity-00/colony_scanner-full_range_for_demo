@@ -2,10 +2,11 @@
 
 /* 왼쪽에 「장비가 어떤지 → 할 일 → 버튼」을 위에서 아래로, 오른쪽에 알람.
    눈은 위에서 아래로 내려오며 읽고, 손은 맨 아래 큰 버튼에 닿는다. */
-.home{height:100%;min-height:0;display:grid;grid-template-columns:19rem minmax(0,1fr) 21rem;gap:1rem}
+.home{height:100%;min-height:0;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr) 20rem;gap:1rem}
 .app[data-w="sm"] .home{grid-template-columns:minmax(0,1fr);overflow-y:auto}
 
-/* 맨 왼쪽 Well 상태 — 상세 왼쪽과 같은 트레이를 그대로 줄여 쓴다. 칸을 누르면 상세. */
+/* 맨 왼쪽 Well 상태 — 홈에서 가장 넓은 칸. 장비 앞에서 맨 먼저 보는 것이 어느 칸에
+   무엇이 있는지다. 상세 왼쪽과 같은 트레이이고, 칸을 누르면 상세로 간다. */
 .home-tray{display:flex;flex-direction:column;min-height:0;padding:0.75rem 0 0}
 .home-tray .tray-box{flex:1;min-height:0;margin:0 0.625rem 0 0.375rem;padding:0 0 0.625rem}
 .home-tray .tray{height:100%;grid-auto-rows:minmax(0,1fr)}
@@ -34,14 +35,14 @@
 .hs-job b{font-size:1.75rem;line-height:1.55}
 
 /* 요약 칸 — 흰 면 + 회색 테두리. 누를 수 있는 칸이지만 평소에는 조용하게 둔다. */
-.home-tiles{flex:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1rem}
-.home-tile{min-height:7.5rem;padding:1rem 1.125rem;display:grid;grid-template-columns:auto 1fr;
-  grid-template-rows:auto 1fr;align-items:center;column-gap:0.625rem;row-gap:0.5rem;text-align:left;
+.home-tiles{flex:1;min-height:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:minmax(0,1fr);gap:1rem}
+.home-tile{min-height:6.5rem;padding:1rem 1.125rem;display:grid;grid-template-columns:auto 1fr;
+  grid-template-rows:auto 1fr;align-items:center;column-gap:0.625rem;row-gap:0.25rem;text-align:left;
   background:#fff;border:1px solid var(--g3);border-radius:var(--rr);color:var(--gt)}
 .home-tile .stat-ic{width:1.75rem;height:1.75rem}
 .home-tile .stat-ic svg{width:1rem;height:1rem}
 .home-tile small{font-size:0.9375rem;font-weight:700;color:var(--gt)}
-.home-tile b{grid-column:1 / -1;align-self:end;font-size:2.5rem;font-weight:800;letter-spacing:-.02em;line-height:1;
+.home-tile b{grid-column:1 / -1;align-self:center;font-size:2.5rem;font-weight:800;letter-spacing:-.02em;line-height:1;
   color:var(--ink);font-variant-numeric:tabular-nums}
 .home-tile b em{font-style:normal;font-size:1rem;font-weight:600;color:var(--gt);margin-left:0.25rem}
 /* 할 일이 없는 칸(0)은 누를 데가 없다. 흐리게 하지 않고 숫자만 회색으로 낮춘다 —
@@ -49,14 +50,14 @@
 .home-tile:disabled{opacity:1;cursor:default}
 .home-tile:disabled b{color:#8f8f8f}
 
-/* 등록 · 반출 — 홈에서 가장 큰 버튼. 남는 높이를 이 둘이 가져간다. */
-.home-acts{flex:1;min-height:7rem;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
-.home-act{height:100%;min-height:7rem;display:flex;align-items:center;justify-content:center;gap:1.25rem;
-  padding:1rem 1.5rem;border:1px solid var(--line);border-radius:var(--rr);background:#fff;color:var(--blue)}
-.home-act>svg{width:3rem;height:3rem;flex:none;stroke-width:2}
+/* 등록 · 반출 — 바로 누르는 입구(피드백 6). 손가락에 넉넉한 높이만 주고 남는 높이는 가져가지 않는다. */
+.home-acts{flex:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
+.home-act{height:6.5rem;display:flex;align-items:center;justify-content:center;gap:0.875rem;
+  padding:0.75rem 1rem;border:1px solid var(--line);border-radius:var(--rr);background:#fff;color:var(--blue)}
+.home-act>svg{width:2.25rem;height:2.25rem;flex:none;stroke-width:2}
 .home-act span{display:flex;flex-direction:column;align-items:flex-start;gap:0.375rem}
-.home-act b{font-size:1.875rem;font-weight:800;letter-spacing:-.02em;color:var(--ink)}
-.home-act small{font-size:1rem;font-weight:600;color:var(--gt)}
+.home-act b{white-space:nowrap;font-size:1.375rem;font-weight:800;letter-spacing:-.02em;color:var(--ink)}
+.home-act small{white-space:nowrap;font-size:0.875rem;font-weight:600;color:var(--gt)}
 .home-act.primary{background:var(--blue);border-color:var(--blue);color:#fff}
 .home-act.primary b,.home-act.primary small{color:#fff}
 /* 누를 수 없을 때는 면을 중립 회색으로 바꾼다. opacity 로 흐리지 않는다. */
