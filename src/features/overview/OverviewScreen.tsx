@@ -3,7 +3,9 @@ import type {AppState} from '../../api/types.ts';
 import {SLOTS_PER_DEVICE, STAGES, type SendCommand} from '../../config/defines.ts';
 import {ActIcon} from '../../shared/ActIcon.tsx';
 import {Badge} from '../../shared/Badge.tsx';
+import {WellLegend} from '../../shared/Legend.tsx';
 import {scannerNext} from '../../shared/ScannerHead.tsx';
+import {Tray} from '../../shared/Tray.tsx';
 import {alertItems} from '../../utils/alerts.ts';
 import {active, pending, plateBad, pos, totalRuns} from '../../utils/plate.ts';
 import {RemoveDialog} from './RemoveDialog.tsx';
@@ -30,9 +32,13 @@ interface Tile {
 /**
  * 홈 (v1.7) — 현황 요약과 알람만 둔다.
  *
- * 2차 피드백(상무님 요구): 홈을 단순하게. 트레이 24칸은 상세 왼쪽으로 옮기고,
+ * 2차 피드백(상무님 요구): 홈을 단순하게. 플레이트 상세는 상세 탭으로 옮기고,
  * 홈에는 「지금 장비가 어떤지」와 「내가 할 일」만 남긴다. 장비 앞에 선 사람이
  * 맨 먼저 하는 일인 등록과 반출은 홈에서 바로 누른다.
+ *
+ * 다만 24칸의 Well 상태(원)는 홈에도 둔다 — 「지금 장비가 어떤지」의 첫째가
+ * 어느 칸에 무엇이 있는지다(피드백 3: 플레이트별 상태를 원으로). 칸을 누르면
+ * 그 칸의 상세로 간다.
  *
  * 요약 칸 넷은 분석자가 손을 대야 하는 것만 센다 — 꺼내라 · 넣을 수 있다 ·
  * 보내라 · 손 봐라. 숫자가 0 이 아니면 그 일을 하러 바로 갈 수 있게 누를 수 있다.
@@ -93,6 +99,13 @@ export function OverviewScreen({state, send, openDetail, openRegister, onDevice,
 
   return (
     <div className="home">
+      <section className="card scanner home-tray">
+        <div className="tray-box">
+          <Tray state={state} deviceId={device.id} compact onSelect={n => openDetail(device.id, n)} />
+        </div>
+        <WellLegend />
+      </section>
+
       <div className="home-main">
         {/* 장비가 지금 어떤지. 숫자 셋만 크게 — 다음 촬영 · 배양 중 · 지금 하는 일. */}
         <section className="card home-status">

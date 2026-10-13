@@ -2,8 +2,14 @@
 
 /* 왼쪽에 「장비가 어떤지 → 할 일 → 버튼」을 위에서 아래로, 오른쪽에 알람.
    눈은 위에서 아래로 내려오며 읽고, 손은 맨 아래 큰 버튼에 닿는다. */
-.home{height:100%;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 25rem;gap:1rem}
+.home{height:100%;min-height:0;display:grid;grid-template-columns:19rem minmax(0,1fr) 21rem;gap:1rem}
 .app[data-w="sm"] .home{grid-template-columns:minmax(0,1fr);overflow-y:auto}
+
+/* 맨 왼쪽 Well 상태 — 상세 왼쪽과 같은 트레이를 그대로 줄여 쓴다. 칸을 누르면 상세. */
+.home-tray{display:flex;flex-direction:column;min-height:0;padding:0.75rem 0 0}
+.home-tray .tray-box{flex:1;min-height:0;margin:0 0.625rem 0 0.375rem;padding:0 0 0.625rem}
+.home-tray .tray{height:100%;grid-auto-rows:minmax(0,1fr)}
+.home-tray .legend{flex:none;flex-wrap:wrap;gap:0.375rem 0.875rem;padding:0.625rem 0.875rem 0.75rem;border-top:1px solid var(--g3)}
 .home-main{display:flex;flex-direction:column;gap:1rem;min-height:0}
 
 .home-status{flex:none;padding:1.125rem 1.5rem 1.25rem}

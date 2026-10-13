@@ -127,8 +127,7 @@
 @media (hover:hover) and (pointer:fine){
 }
 
-/* 상세 왼쪽 = 1.6 까지의 홈 스캐너 카드. 범례는 카드 맨 아래에 붙인다 —
-   홈에서 트레이가 빠지면서 범례가 갈 곳이 여기뿐이다. */
+/* 상세 왼쪽 = 1.6 까지의 홈 스캐너 카드. 범례는 카드 맨 아래에 붙인다(홈 트레이와 같은 자리). */
 .detail-page>.tray-card{padding:0}
 .detail-page>.tray-card .tray-box{flex:1;min-height:0;display:flex;flex-direction:column}
 .detail-page>.tray-card .legend{flex:none;flex-wrap:wrap;gap:0.375rem 0.875rem;padding:0.625rem 0.875rem 0.75rem;border-top:1px solid var(--g3)}
