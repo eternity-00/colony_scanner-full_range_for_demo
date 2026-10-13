@@ -159,6 +159,29 @@ export function OverviewScreen({state, send, openDetail, openRegister, onDevice,
           ))}
         </div>
 
+        {/* 알람 — 헤더 종과 같은 목록이다. 홈에서는 펼치지 않아도 보이게 늘 깔아 두고,
+            화면이 길어지면 남는 높이를 이 목록이 받는다. */}
+        <section className="card home-alerts">
+          <div className="ha-head">
+            <h2>알람</h2>
+            <em>{alerts.length}건</em>
+          </div>
+          {alerts.length === 0 ? (
+            <p className="ha-empty">지금 처리할 일이 없습니다.</p>
+          ) : (
+            <ul className="alert-list">
+              {alerts.map(i => (
+                <li key={i.id} className={i.kind}>
+                  <button disabled={!i.go} onClick={() => i.go?.()}>
+                    <b>{i.where}</b>
+                    <span>{i.what}</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
         {/* 장비 앞에 선 사람이 맨 먼저 하는 두 가지(피드백 6). 바로 들어가는 입구다. */}
         <div className="home-acts">
           <button className="home-act primary" onClick={() => openRegister(device.id)} disabled={!free}>
@@ -177,28 +200,6 @@ export function OverviewScreen({state, send, openDetail, openRegister, onDevice,
           </button>
         </div>
       </div>
-
-      {/* 알람 — 헤더 종과 같은 목록이다. 홈에서는 펼치지 않아도 보이게 늘 깔아 둔다. */}
-      <section className="card home-alerts">
-        <div className="ha-head">
-          <h2>알람</h2>
-          <em>{alerts.length}건</em>
-        </div>
-        {alerts.length === 0 ? (
-          <p className="ha-empty">지금 처리할 일이 없습니다.</p>
-        ) : (
-          <ul className="alert-list">
-            {alerts.map(i => (
-              <li key={i.id} className={i.kind}>
-                <button disabled={!i.go} onClick={() => i.go?.()}>
-                  <b>{i.where}</b>
-                  <span>{i.what}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
 
       {removing && <RemoveDialog state={state} device={device} send={send} onClose={() => setRemoving(false)} />}
     </div>

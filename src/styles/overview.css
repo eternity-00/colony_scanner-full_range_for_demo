@@ -1,8 +1,9 @@
 /* 홈 (v1.7) — 스캐너 상태 · 요약 칸 넷 · 등록/반출 · 알람 */
 
-/* 왼쪽에 「장비가 어떤지 → 할 일 → 버튼」을 위에서 아래로, 오른쪽에 알람.
-   눈은 위에서 아래로 내려오며 읽고, 손은 맨 아래 큰 버튼에 닿는다. */
-.home{height:100%;min-height:0;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr) 20rem;gap:1rem}
+/* 왼쪽에 Well 트레이, 오른쪽에 「장비가 어떤지 → 할 일 → 알람 → 버튼」을 위에서 아래로.
+   요약 칸과 버튼은 높이를 고정하고, 화면이 길어지면 남는 높이는 알람 목록이 받는다 —
+   숫자 하나짜리 칸이 늘어나면 빈 면만 커진다. */
+.home{height:100%;min-height:0;display:grid;grid-template-columns:minmax(22rem,0.8fr) minmax(0,1fr);gap:1rem}
 .app[data-w="sm"] .home{grid-template-columns:minmax(0,1fr);overflow-y:auto}
 
 /* 맨 왼쪽 Well 상태 — 홈에서 가장 넓은 칸. 장비 앞에서 맨 먼저 보는 것이 어느 칸에
@@ -35,14 +36,16 @@
 .hs-job b{font-size:1.75rem;line-height:1.55}
 
 /* 요약 칸 — 흰 면 + 회색 테두리. 누를 수 있는 칸이지만 평소에는 조용하게 둔다. */
-.home-tiles{flex:1;min-height:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:minmax(0,1fr);gap:1rem}
-.home-tile{min-height:6.5rem;padding:1rem 1.125rem;display:grid;grid-template-columns:auto 1fr;
+.home-tiles{flex:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1rem}
+/* 칸이 좁아 이름이 접히면 3 + 1 이 아니라 2 × 2 로 넘긴다. */
+@media (max-width:1100px){.home-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.home-tile{height:6.5rem;padding:1rem 1.125rem;display:grid;grid-template-columns:auto 1fr;
   grid-template-rows:auto 1fr;align-items:center;column-gap:0.625rem;row-gap:0.25rem;text-align:left;
   background:#fff;border:1px solid var(--g3);border-radius:var(--rr);color:var(--gt)}
 .home-tile .stat-ic{width:1.75rem;height:1.75rem}
 .home-tile .stat-ic svg{width:1rem;height:1rem}
-.home-tile small{font-size:0.9375rem;font-weight:700;color:var(--gt)}
-.home-tile b{grid-column:1 / -1;align-self:center;font-size:2.5rem;font-weight:800;letter-spacing:-.02em;line-height:1;
+.home-tile small{white-space:nowrap;font-size:0.9375rem;font-weight:700;color:var(--gt)}
+.home-tile b{grid-column:1 / -1;align-self:end;font-size:2.5rem;font-weight:800;letter-spacing:-.02em;line-height:1;
   color:var(--ink);font-variant-numeric:tabular-nums}
 .home-tile b em{font-style:normal;font-size:1rem;font-weight:600;color:var(--gt);margin-left:0.25rem}
 /* 할 일이 없는 칸(0)은 누를 데가 없다. 흐리게 하지 않고 숫자만 회색으로 낮춘다 —
@@ -65,7 +68,7 @@
 .home-act:disabled b,.home-act:disabled small{color:#8f8f8f}
 
 /* 알람 — 헤더 종의 목록을 늘 펼쳐 둔 것. 줄 꼴은 종 말풍선과 같다. */
-.home-alerts{display:flex;flex-direction:column;min-height:0;padding:1rem 1.125rem}
+.home-alerts{flex:1;display:flex;flex-direction:column;min-height:0;padding:1rem 1.125rem}
 .ha-head{flex:none;display:flex;align-items:baseline;justify-content:space-between;padding-bottom:0.75rem;border-bottom:1px solid var(--g3)}
 .ha-head h2{font-size:1.25rem;font-weight:800;color:var(--gt)}
 .ha-head em{font-style:normal;font-size:0.9375rem;font-weight:700;color:var(--gt);font-variant-numeric:tabular-nums}
