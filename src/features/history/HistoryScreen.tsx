@@ -107,14 +107,17 @@ export function HistoryScreen({state, openDetail, openPlateViewer}: Props) {
           <option value="7">최근 7일</option>
           <option value="30">최근 30일</option>
         </select>
-        <select value={draft.device} onChange={e => pick('device', Number(e.target.value))}>
-          <option value="0">전체 스캐너</option>
-          {state.devices.map(d => (
-            <option key={d.id} value={d.id}>
-              {d.name}
-            </option>
-          ))}
-        </select>
+        {/* 스캐너가 한 대면 고를 것이 없어 뺀다. */}
+        {state.devices.length > 1 && (
+          <select value={draft.device} onChange={e => pick('device', Number(e.target.value))}>
+            <option value="0">전체 스캐너</option>
+            {state.devices.map(d => (
+              <option key={d.id} value={d.id}>
+                {d.name}
+              </option>
+            ))}
+          </select>
+        )}
         <select value={draft.tier} onChange={e => pick('tier', Number(e.target.value))}>
           <option value="0">전체 단</option>
           {[8, 7, 6, 5, 4, 3, 2, 1].map(t => (
@@ -175,7 +178,8 @@ export function HistoryScreen({state, openDetail, openPlateViewer}: Props) {
                 <tr key={p.id}>
                   <td>{p.id}</td>
                   <td>
-                    S{p.deviceId} · {pos(p.slot)}
+                    {state.devices.length > 1 && `S${p.deviceId} · `}
+                    {pos(p.slot)}
                   </td>
                   <td>
                     {p.runs.length}/{totalRuns(state)}

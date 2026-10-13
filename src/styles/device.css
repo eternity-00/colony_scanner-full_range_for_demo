@@ -103,3 +103,18 @@
 .lmain{display:flex;flex-direction:column;gap:2px;min-width:0}
 .lmain b{font-size:0.875rem;font-weight:700;color:var(--ink);line-height:1.35;word-break:break-all}
 .lmain small{font-size:0.75rem;font-weight:600;color:var(--gt);font-variant-numeric:tabular-nums}
+
+/*
+ * 스캐너 한 대 (v1.7). 카드 넷을 나란히 놓던 칸에 하나만 들어가면 왼쪽 1/4 만
+ * 차고 나머지가 빈다. 한 장을 가로로 펼쳐 왼쪽에 모듈 상태, 오른쪽에 버튼을 둔다.
+ */
+.device-grid.one{grid-template-columns:minmax(0,1fr)}
+.device-grid.one .card{display:grid;grid-template-columns:minmax(0,1fr) 22rem;grid-template-rows:auto 1fr;
+  column-gap:2.5rem;row-gap:1rem;padding:1.25rem 1.5rem}
+.device-grid.one .card>.row{grid-column:1 / -1;padding-bottom:0.875rem;border-bottom:1px solid var(--g3)}
+.device-grid.one .card h3{font-size:1.25rem}
+.device-grid.one .card dl{align-content:start;gap:1rem 2rem}
+.device-grid.one .card dt{font-size:1.0625rem}
+.device-grid.one .card dd{font-size:1.25rem}
+.device-grid.one .card .dev-actions{grid-column:2;grid-row:2;align-self:start;margin-top:0;padding-top:0;gap:0.625rem}
+.device-grid.one .card .da{flex:none;height:4.25rem;min-height:0;font-size:1.125rem}

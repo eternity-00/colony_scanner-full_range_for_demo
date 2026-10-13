@@ -36,17 +36,19 @@ export function CaptureScreen({state, send, openDetail}: Props) {
   return (
     <div className="run-page">
       <div className="run-bar">
+        {/* 스캐너가 둘 이상일 때만 고르는 탭을 둔다. 한 대면 고를 것이 없다. */}
         <div className="run-tabs">
-          {devices.map(d => (
-            <button
-              key={d.id}
-              className={`rt ${tone(d)} ${selected === d.id ? 'sel' : ''}`}
-              onClick={() => setSelected(d.id)}
-            >
-              <i />
-              {d.name}
-            </button>
-          ))}
+          {devices.length > 1 &&
+            devices.map(d => (
+              <button
+                key={d.id}
+                className={`rt ${tone(d)} ${selected === d.id ? 'sel' : ''}`}
+                onClick={() => setSelected(d.id)}
+              >
+                <i />
+                {d.name}
+              </button>
+            ))}
         </div>
         <div className="run-right">
           <button className="queue-btn" onClick={() => setQueueOpen(true)}>

@@ -11,6 +11,8 @@ interface Props {
   compact?: boolean;
   /** 등록 화면: 비어있는 칸만 고를 수 있다. */
   registration?: boolean;
+  /** 반출: 플레이트가 있는 칸만 고를 수 있다. */
+  removal?: boolean;
 }
 
 /** 8단 × 3열 = 24슬롯 수납도. */
@@ -21,6 +23,7 @@ export function Tray({
   onSelect,
   compact = false,
   registration = false,
+  removal = false,
 }: Props) {
   const plates = platesFor(state, deviceId);
   const bySlot = new Map(plates.map(p => [p.slot, p]));
@@ -46,7 +49,7 @@ export function Tray({
                 <button
                   key={slot}
                   className={`cell w-${cell} ${chosen ? 'selected' : ''}`}
-                  disabled={(compact && !onSelect) || (registration && !!plate)}
+                  disabled={(compact && !onSelect) || (registration && !!plate) || (removal && !plate)}
                   onClick={() => onSelect?.(slot)}
                   title={`${pos(slot)} · ${plate ? plate.id : '빈 슬롯'} · ${WELL_LABEL[cell]}`}
                 >

@@ -84,7 +84,7 @@ export function DeviceScreen({state, send}: Props) {
         </section>
       )}
 
-      <div className="device-grid">
+      <div className={`device-grid ${state.devices.length === 1 ? 'one' : ''}`}>
         {state.devices.map(d => (
           <section className="card stack" key={d.id}>
             <div className="row between">
@@ -141,7 +141,7 @@ export function DeviceScreen({state, send}: Props) {
           <h2>{isAdmin ? '캘리브레이션' : '장비 이력'}</h2>
           <small>
             {isAdmin
-              ? '선택 항목을 전체 스캐너에 일괄 실행합니다.'
+              ? '선택 항목을 스캐너에 실행합니다.'
               : '캘리브레이션은 관리자 권한이 필요합니다.'}
           </small>
         </div>
@@ -168,13 +168,13 @@ export function DeviceScreen({state, send}: Props) {
               className="outline-danger cal-btn"
               onClick={() =>
                 setAsk({
-                  what: '스캐너 4대를 모두 재초기화합니다. 진행 중인 촬영은 중단됩니다.',
+                  what: '스캐너를 재초기화합니다. 진행 중인 촬영은 중단됩니다.',
                   danger: true,
                   run: () => void Promise.all(state.devices.map(d => send('reset', d.id))),
                 })
               }
             >
-              전체 스캐너 재초기화
+              스캐너 재초기화
             </button>
           </>
         )}

@@ -179,7 +179,14 @@ export default function App() {
 
   const screens: Record<TabKey, ReactNode> = {
     overview: (
-      <OverviewScreen state={state} openDetail={openDetail} openRegister={openRegister} />
+      <OverviewScreen
+        state={state}
+        send={execute}
+        openDetail={openDetail}
+        openRegister={openRegister}
+        onDevice={() => setTab('device')}
+        onNeedAdmin={(where, what) => setAdminAsk({where, what})}
+      />
     ),
     detail: (
       <DetailScreen

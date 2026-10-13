@@ -2,9 +2,11 @@ import type {AppState, Plate, Run} from '../../api/types.ts';
 import type {SendCommand} from '../../config/defines.ts';
 import {ActIcon} from '../../shared/ActIcon.tsx';
 import {Badge} from '../../shared/Badge.tsx';
+import {WellLegend} from '../../shared/Legend.tsx';
+import {ScannerHead} from '../../shared/ScannerHead.tsx';
 import {Tray} from '../../shared/Tray.tsx';
 import {elapsedLabel, fmt} from '../../utils/datetime.ts';
-import {nextAt, pending, platesFor, pos, status, tone, totalRuns} from '../../utils/plate.ts';
+import {nextAt, pending, pos, status, tone, totalRuns} from '../../utils/plate.ts';
 import {RunsTable} from './RunsTable.tsx';
 
 interface Props {
@@ -13,7 +15,7 @@ interface Props {
   slot: number;
   setSlot: (deviceId: number, slot: number) => void;
   send: SendCommand;
-  openRegister: (deviceId: number) => void;
+  openRegister: (deviceId: number, slot?: number) => void;
   openViewer: (plate: Plate, run: Run, wellIndex: number) => void;
 }
 
@@ -35,31 +37,25 @@ export function DetailScreen({
 
   return (
     <div className="split detail-page">
-      <section className="card tray-card">
-        <div className="row between">
-          <h2>트레이 수납도</h2>
-          <select
-            value={deviceId}
-            onChange={e => {
-              const id = Number(e.target.value);
-              setSlot(id, platesFor(state, id).at(-1)?.slot || 1);
-            }}
-          >
-            {state.devices.map(d => (
-              <option key={d.id} value={d.id}>
-                {d.name}
-              </option>
-            ))}
-          </select>
+      {/*
+        * 왼쪽은 1.6 까지 홈에 있던 스캐너 카드 그대로다(2차 피드백: 기존 홈 →
+        * 상세 왼쪽). 칸을 누르면 팝업 없이 오른쪽이 그 칸으로 바뀐다 — 이 화면에서는
+        * 칸을 고르는 것 자체가 「자세히 보기」라 한 번 더 묻지 않는다.
+        * 스캐너가 한 대라 고르는 상자는 없앴다.
+        */}
+      <section className="card scanner tray-card">
+        <ScannerHead state={state} device={device} />
+        <div className="tray-box">
+          <Tray state={state} deviceId={deviceId} selected={slot} onSelect={n => setSlot(deviceId, n)} />
         </div>
-        <Tray state={state} deviceId={deviceId} selected={slot} onSelect={n => setSlot(deviceId, n)} />
+        <WellLegend />
       </section>
 
       <div className="stack">
         <section className="card stack">
           <div className="row between">
-            {/* 되돌아가는 단추는 뺐다 — 레일의 홈이 늘 같은 자리에 있고,
-                이 화면은 「어디서 왔는지」가 아니라 「무엇을 보는지」를 말한다. */}
+            {/* 되돌아가는 단추는 뺐다 — 이 화면은 「어디서 왔는지」가 아니라
+                「무엇을 보는지」를 말한다. */}
             <div className="titleline">
               <h2>
                 {device.name} · {pos(slot)}
@@ -147,7 +143,7 @@ export function DetailScreen({
           ) : (
             <div className="empty-state">
               <p>빈 슬롯입니다. 이 위치에 플레이트를 등록할 수 있습니다.</p>
-              <button className="primary" onClick={() => openRegister(deviceId)}>
+              <button className="primary" onClick={() => openRegister(deviceId, slot)}>
                 등록 화면으로
               </button>
             </div>

@@ -96,20 +96,23 @@ export function RegisterScreen({state, send, setTab, device = 1, slot: picked}: 
         </div>
         <div className="register-layout">
           <section className="card stack">
-            <div className="device-tabs">
-              {state.devices.map(x => (
-                <button
-                  key={x.id}
-                  className={x.id === deviceId ? 'selected' : ''}
-                  onClick={() => setDeviceId(x.id)}
-                >
-                  {x.name}
-                  <small>
-                    {status(x)} · 빈 슬롯 {SLOTS_PER_DEVICE - platesFor(state, x.id).length}
-                  </small>
-                </button>
-              ))}
-            </div>
+            {/* 스캐너가 둘 이상일 때만 고르는 탭을 둔다. */}
+            {state.devices.length > 1 && (
+              <div className="device-tabs">
+                {state.devices.map(x => (
+                  <button
+                    key={x.id}
+                    className={x.id === deviceId ? 'selected' : ''}
+                    onClick={() => setDeviceId(x.id)}
+                  >
+                    {x.name}
+                    <small>
+                      {status(x)} · 빈 슬롯 {SLOTS_PER_DEVICE - platesFor(state, x.id).length}
+                    </small>
+                  </button>
+                ))}
+              </div>
+            )}
             <Tray
               state={state}
               deviceId={deviceId}

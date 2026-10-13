@@ -1,7 +1,7 @@
 import {useEffect, useState} from 'react';
 import type {AppState} from '../api/types.ts';
 import {Modal} from '../shared/Modal.tsx';
-import {active, faultLabel, pending, plateBad, pos, totalRuns} from '../utils/plate.ts';
+import {alertItems, type AlertItem as Item} from '../utils/alerts.ts';
 
 interface Props {
   state: AppState;
@@ -13,22 +13,6 @@ interface Props {
   onNeedAdmin: (where: string, what: string) => void;
 }
 
-type Kind = 'device' | 'plate' | 'done';
-
-interface Item {
-  id: string;
-  kind: Kind;
-  /** 어디서 난 일인지 — SCANNER 3 · 8단 1열 */
-  where: string;
-  /** 무슨 일인지 */
-  what: string;
-  go?: () => void;
-  /**
-   * 누르면 화면이 바뀌는 줄에는 확인을 한 번 받는다. 알림을 읽으려고 눌렀는데
-   * 보던 화면이 사라지면 놀란다. 확인이 필요 없는 줄(안내만 뜨는 줄)은 비워 둔다.
-   */
-  ask?: string;
-}
 
 /*
  * 읽은 알림은 저장하지 않는다. 화면을 다시 띄우면 전부 새 알림으로 돌아간다.
@@ -63,8 +47,6 @@ export function AlertBell({state, onDevice, onPlate, onNeedAdmin}: Props) {
   const [read, setRead] = useState<string[]>([]);
   /** 화면을 옮기기 전에 확인을 받는 줄. */
   const [ask, setAsk] = useState<Item | null>(null);
-  const isAdmin = state.session.role === 'admin';
-
   useEffect(() => {
     if (!open) return;
     const fn = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false);
@@ -72,41 +54,7 @@ export function AlertBell({state, onDevice, onPlate, onNeedAdmin}: Props) {
     return () => document.removeEventListener('keydown', fn);
   }, [open]);
 
-  const name = (id: number) => state.devices.find(d => d.id === id)?.name ?? `SCANNER ${id}`;
-  const need = totalRuns(state);
-  const plates = active(state);
-
-  const items: Item[] = [
-    ...state.devices
-      .filter(d => faultLabel(d))
-      .map<Item>(d => ({
-        id: `d${d.id}`,
-        kind: 'device',
-        where: d.name,
-        what: faultLabel(d) as string,
-        // 관리자는 고치러 가고, 분석자는 왜 못 고치는지를 듣는다.
-        go: isAdmin ? onDevice : () => onNeedAdmin(d.name, faultLabel(d) as string),
-        ask: isAdmin ? '장비 화면으로 이동하시겠습니까?' : undefined,
-      })),
-    ...plates.filter(plateBad).map<Item>(p => ({
-      id: `b${p.id}`,
-      kind: 'plate',
-      where: `${name(p.deviceId)} · ${pos(p.slot)}`,
-      what: p.runs.at(-1)?.imageState === 'failed' ? '촬영 실패' : `미전송 ${pending(p)}건`,
-      go: () => onPlate(p.deviceId, p.slot),
-      ask: '이 플레이트 상세로 이동하시겠습니까?',
-    })),
-    ...plates
-      .filter(p => p.runs.length >= need)
-      .map<Item>(p => ({
-        id: `w${p.id}`,
-        kind: 'done',
-        where: `${name(p.deviceId)} · ${pos(p.slot)}`,
-        what: `촬영 완료 ${p.runs.length}/${need}`,
-        go: () => onPlate(p.deviceId, p.slot),
-        ask: '이 플레이트 상세로 이동하시겠습니까?',
-      })),
-  ];
+  const items = alertItems(state, {onDevice, onPlate, onNeedAdmin});
 
   const ids = items.map(i => i.id);
   const key = ids.join('|');
