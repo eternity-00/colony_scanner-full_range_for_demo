@@ -1,7 +1,7 @@
 import {EventEmitter} from 'node:events';
-import {DeviceError} from './virtual-device.mjs';
+import {DeviceError,SCANNER_COUNT} from './virtual-device.mjs';
 
-const offlineDevices=()=>Array.from({length:4},(_,i)=>({id:i+1,name:`SCANNER ${i+1}`,connected:false,pcConnected:false,doorOpen:false,fault:'ENGINE_OFFLINE',failCamera:false,temperature:0,co2:0,targetTemperature:37,targetCo2:5,z:0,light:false,heater:false,job:null}));
+const offlineDevices=()=>Array.from({length:SCANNER_COUNT},(_,i)=>({id:i+1,name:`SCANNER ${i+1}`,connected:false,pcConnected:false,doorOpen:false,fault:'ENGINE_OFFLINE',failCamera:false,temperature:0,co2:0,targetTemperature:37,targetCo2:5,z:0,light:false,heater:false,job:null}));
 
 export class RemoteDeviceAdapter extends EventEmitter {
  constructor({url='http://127.0.0.1:8790',pollMs=150}={}){

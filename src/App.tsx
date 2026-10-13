@@ -18,7 +18,7 @@ import {OverviewScreen} from './features/overview/OverviewScreen.tsx';
 import {RegisterScreen} from './features/register/RegisterScreen.tsx';
 import {SettingsScreen} from './features/settings/SettingsScreen.tsx';
 import {Header} from './layout/Header.tsx';
-import {Rail} from './layout/Rail.tsx';
+import {MenuDrawer} from './layout/MenuDrawer.tsx';
 import {Modal} from './shared/Modal.tsx';
 import {ShotViewer, type ShotTarget} from './shared/ShotViewer.tsx';
 import {hms, ymd} from './utils/datetime.ts';
@@ -53,6 +53,7 @@ export default function App() {
   // 관리자 권한이 없어 막힌 동작. PIN 이 맞으면 retry 로 그대로 이어서 보낸다.
   const [gate, setGate] = useState<{reason: string; retry: () => void} | null>(null);
   const [registerAt, setRegisterAt] = useState<{deviceId: number; slot?: number}>({deviceId: 1});
+  const [menu, setMenu] = useState(false);
   const [exitAsk, setExitAsk] = useState(false);
   const [exiting, setExiting] = useState(false);
   const [operator, setOperator] = useState(
@@ -154,7 +155,7 @@ export default function App() {
         text:
           cmd === 'remove'
             ? '보유 영상 파일을 삭제하고 슬롯을 비웁니다. 촬영 이력은 유지됩니다.'
-            : '외부 가상장비의 진행 작업을 즉시 중단합니다.',
+            : '스캐너의 진행 작업을 즉시 중단합니다.',
         run: () => void run(),
         danger: true,
       });
@@ -230,21 +231,33 @@ export default function App() {
 
   return (
     <div className="app" data-w={layoutWidth}>
-      <Rail tab={visible} isAdmin={isAdmin} onSelect={setTab} onExit={() => setExitAsk(true)} />
-      <div className="shell">
-        <Header
-          state={state}
-          tab={visible}
-          clock={hms(state.serverTime)}
-          day={ymd(state.serverTime)}
-          operator={operator}
-          onAccount={() => setUserCard(true)}
-          onDevice={() => setTab('device')}
-          onPlate={openDetail}
-          onNeedAdmin={(where, what) => setAdminAsk({where, what})}
-        />
-        <main>{screens[visible]}</main>
-      </div>
+      <Header
+        state={state}
+        tab={visible}
+        clock={hms(state.serverTime)}
+        day={ymd(state.serverTime)}
+        operator={operator}
+        onMenu={() => setMenu(true)}
+        onAccount={() => setUserCard(true)}
+        onDevice={() => setTab('device')}
+        onPlate={openDetail}
+        onNeedAdmin={(where, what) => setAdminAsk({where, what})}
+      />
+      <main>{screens[visible]}</main>
+      <MenuDrawer
+        open={menu}
+        tab={visible}
+        isAdmin={isAdmin}
+        onSelect={key => {
+          setTab(key);
+          setMenu(false);
+        }}
+        onExit={() => {
+          setMenu(false);
+          setExitAsk(true);
+        }}
+        onClose={() => setMenu(false)}
+      />
 
       {notice && (
         <button className={`toast ${notice.bad ? 'bad' : ''}`} onClick={() => setNotice(null)}>
@@ -321,14 +334,14 @@ export default function App() {
 
       {exitAsk && (
         <Modal
-          title="가상 머신 종료"
+          title="종료"
           confirmLabel="종료하고 나가기"
           danger
           onConfirm={doExit}
           onClose={() => setExitAsk(false)}
         >
           <p>
-            Colony Scanner 데모를 종료하고 바탕화면으로 돌아갑니다. 진행 중인 촬영이 있으면
+            Colony Scanner 를 종료하고 바탕화면으로 돌아갑니다. 진행 중인 촬영이 있으면
             중단됩니다.
           </p>
         </Modal>
@@ -337,7 +350,7 @@ export default function App() {
       {exiting && (
         <div className="exit-overlay">
           <div className="spin" />
-          <b>가상 머신을 종료하고 있습니다</b>
+          <b>종료하고 있습니다</b>
           <span>바탕화면으로 이동합니다…</span>
         </div>
       )}

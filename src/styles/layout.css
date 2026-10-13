@@ -1,187 +1,82 @@
-/* 앱 껍데기 · 좌측 아이콘 레일 · 헤더 (D2) */
+/* 앱 껍데기 · 헤더 · 메뉴 서랍 (v1.7 · 도안 3-1) */
 
 /* 픽셀 수를 요구하지 않는다. 좁으면 좁은 대로 담고, 분기는 rem 기준으로 App 이 data-w 로 준다. */
-.app{height:100vh;min-height:0;min-width:0;display:flex;flex-direction:row}
-/* 헤더는 화면 끝에서 끝까지 간다 — 왼쪽 파란 색면이 가장자리에 닿아야
-   가로로 잘린 띠가 아니라 화면의 머리로 읽힌다.
-   손잡이가 설 26px 은 본문(main)에서만 비운다. 손잡이는 세로 가운데에
-   있어 헤더와 겹치지 않는다. */
-.shell{flex:1;min-width:0;display:flex;flex-direction:column}
+.app{height:100vh;min-height:0;min-width:0;display:flex;flex-direction:column}
 .boot{height:100vh;display:grid;place-content:center;text-align:center;gap:0.75rem;background:var(--deep);color:#fff}
 .head-status,.row,.actions{display:flex;align-items:center;gap:0.625rem}
-.shell>main{flex:1;min-height:0;padding:1rem 1rem 1rem 2.625rem;overflow:auto}
-.app[data-w="sm"] .shell>main,.app[data-w="md"] .shell>main{padding:0.75rem 0.75rem 0.75rem 2.375rem}
-
-/* ── 좌측 레일 (v1.6 · 떠 있는 밝은 판) ──
- *
- * 본문 옆에 붙어 자리를 먹던 것을 띄워 본문 위로 덮는다. 그래서 본문 자리가
- * 고정된다 — 판이 들어오고 나가도 아래 내용이 움직이지 않는다.
- * 늘 비워 두는 것은 손잡이가 설 26px 뿐이다(main 의 왼쪽 여백).
- *
- * 판은 밝다. 짙은 판은 회색 바탕에 흰 카드가 깔린 이 화면에서 덩어리로
- * 떨어져 나와 시선을 먼저 가져갔다. 메뉴는 목적지가 아니라 지나가는 곳이라
- * 카드와 같은 재료로 두어 「얹힌 한 겹」으로 읽히게 한다.
- *
- * 칸에는 그림 아래 이름을 적는다. 판이 덮는 방식이라 폭은 공짜다 —
- * 118px 로 넓어져도 본문은 한 픽셀도 줄지 않는다. 그러니 가장 읽기 쉬운
- * 쪽을 고르지 않을 이유가 없다.
- *
- * 오른쪽 모서리만 둥글린다(20px). 칸의 둥근 모서리(22px)를 판도 따라 하는
- * 꼴이라 둘이 같은 말을 쓴다.
- *
- * 비스듬히 깎아 봤더니 칸은 네모인데 판만 사선이라 따로 놀았고, 폭의 절반만큼
- * 둥글리면(알약) 이번엔 판이 칸보다 더 크게 말해 버렸다. 칸과 같은 정도로만
- * 둥글리는 것이 가장 조용하다.
- */
-/* 화면 위에서 아래까지 꽉 채운다. 위아래를 띄우면 그 틈으로 본문이 비쳐
-   판이 떠 있는 게 아니라 잘려 있는 것으로 보인다. 오른쪽 모서리만 둥글려
-   가장자리에서 밀려 나온 한 덩이로 남긴다. */
-.rail{position:fixed;z-index:46;left:0;top:0;bottom:0;
-  /* 폭은 헤더에서 로고가 끝나는 자리와 같다 — 자세한 셈은 .rail-title 참고. */
-  --menu-w:10.1875rem;width:var(--menu-w);
-  display:flex;flex-direction:column;align-items:stretch;
-  background:#f7f8f9;border:1px solid var(--line);border-left:0;border-top:0;
-  border-radius:0 0.375rem 0.375rem 0;
-  box-shadow:6px 0 22px #0b203a1f;
-  transform:translateX(-100%);transition:transform .18s cubic-bezier(.4,0,.2,1)}
-.rail.on{transform:translateX(0)}
-/*
- * 접혀 있을 때도 판이 있다는 표시. 화면 왼쪽 가장자리에 그림자를 깐다 —
- * 숨은 판이 밖에서 드리우는 그늘이다. 손잡이 하나만 있으면 그게 무엇인지
- * 모르지만, 가장자리가 어두우면 「저 너머에 뭔가 있다」가 먼저 읽힌다.
- * 손잡이가 설 26px 자리에 딱 맞춘다.
- */
-.app:before{content:'';position:fixed;z-index:44;left:0;top:0;bottom:0;width:1.625rem;
-  pointer-events:none;
-  background:linear-gradient(90deg,#0b203a30 0%,#0b203a14 40%,#0b203a00 100%)}
-
-/* 판 밖을 눌러 닫는 가림막. 어둡게 덮지 않는다 — 뒤의 본문이 그대로 보여야
-   무엇을 보다가 메뉴를 열었는지가 끊기지 않는다. */
-.rail-scrim{position:fixed;inset:0;z-index:45;background:#00000014}
-/*
- * 손잡이 — 흰 면. 회색을 여러 단계 거쳐 여기로 왔다. 왼쪽 가장자리에는
- * 이미 그늘이 깔려 있으므로, 손잡이는 어둡게 할수록 그 그늘에 섞이고
- * 밝을수록 떨어져 나온다. 카드와 같은 흰 면이 가장 또렷하다.
- * 그늘에서 떠 보이게 하는 것은 색이 아니라 그림자의 몫이다.
- */
-.rail-grip{position:fixed;z-index:47;left:0;top:50%;margin-top:-2.125rem;
-  width:1.625rem;height:4.25rem;min-height:0;padding:0;display:grid;place-items:center;
-  border:1px solid var(--line);border-left:0;border-radius:0 0.375rem 0.375rem 0;
-  background:#fff;color:var(--gt);
-  box-shadow:5px 0 18px #0b203a26;cursor:pointer;
-  transition:left .18s cubic-bezier(.4,0,.2,1)}
-.rail-grip.on{left:10.1875rem}
-.rail-grip svg{width:0.9375rem;height:0.9375rem}
-/*
- * 판의 머리 — 옅은 면에 어두운 글씨.
- *
- * 색면으로 두지 않는다. 판이 헤더의 왼쪽을 덮으므로, 머리까지 진한 면이면
- * 「메뉴」와 「현황」이 같은 높이의 색면 둘로 맞붙어 한 덩어리로 읽힌다.
- * 머리를 밝게 비우면 이 줄에서 색면은 「현황」 하나만 남는다.
- *
- * 폭 10.1875rem = 헤더 왼쪽 여백 1.25rem + 로고 8.9375rem — 로고가 끝나는 자리에서
- * 끊는다. 구분선까지 꽉 채우면 머리와 「현황」이 맞붙어 숨 쉴 틈이 없다. 16px 을
- * 남기면 그 사이로 헤더가 그대로 비쳐 두 블록이 갈린다.
- * 높이 3.9375rem = 헤더 4rem − 아래 선 1px.
- *
- * 글자 #3f4a52 는 옅은 면 위에서 7.89:1. 모서리는 깎지 않는다 — 판 위쪽 끝을
- * 가로지르는 띠라 여기서 둥글면 판에서 떨어져 나온 라벨처럼 보인다.
- */
-.rail-title{flex:none;width:100%;height:3.9375rem;
-  display:flex;align-items:center;justify-content:center;
-  background:#eceff2;border-bottom:1px solid var(--line);border-radius:0;
-  color:#3f4a52}
-/* 칸 사이를 벌린다. 카드끼리 붙어 있으면 여섯이 한 덩이로 보여 어디까지가
-   한 칸인지 손가락이 헷갈린다 — 8 → 14px. */
-/* 위아래 여백은 칸 사이보다 넓게 둔다. 같으면 첫 칸이 MENU 선에, 끝 칸이
-   발치 선에 붙어 선이 칸의 일부처럼 보인다. */
-.rail-nav{width:100%;flex:1;min-height:0;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;gap:0.5rem;padding:0.75rem 0 0.625rem;overflow-y:auto}
-/* 판의 발치 — 가는 선으로 메뉴와 가르고 흐리게 둔다. 메뉴 칸과 같은 무게로
-   두면 「종료」가 일곱 번째 화면처럼 보인다. */
-.rail-foot{flex:none;width:calc(100% - 2rem);margin-inline:auto;display:flex;align-items:center;justify-content:center;
-  gap:0.5rem;padding:0.625rem 0 0.75rem;border-top:1px solid var(--line)}
-.rail-foot em{font-style:normal;font-size:0.6875rem;font-weight:700;color:#a8b0b7;
-  font-variant-numeric:tabular-nums}
-.rail-exit{width:2rem;height:2rem;min-height:0;flex:none;padding:0;display:grid;place-items:center;
-  border:0;border-radius:0.375rem;background:transparent;color:#a8b0b7;cursor:pointer}
-.rail-exit svg{width:1.125rem;height:1.125rem}
-/* 흰 네모에 파란 아이콘 + 이름. 판·손잡이·칸 모두 6px 만 깎는다 — 둥근 느낌을
-   빼되 모서리가 날로 서지는 않게. 아이콘은 그림이라 3:1 이면 되므로
-   #4a7b96 로 두고, 글자는 4.5:1 이 필요해 #3f6a80 으로 한 단계 짙게 쓴다. */
-.rail-nav button{width:calc(var(--menu-w) - 1.5rem);height:5rem;min-height:0;flex:none;padding:0;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.3125rem;
-  border:1px solid var(--line);border-radius:0.375rem;background:#fff;color:var(--blue);cursor:pointer;
-  box-shadow:0 1px 2px #0b203a12}
-.rail-nav button svg{width:2.125rem;height:2.125rem}
-.rail-nav button span{font-size:0.9375rem;font-weight:800;color:#3f6a80;white-space:nowrap}
-/* 고른 것은 색면이 아니라 테두리 두 겹으로 띄운다. 밝은 판에서 하나만 색으로
-   채우면 그 자리에 무게가 쏠려, 「지금 화면」이 아니라 「눌러야 할 것」으로 보인다.
-   네온 발광과 안쪽 그라데이션을 거쳐 여기로 돌아왔다 — 둘 다 고른 칸 하나를
-   화면에서 가장 센 것으로 만들어, 정작 봐야 할 본문보다 먼저 눈에 들어왔다. */
-.rail-nav button.on{border:2px solid var(--blue);box-shadow:0 0 0 4px #4a7b961f}
+.app>main{flex:1;min-height:0;padding:1rem 1.25rem;overflow:auto}
+.app[data-w="sm"]>main,.app[data-w="md"]>main{padding:0.75rem 1rem}
 
 /* ── 헤더 ── */
-.shell>header{height:4rem;flex:none;display:flex;align-items:stretch;background:#fff;border-bottom:1px solid var(--g3)}
-/* 지금 보는 화면을 색면으로 못박는다. 오른쪽 아래 모서리만 깎아 네모가 그냥
-   끊기지 않게 한다 — 화살표로 깎으면 어디로 가라는 방향이 생기는데, 이 색면은
-   「여기가 지금 보는 화면」이라는 표시지 지시가 아니다. 깎이는 폭만큼 오른쪽
-   여백을 더 줘서 글자가 사선에 닿지 않게 한다. */
-/* 파란 색면 하나에 로고와 화면 이름을 함께 담는다. 둘을 따로 두면 파란
-   덩어리가 둘이 되어 어느 쪽이 「지금 화면」인지 흐려진다.
-   오른쪽 변을 통째로 비스듬히 세운다 — 모서리만 깎으면 네모가 살짝 이 빠진
-   것으로 보이는데, 변 전체가 기울면 한 덩이가 비스듬히 놓인 것으로 읽힌다.
-   기운 만큼 오른쪽 여백을 더 줘 글자가 사선에 닿지 않게 한다. */
-.hd-mode{flex:none;display:flex;align-items:center;gap:1rem;padding:0 2.375rem 0 1.25rem;
-  background:var(--blue);color:#fff;
-  clip-path:polygon(0 0,100% 0,calc(100% - 1.75rem) 100%,0 100%)}
-/* 로고와 화면 이름을 가르는 선. 색면 위라 흰색을 옅게 깐다. */
-.hd-bar{width:1px;height:2.375rem;flex:none;background:#ffffff59}
-/* 화면 이름 옆 아이콘. 파란 색면 위의 흰 선이라 얇으면 묻힌다 —
-   크기와 선 굵기를 같이 올린다(굵기는 stroke-width 로, SVG 안이 아니라
-   여기서 준다 — 레일의 같은 아이콘은 흰 바탕이라 그대로 둔다). */
-.hd-mode>svg{width:1.9375rem;height:1.9375rem;flex:none;stroke-width:2.2}
-/* 아이콘까지 baseline 으로 묶으면 SVG 의 기준선이 아래 모서리라 글자가 위로 밀린다. */
-.hd-mode-t{display:flex;align-items:baseline;gap:0.5rem;white-space:nowrap}
-/* 지금 보는 화면 이름이라 헤더에서 가장 굵다 — 700 → 800. */
-.hd-mode-t b{font-size:1.375rem;font-weight:800;letter-spacing:.04em}
-.hd-mode-t em{font-style:normal;font-size:0.96875rem;font-weight:600;letter-spacing:.04em}
-/* 여기에는 장비 전체에 하나뿐인 값만 둔다(Header.tsx 주석). */
-.hd-meta{flex:1;min-width:0;display:flex;align-items:center;gap:1.625rem;padding:0 1.25rem;overflow:hidden}
-.hm{flex:none;display:flex;flex-direction:column;gap:2px;white-space:nowrap}
-/* 값 사이를 곧은 세로선으로 가른다. 라벨/값이 두 줄이라 간격만으로는
-   어디까지가 한 쌍인지 흐려진다. 선은 글자 높이만큼만 — 헤더 끝까지 그으면
-   칸처럼 보인다.
-   사선은 왼쪽 색면의 오른쪽 변 하나만 쓴다. 선까지 다 눕혀 봤더니 헤더가
-   통째로 기운 무늬가 되어, 읽어야 할 값보다 무늬가 먼저 보였다. */
-.hm+.hm{padding-left:1.625rem;border-left:1px solid var(--g3)}
-.hm small{font-size:0.75rem;font-weight:700;letter-spacing:.06em;color:var(--gt)}
-.hm b{font-size:0.9375rem;font-weight:700;letter-spacing:-.01em;color:var(--ink);font-variant-numeric:tabular-nums}
-.hm b.bad{color:#c01d27}
-/* 시각은 값 줄에서 유일하게 초마다 바뀌는 값이라 등폭 숫자로 세운다.
-   자리가 흔들리면 옆의 「유선 연결」까지 같이 떨리는 것처럼 보인다. */
-.hm-clock small,.hm-clock b{font-variant-numeric:tabular-nums}
-.hm-clock b{font-size:1rem}
-/* 종과 로고는 하는 일이 다르다 — 하나는 누르는 자리, 하나는 읽는 표식이다.
-   붙여 두면 로고까지 눌러 보게 된다. 사이를 벌려 둘을 갈라 놓는다. */
-.hd-right{flex:none;display:flex;align-items:center;gap:0.875rem;padding:0 0.75rem 0 0.5rem}
+/* 메뉴 버튼이 1.25배로 커지면서 헤더도 4 → 5rem. 색면이 헤더 높이를 그대로 쓰므로
+   둘을 같이 올려야 색면이 잘리지 않는다. */
+.app>header{height:5rem;flex:none;background:#fff;color:var(--ink);display:flex;align-items:center;padding:0;border-bottom:1px solid var(--g3)}
+
+/* 헤더 왼쪽 색면이 곧 메뉴 버튼이다. 서랍형이라 메뉴가 평소에 보이지 않으므로,
+   여는 곳은 헤더에서 가장 눈에 띄는 자리여야 한다 — 터치 타깃 5rem. */
+.hd-menu{width:5rem;height:5rem;min-height:0;flex:none;margin:0;padding:0;border:0;border-radius:0;background:var(--blue);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:0.4375rem;cursor:pointer}
+.hd-menu span{width:1.75rem;height:3px;background:#fff}
+
+.wm{padding-left:1.25rem;font-size:1.5rem;font-weight:800;letter-spacing:-.02em;color:var(--gt);white-space:nowrap}
+.wm i{font-style:normal;color:var(--blue)}
+/* 구분선은 글자 높이만큼만 그린다. 헤더 끝까지 그으면 칸처럼 보인다. */
+.sub{margin-left:0.875rem;padding-left:0.875rem;border-left:1px solid #9ba2ac;font-size:0.9375rem;color:var(--gt);white-space:nowrap}
+.head-status{margin-left:auto;min-width:0;gap:0.5rem;padding-right:1rem;font-size:0.8125rem}
+.hstat{display:inline-flex;align-items:center;gap:0.4375rem;white-space:nowrap;height:2.375rem;padding:0 0.8125rem;border-radius:var(--rr);background:#fff;border:1px solid var(--line);color:var(--gt);font-size:0.8125rem;font-weight:500}
+.hstat b{color:var(--gt);font-weight:700;font-variant-numeric:tabular-nums}
+.hstat .dot{width:0.4375rem;height:0.4375rem;flex:none;background:#147d40}
+.hstat.bad{background:#ca263f;border-color:#ca263f;color:#fff}
+.hstat.bad b{color:#fff}
+.hstat.bad .dot{background:#fff}
+.clock{display:inline-flex;align-items:center;color:var(--gt);font-size:0.8125rem;font-weight:600;padding:0 0.375rem;white-space:nowrap;font-variant-numeric:tabular-nums}
 .hd-bell{position:relative;width:3.25rem;height:3.25rem;min-height:0;flex:none;padding:0;display:grid;place-items:center;
   border:0;background:transparent;color:var(--ink);cursor:pointer}
 .hd-bell svg{width:2rem;height:2rem}
 .hd-bell i{position:absolute;top:1px;right:1px;min-width:1.125rem;height:1.125rem;padding:0 0.25rem;border-radius:0.5625rem;
   background:#c01d27;color:#fff;font-size:0.65625rem;font-weight:700;font-style:normal;display:grid;place-items:center}
-/* 로고는 파란 색면 안, 화면 맨 왼쪽이다. 2단 락업이라 세로를 잡고 가로는
-   비율로 따라간다. 색면 높이(4rem) 안에서 위아래 숨 쉴 자리를 남긴다. */
-.wm{display:block;height:3.375rem;width:auto;flex:none}
-.app[data-w="sm"] .wm{height:2.5rem}
-/* ── 오른쪽 끝: 알림 · 계정 ── */
-/* 계정 — 이니셜 동그라미 + 등급. 누르면 말풍선이 뜬다. */
-.hd-acc{display:flex;align-items:center;gap:0.5rem;height:2.875rem;min-height:0;padding:0 0.625rem 0 0.375rem;
-  border:0;border-radius:var(--rr);background:transparent;cursor:pointer}
-.hd-acc i{width:2.25rem;height:2.25rem;flex:none;border-radius:50%;background:var(--deep);color:#fff;
-  display:grid;place-items:center;font-style:normal;font-size:0.9375rem;font-weight:800}
-.hd-acc em{font-style:normal;font-size:0.8125rem;font-weight:700;color:var(--gt);white-space:nowrap}
-.app[data-w="md"] .hd-meta .hm:first-child{display:none}
+.role-chip{height:2.625rem;min-height:0;min-width:0;display:inline-flex;white-space:nowrap;flex-direction:row;align-items:center;gap:0.5625rem;padding:0 0.875rem 0 0.25rem;border:1px solid var(--line);border-radius:var(--rr);background:#fff;color:var(--gt);font-size:0.8125rem;font-weight:600}
+.role-chip i{width:2.0625rem;height:2.0625rem;flex:none;border-radius:1px;background:var(--deep);color:#fff;display:grid;place-items:center;font-style:normal;font-size:0.75rem;font-weight:700}
+/* 관리자일 때만 이니셜을 깊은 주황으로 바꾼다. 칩 전체를 물들이지 않는다. */
+.role-chip.admin i{background:#c77d0a}
+
+/* 폭이 모자라면 부제와 사용자 이름을 덜어낸다. 이니셜과 상태칩은 남긴다. */
+.app[data-w="md"] .sub{display:none}
+.app[data-w="sm"] .sub,.app[data-w="sm"] .clock{display:none}
+.app[data-w="sm"] .role-chip{padding:0 0.25rem}
+.app[data-w="sm"] .role-chip .who{display:none}
+
+/* ── 메뉴 서랍 ── */
+.drawer-scrim{position:fixed;inset:0;z-index:44;background:#0a112eaa;animation:scrim-in .15s ease}
+@keyframes scrim-in{from{opacity:0}to{opacity:1}}
+.app>nav.drawer{position:fixed;z-index:45;top:0;left:0;height:100vh;width:min(25rem,88vw);display:flex;flex-direction:column;gap:0.375rem;padding:1rem 0.875rem 1rem;background:#fff;border-right:1px solid var(--g3);box-shadow:8px 0 32px #0a112e26;transform:translateX(-100%);transition:transform .22s cubic-bezier(.4,0,.2,1)}
+.app>nav.drawer.open{transform:translateX(0)}
+.drawer-head{display:flex;align-items:center;justify-content:space-between;padding:0.25rem 0.625rem 0.875rem;margin-bottom:0.375rem;border-bottom:1px solid var(--g3)}
+.drawer-head b{font-size:1.625rem;font-weight:800;letter-spacing:3px;color:var(--gt)}
+.drawer-x{width:3.25rem;height:3.25rem;min-height:0;padding:0;border:0;border-radius:var(--rr);background:transparent;font-size:2.25rem;line-height:1;color:var(--gt);cursor:pointer}
+/* 항목 칸: 1.3 의 4.125rem → 5.25rem(약 1.27배). 칸 사이도 함께 벌려
+   장갑 낀 손가락이 옆 칸을 건드리지 않게 한다. */
+.drawer-list{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:0.5rem}
+.app>nav.drawer .drawer-list button{display:flex;flex-direction:row;align-items:center;gap:1rem;width:100%;min-height:5.25rem;flex:none;padding:0 1.25rem;border:0;border-radius:var(--rr);background:transparent;color:var(--gt);text-align:left}
+.di{width:3.5rem;height:3.5rem;flex:none;border-radius:2px;display:grid;place-items:center;background:#f2f1f3;border:1px solid var(--line)}
+.di .dico{width:1.875rem;height:1.875rem;color:var(--gt)}
+.app>nav.drawer .drawer-list button b{font-size:1.75rem;font-weight:800;letter-spacing:-.3px}
+.app>nav.drawer .drawer-list button small{font-size:0.9375rem;font-weight:600;color:var(--gt);letter-spacing:.4px}
+/* 포인트는 선택 행 하나. 「현재 위치」는 상태가 아니라 내비게이션이라
+   경고색(빨강·앰버·초록)은 뜻이 안 맞고, 회색은 비활성처럼 읽힌다. */
+.app>nav.drawer .drawer-list button.active{background:var(--blue);color:#fff}
+.app>nav.drawer .drawer-list button.active small{color:#dde5f2}
+/* 선택 행이 짙은 면이라, 그 위의 아이콘 칩만 흰 면으로 뒤집는다. */
+.app>nav.drawer .drawer-list button.active .di{background:#fff;border-color:#fff}
+.app>nav.drawer .drawer-list button.active .dico{color:var(--blue)}
+.app[data-w="sm"]>nav.drawer .drawer-list button{min-height:3.75rem}
+.app[data-w="sm"]>nav.drawer .drawer-list button b{font-size:1.25rem}
+.app[data-w="sm"]>nav.drawer .drawer-list button small{display:none}
+
+/* 서랍 맨 아래 — 종료와 버전. 메뉴 칸과는 선으로 가른다. */
+.drawer-foot{margin-top:auto;padding-top:0.75rem;border-top:1px solid var(--g3);display:flex;align-items:center;gap:0.75rem}
+.exit-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:0.625rem;min-height:3.75rem;border:1px solid var(--line);border-radius:var(--rr);background:#fff;color:#ca263f;font-size:1.0625rem;font-weight:800}
+.exit-btn svg{width:1.375rem;height:1.375rem}
+.drawer-foot em{flex:none;padding-right:0.5rem;font-style:normal;font-size:0.75rem;font-weight:700;color:#a8b0b7;font-variant-numeric:tabular-nums}
 
 /* 종료 오버레이 */
 .exit-overlay{position:fixed;inset:0;z-index:60;background:var(--deep);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0.875rem;color:#fff}
@@ -196,9 +91,9 @@
  * 남는다. 화면을 옮겨도 그 자리에 새로 그려진 버튼이 눌린 것처럼 옅게 떠 있었다.
  */
 @media (hover:hover) and (pointer:fine){
- .rail-nav button:hover:not(.on){background:#eef1f3;border-color:#c8ced3}
- .rail-grip:hover{background:#eef1f3}
- .rail-exit:hover{background:#eef1f3;color:var(--gt)}
+ .hd-menu:hover{filter:brightness(.92)}
+ .drawer-x:hover,.app>nav.drawer .drawer-list button:hover:not(.active){background:#f2f1f3}
+ .exit-btn:hover{background:#f2f1f3;border-color:#9ba2ac}
  .hd-bell:hover{background:#eaeaea}
- .hd-acc:hover{background:#eaeaea}
+ .role-chip:hover{background:#f2f4f8}
 }

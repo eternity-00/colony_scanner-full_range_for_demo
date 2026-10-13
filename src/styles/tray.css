@@ -39,7 +39,7 @@
 .cell.w-empty{border:1px dashed #d8d8d8;color:#9a9a9a}
 .cell.w-empty::before{background:#fff;border-color:#d2d2d2}
 /* 촬영 중은 사람이 할 일이 없는 상태라 깜빡이지 않는다. */
-.cell.w-busy::before{background:var(--dot);border-color:var(--dot)}
+.cell.w-busy::before{background:#6ba4c4;border-color:#6ba4c4}
 .cell.w-done::before{background:var(--well-done);border-color:var(--well-done)}
 .cell.w-bad::before{background:var(--well-bad);border-color:var(--well-bad)}
 
@@ -55,7 +55,7 @@
 .legend span{display:inline-flex;align-items:center;gap:0.375rem;white-space:nowrap}
 .legend i{width:0.8125rem;height:0.8125rem;flex:none;border-radius:50%;background:#d99009;border:2px solid #d99009}
 .legend i.w-empty{background:#fff;border-color:#d2d2d2}
-.legend i.w-busy{background:var(--dot);border-color:var(--dot)}
+.legend i.w-busy{background:#6ba4c4;border-color:#6ba4c4}
 .legend i.w-done{background:#5aa153;border-color:#5aa153}
 .legend i.w-bad{background:#d6202b;border-color:#d6202b}
 

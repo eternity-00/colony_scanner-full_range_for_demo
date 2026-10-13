@@ -20,7 +20,7 @@ interface Props {
   operator: string;
   setOperator: (name: string) => void;
   onRole: () => void;
-  /** 가상 머신 종료. 레일에 있던 것을 여기로 내렸다. */
+  /** 프로그램 종료. 서랍 맨 아래에도 있다. */
   onExit: () => void;
 }
 
@@ -349,17 +349,16 @@ export function SettingsScreen({state, send, operator, setOperator, onRole,
             {state.devices.length}대 · 각 {SLOTS_PER_DEVICE}슬롯
           </dd>
           <dt>시리얼</dt>
-          <dd>CC-DEMO-260915</dd>
+          <dd>미등록</dd>
         </dl>
         {/*
-          * 가상 머신 종료. 레일에 있던 것을 여기로 내렸다 — 하루에 한 번
-          * 쓸까 말까 한 것이 화면을 옮길 때마다 지나가는 판에 있을 이유가 없고,
-          * 잘못 눌리면 촬영이 끊긴다. 장비 정보 아래가 제자리다.
+          * 프로그램 종료. 서랍 맨 아래에도 있지만, 장비 정보를 보러 온 사람이
+          * 찾는 자리도 여기라 함께 둔다. 잘못 눌려도 확인 팝업이 받는다.
           */}
         <div className="quit">
           <p>
-            <b>가상 머신 종료</b>
-            <em>데모를 끝내고 바탕화면으로 돌아갑니다. 진행 중인 촬영은 중단됩니다.</em>
+            <b>프로그램 종료</b>
+            <em>Colony Scanner 를 끝내고 바탕화면으로 돌아갑니다. 진행 중인 촬영은 중단됩니다.</em>
           </p>
           <button className="outline-danger" onClick={onExit}>
             종료

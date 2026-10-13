@@ -1,11 +1,13 @@
 import {EventEmitter} from 'node:events';
 import {randomUUID} from 'node:crypto';
+/** 스캐너 수. LCD 하나가 스캐너 한 대를 맡는다(2차 피드백). 테스트는 SCANNER_COUNT 로 늘려 쓴다. */
+export const SCANNER_COUNT=Math.max(1,Number(process.env.SCANNER_COUNT)||1);
 export const STAGES=['이송','물기 제거','촬영','수납 복귀','전송','PC 저장'];
 export class DeviceError extends Error { constructor(code,message,status=409){super(message);this.code=code;this.status=status;} }
 export class VirtualDeviceAdapter extends EventEmitter {
  constructor({stageMs=1600,config=[]}={}){
   super();this.stageMs=stageMs;
-  this.devices=Array.from({length:4},(_,i)=>({id:i+1,name:`SCANNER ${i+1}`,connected:true,pcConnected:true,doorOpen:false,fault:null,failCamera:false,temperature:37,co2:5,targetTemperature:37,targetCo2:5,z:0,light:false,heater:false,job:null,...config[i],id:i+1,job:null,light:false,heater:false,z:0}));
+  this.devices=Array.from({length:SCANNER_COUNT},(_,i)=>({id:i+1,name:`SCANNER ${i+1}`,connected:true,pcConnected:true,doorOpen:false,fault:null,failCamera:false,temperature:37,co2:5,targetTemperature:37,targetCo2:5,z:0,light:false,heater:false,job:null,...config[i],id:i+1,job:null,light:false,heater:false,z:0}));
  }
  snapshot(){return structuredClone(this.devices);}
  get(id){const d=this.devices.find(d=>d.id===id);if(!d)throw new DeviceError('INVALID_DEVICE','스캐너 번호는 1~4여야 합니다.',400);return d;}

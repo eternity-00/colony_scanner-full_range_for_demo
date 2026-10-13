@@ -23,7 +23,7 @@ const id = () => {
 
 export async function getState(): Promise<AppState> {
   const res = await fetch('/api/state');
-  if (!res.ok) throw new Error('가상장비 서버 상태를 읽을 수 없습니다.');
+  if (!res.ok) throw new Error('장비 제어 서버 상태를 읽을 수 없습니다.');
   return res.json() as Promise<AppState>;
 }
 
