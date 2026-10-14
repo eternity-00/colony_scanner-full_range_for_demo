@@ -11,7 +11,7 @@ import {elapsedLabel, kdt} from '../../utils/datetime.ts';
 import {
   dueNow,
   nextAt,
-  pending,
+  plateBad,
   platesFor,
   pos,
   totalRuns,
@@ -66,7 +66,7 @@ export function StatusScreen({
   const need = totalRuns(state);
   const free = SLOTS_PER_DEVICE - plates.length;
   const waiting = plates.filter(p => p.runs.length >= need).length;
-  const unsent = plates.reduce((a, p) => a + pending(p), 0);
+  const bad = plates.filter(plateBad).length;
   const next = scannerNext(state, d);
   const job = d.job && ['running', 'paused'].includes(d.job.status) ? d.job : null;
   const capturing = job?.type === 'capture';
@@ -131,15 +131,16 @@ export function StatusScreen({
           )}
         </button>
 
+        {/* 홈 아랫줄과 같은 넷, 같은 색(혜원님 10/14). 미전송은 따로 세지 않고 문제 발생에 든다. */}
         <div className="p-card st-facts">
-          <span>
-            <small>빈 슬롯</small>
-            <b className={free ? '' : 'zero'}>
-              {free}
-              <em>칸</em>
+          <span className={plates.length ? 'grow' : ''}>
+            <small>배양 중</small>
+            <b className={plates.length ? '' : 'zero'}>
+              {plates.length}
+              <em>/ {SLOTS_PER_DEVICE}</em>
             </b>
           </span>
-          <span>
+          <span className={waiting ? 'ready' : ''}>
             <small>반출 대기</small>
             <b className={waiting ? '' : 'zero'}>
               {waiting}
@@ -147,10 +148,17 @@ export function StatusScreen({
             </b>
           </span>
           <span>
-            <small>미전송</small>
-            <b className={unsent ? '' : 'zero'}>
-              {unsent}
-              <em>건</em>
+            <small>빈 슬롯</small>
+            <b className={free ? '' : 'zero'}>
+              {free}
+              <em>칸</em>
+            </b>
+          </span>
+          <span className={bad ? 'bad' : ''}>
+            <small>문제 발생</small>
+            <b className={bad ? '' : 'zero'}>
+              {bad}
+              <em>매</em>
             </b>
           </span>
         </div>
