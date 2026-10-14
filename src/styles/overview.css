@@ -7,8 +7,11 @@
 
 /* 등록 · 반출 — 홈에서 가장 큰 두 칸. */
 .home-acts{min-height:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
-.home-act{height:100%;min-height:8rem;display:flex;align-items:center;justify-content:center;gap:1.25rem;
+.home-act{height:100%;min-height:8rem;display:flex;align-items:center;justify-content:center;
   padding:1rem 1.5rem;border:1px solid var(--line);border-radius:var(--rr);background:#fff;color:var(--blue)}
+/* 아이콘 붙은 버튼 공통 규칙(button:has(>.acti), 간격 7px)이 이 버튼에도 걸린다. 이 버튼은
+   아이콘이 크니 글자와 더 띄운다. */
+.home-acts>.home-act{gap:1.75rem}
 .home-act>svg{width:3.25rem;height:3.25rem;flex:none;stroke-width:2}
 .home-act span{display:flex;flex-direction:column;align-items:center;gap:0.5rem}
 .home-act b{white-space:nowrap;font-size:2rem;font-weight:800;letter-spacing:-.02em;color:var(--ink)}
