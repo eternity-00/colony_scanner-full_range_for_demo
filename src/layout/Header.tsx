@@ -66,7 +66,10 @@ export function Header({state, tab, clock, day, operator, onMenu, onAccount, onH
           </span>
         </button>
       </div>
-      <span className="sub">{name?.[1]}</span>
+      <span className="sub">
+        {name?.[1]}
+        <em>{name?.[2]}</em>
+      </span>
 
       <div className="head-status">
         <span className={`hstat ${abnormal ? 'bad' : ''}`}>

@@ -613,3 +613,6 @@
 .hd-sep{width:1px;height:2.375rem;flex:none;background:#ffffff59}
 .wm-home{display:inline-flex;align-items:center;gap:0.625rem;padding-left:1.125rem}
 .wm-home svg{width:1.75rem;height:1.75rem;flex:none;stroke-width:2.2;color:#fff}
+/* 화면 이름 옆 영문(혜원님 10/14) — 한 단계 작고 옅게. 좁은 화면에서는 접는다. */
+.app>header .sub em{margin-left:0.5rem;font-style:normal;font-size:0.9375rem;font-weight:600;color:var(--p-tx2)}
+@media (max-width:1150px){.app>header .sub em{display:none}}
