@@ -182,7 +182,6 @@ export default function App() {
     overview: (
       <OverviewScreen
         state={state}
-        send={execute}
         openDetail={openDetail}
         openRegister={openRegister}
         onDevice={() => setTab('device')}

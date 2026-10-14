@@ -1,17 +1,15 @@
 import {useState} from 'react';
 import type {AppState} from '../../api/types.ts';
-import {SLOTS_PER_DEVICE, type SendCommand} from '../../config/defines.ts';
+import {SLOTS_PER_DEVICE} from '../../config/defines.ts';
 import {ActIcon} from '../../shared/ActIcon.tsx';
 import {Badge} from '../../shared/Badge.tsx';
 import {Modal} from '../../shared/Modal.tsx';
 import {scannerNext} from '../../shared/ScannerHead.tsx';
 import {alertItems} from '../../utils/alerts.ts';
 import {active, pending, plateBad, totalRuns} from '../../utils/plate.ts';
-import {RemoveDialog} from './RemoveDialog.tsx';
 
 interface Props {
   state: AppState;
-  send: SendCommand;
   openDetail: (deviceId: number, slot?: number) => void;
   openRegister: (deviceId: number, slot?: number) => void;
   onDevice: () => void;
@@ -63,21 +61,25 @@ const Glyph = ({path}: {path: string}) => (
  */
 export function OverviewScreen({
   state,
-  send,
   openDetail,
   openRegister,
   onDevice,
   onStatus,
   onNeedAdmin,
 }: Props) {
-  const [removing, setRemoving] = useState(false);
   const [alertsOpen, setAlertsOpen] = useState(false);
   const device = state.devices[0];
   if (!device) return null;
 
   const plates = active(state).filter(p => p.deviceId === device.id);
   const need = totalRuns(state);
-  const done = plates.filter(p => p.runs.length >= need);
+  const done = plates.filter(p => p.runs.length >= need).sort((a, b) => a.slot - b.slot);
+  /*
+   * 반출은 따로 탭이 없다. 상세에서 꺼낼 칸을 골라 둔 채로 연다 — 촬영을 다 마친
+   * 판 중 첫 칸, 그런 판이 없으면 맨 앞 칸. 상세의 「플레이트 반출」이 확인을 받는다.
+   */
+  const removeTarget = done[0] ?? [...plates].sort((a, b) => a.slot - b.slot)[0];
+  const openRemove = () => removeTarget && openDetail(device.id, removeTarget.slot);
   const unsent = plates.filter(p => pending(p) > 0);
   const bad = plates.filter(plateBad);
   const free = SLOTS_PER_DEVICE - plates.length;
@@ -96,7 +98,7 @@ export function OverviewScreen({
       value: done.length,
       unit: '매',
       path: 'M12 3v10M8 9l4 4 4-4M4 20h16',
-      go: done.length ? () => setRemoving(true) : undefined,
+      go: done.length ? openRemove : undefined,
     },
     {
       key: 'send',
@@ -128,7 +130,7 @@ export function OverviewScreen({
             <small>{free ? `빈 슬롯 ${free}칸` : '빈 슬롯 없음'}</small>
           </span>
         </button>
-        <button className="home-act" onClick={() => setRemoving(true)} disabled={!plates.length}>
+        <button className="home-act" onClick={openRemove} disabled={!plates.length}>
           <ActIcon name="eject" />
           <span>
             <b>플레이트 반출</b>
@@ -253,7 +255,6 @@ export function OverviewScreen({
         </Modal>
       )}
 
-      {removing && <RemoveDialog state={state} device={device} send={send} onClose={() => setRemoving(false)} />}
     </div>
   );
 }

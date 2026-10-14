@@ -160,19 +160,6 @@ button.hsum:disabled{opacity:1;cursor:default}
 .app[data-w="sm"] .overview{overflow-y:auto}
 
 
-/* 반출 팝업 — 왼쪽 트레이에서 칸을 고르고, 오른쪽에서 확인한다. */
-.remove-pick{flex:1;min-height:0;display:grid;grid-template-columns:22rem minmax(0,1fr);gap:1.5rem;padding:1rem 1.5rem 1.5rem}
-.remove-pick .tray{height:100%;min-height:0}
-.remove-side{display:flex;flex-direction:column;min-height:0}
-.remove-side .actions{margin-top:auto;justify-content:flex-end}
-.remove-side .actions button{min-width:8rem;min-height:3.25rem;font-size:1rem}
-.pick-cell.w-ok::before{background:#d99009;border-color:#d99009}
-.pick-cell.w-busy::before{background:#6ba4c4;border-color:#6ba4c4}
-.pick-cell.w-done::before{background:#5aa153;border-color:#5aa153}
-.pick-cell.w-bad::before{background:#d6202b;border-color:#d6202b}
-.pick-info dd.warnv{color:#a8720d}
-.pick-info dd.badv{color:#c01d27}
-
 /* 아이콘 칩은 꽉 찬 색면 + 흰 아이콘. 흰 글씨가 올라가므로 전부 깊은 톤이다. */
 .stat-ic{width:1.375rem;height:1.375rem;flex:none;border-radius:2px;display:grid;place-items:center;color:#fff}
 .stat-ic svg{width:0.8125rem;height:0.8125rem}
