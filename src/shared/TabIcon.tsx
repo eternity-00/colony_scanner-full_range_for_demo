@@ -2,12 +2,19 @@ import type {ReactNode} from 'react';
 import type {TabKey} from '../config/defines.ts';
 
 const PATHS: Record<TabKey, ReactNode> = {
-  // 현황은 첫 화면이자 돌아오는 자리라 집으로 그린다.
+  // 홈은 첫 화면이자 돌아오는 자리라 집으로 그린다.
   overview: (
     <>
       <path d="M3.5 10.2 12 3.5l8.5 6.7" />
       <path d="M5.8 9.2V19.5a1 1 0 0 0 1 1h10.4a1 1 0 0 0 1-1V9.2" />
       <path d="M9.8 20.5v-5.3h4.4v5.3" />
+    </>
+  ),
+  // 현황은 트레이 24칸을 보는 화면이라 칸 격자로 그린다.
+  status: (
+    <>
+      <rect x="4" y="3.5" width="16" height="17" rx="1.5" />
+      <path d="M4 9.2h16M4 14.8h16M9.3 3.5v17M14.7 3.5v17" />
     </>
   ),
   detail: (

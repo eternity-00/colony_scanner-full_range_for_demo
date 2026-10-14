@@ -5,6 +5,7 @@ export type WellState = 'ok' | 'empty' | 'busy' | 'done' | 'bad';
 
 export type TabKey =
   | 'overview'
+  | 'status'
   | 'detail'
   | 'register'
   | 'running'
@@ -35,7 +36,8 @@ export type SendCommand = (
  * 나머지도 같은 이유로 보여주되 장비를 움직이는 버튼만 막는다.
  */
 export const TABS: readonly (readonly [TabKey, string, string, boolean])[] = [
-  ['overview', '현황', 'Overview', false],
+  ['overview', '홈', 'Home', false],
+  ['status', '현황', 'Status', false],
   ['register', '등록', 'Register', false],
   ['detail', '상세', 'Detail', false],
   ['running', '촬영', 'Capture', false],

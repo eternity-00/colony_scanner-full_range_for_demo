@@ -30,6 +30,7 @@ interface Props {
  */
 const SUBTITLE: Record<TabKey, string> = {
   overview: 'Incubator #1',
+  status: '현황',
   detail: '상세',
   register: '플레이트 등록',
   running: '촬영',

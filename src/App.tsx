@@ -17,6 +17,7 @@ import {HistoryScreen} from './features/history/HistoryScreen.tsx';
 import {OverviewScreen} from './features/overview/OverviewScreen.tsx';
 import {RegisterScreen} from './features/register/RegisterScreen.tsx';
 import {SettingsScreen} from './features/settings/SettingsScreen.tsx';
+import {StatusScreen} from './features/status/StatusScreen.tsx';
 import {Header} from './layout/Header.tsx';
 import {MenuDrawer} from './layout/MenuDrawer.tsx';
 import {Modal} from './shared/Modal.tsx';
@@ -188,6 +189,7 @@ export default function App() {
         onNeedAdmin={(where, what) => setAdminAsk({where, what})}
       />
     ),
+    status: <StatusScreen state={state} openDetail={openDetail} openRegister={openRegister} />,
     detail: (
       <DetailScreen
         state={state}
