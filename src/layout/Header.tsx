@@ -1,5 +1,6 @@
 import type {AppState} from '../api/types.ts';
 import type {TabKey} from '../config/defines.ts';
+import {TabIcon} from '../shared/TabIcon.tsx';
 import {tempAbnormal} from '../utils/plate.ts';
 
 interface Props {
@@ -14,6 +15,8 @@ interface Props {
   onMenu: () => void;
   /** 계정 칩을 눌렀을 때 — 말풍선을 연다. */
   onAccount: () => void;
+  /** 홈 버튼 — 어느 화면에서든 한 번에 홈으로. */
+  onHome: () => void;
 }
 
 /**
@@ -43,7 +46,7 @@ const SUBTITLE: Record<TabKey, string> = {
  *
  * 알림 종은 없다 — 알람은 홈의 알람 칸이 맡는다.
  */
-export function Header({state, tab, clock, day, operator, onMenu, onAccount}: Props) {
+export function Header({state, tab, clock, day, operator, onMenu, onAccount, onHome}: Props) {
   const devices = state.devices;
   const linked = devices.filter(d => d.connected).length;
   const abnormal = devices.some(tempAbnormal);
@@ -59,6 +62,15 @@ export function Header({state, tab, clock, day, operator, onMenu, onAccount}: Pr
         <span />
         <span />
         <span />
+      </button>
+      {/* 홈 — 메뉴를 열지 않고 어디서든 한 번에 홈으로(혜원님 10/14). 홈에 있을 때는 옅은 면. */}
+      <button
+        className={`hd-home ${tab === 'overview' ? 'on' : ''}`}
+        onClick={onHome}
+        aria-label="홈으로"
+        aria-current={tab === 'overview' ? 'page' : undefined}
+      >
+        <TabIcon tab="overview" />
       </button>
       <span className="wm">
         Colony<i>Scanner</i>

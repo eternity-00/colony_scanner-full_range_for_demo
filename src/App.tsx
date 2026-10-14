@@ -256,6 +256,7 @@ export default function App() {
         operator={operator}
         onMenu={() => setMenu(true)}
         onAccount={() => setUserCard(true)}
+        onHome={() => setTab('overview')}
       />
       <main>{screens[visible]}</main>
       <MenuDrawer

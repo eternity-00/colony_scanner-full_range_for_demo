@@ -590,3 +590,17 @@
 /* 장비 — 스캐너 재초기화 버튼을 넓고 두툼하게(혜원님 10/14). */
 .dv-reset{min-height:5.5rem;font-size:1.25rem;font-weight:800}
 @media (max-height:700px){.dv-reset{min-height:4rem;font-size:1.0625rem}}
+
+/* 헤더 홈 버튼 — 메뉴 색면 바로 옆, 같은 높이의 흰 칸. 홈에 있을 때는 옅은 파란 면(혜원님 10/14). */
+.hd-home{width:5rem;height:5rem;min-height:0;flex:none;margin:0;padding:0;display:grid;place-items:center;
+  border:0;border-right:1px solid var(--p-bd2);border-radius:0;background:#fff;color:var(--blue)}
+.hd-home svg{width:2rem;height:2rem}
+.hd-home.on{background:var(--p-pri-soft)}
+@media (hover:hover) and (pointer:fine){.hd-home:hover{background:#f2f6fa;filter:none}}
+.app[data-w="sm"] .hd-home{width:4rem}
+
+/* 메뉴 서랍 바닥 — 제조사 로고 · 앱 버전 */
+.drawer-foot{flex:none;display:flex;align-items:center;justify-content:space-between;gap:0.75rem;
+  margin-top:0.5rem;padding:0.75rem 0.625rem 0.25rem;border-top:1px solid var(--p-bd2)}
+.drawer-foot img{height:1.5rem;width:auto}
+.drawer-foot span{font-size:0.75rem;font-weight:600;color:var(--p-tx3);font-variant-numeric:tabular-nums}
