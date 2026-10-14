@@ -609,3 +609,7 @@
 .drawer-foot span{font-size:0.75rem;font-weight:600;color:var(--p-tx3);font-variant-numeric:tabular-nums}
 .app>header .sub{font-size:1.375rem;font-weight:800;color:var(--p-tx);margin-left:0.75rem}
 @media (max-width:1150px){.app>header .clock{display:none}.app>header .sub{font-size:1.1875rem}}
+/* 사선 칸 안 — 메뉴(≡)와 로고 사이에 옅은 세로선, 로고 앞에 집 아이콘(누르면 홈). */
+.hd-sep{width:1px;height:2.375rem;flex:none;background:#ffffff59}
+.wm-home{display:inline-flex;align-items:center;gap:0.625rem;padding-left:1.125rem}
+.wm-home svg{width:1.75rem;height:1.75rem;flex:none;stroke-width:2.2;color:#fff}

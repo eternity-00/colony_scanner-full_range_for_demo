@@ -1,5 +1,6 @@
 import type {AppState} from '../api/types.ts';
 import {TABS, type TabKey} from '../config/defines.ts';
+import {TabIcon} from '../shared/TabIcon.tsx';
 import {tempAbnormal} from '../utils/plate.ts';
 
 interface Props {
@@ -52,13 +53,17 @@ export function Header({state, tab, clock, day, operator, onMenu, onAccount, onH
           <span />
           <span />
         </button>
+        <i className="hd-sep" aria-hidden="true" />
         <button
           className="wm wm-home"
           onClick={onHome}
           aria-label="홈으로"
           aria-current={tab === 'overview' ? 'page' : undefined}
         >
-          Colony<i>Scanner</i>
+          <TabIcon tab="overview" />
+          <span>
+            Colony<i>Scanner</i>
+          </span>
         </button>
       </div>
       <span className="sub">{name?.[1]}</span>
