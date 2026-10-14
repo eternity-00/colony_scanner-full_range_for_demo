@@ -587,3 +587,6 @@
 .cp-queue li .cp-row.now{border:0;border-radius:8px;background:var(--p-pri-soft)}
 /* 관리자는 버튼이 셋 — 글자가 접히지 않게 */
 .cp-acts:not(.one) .p-btn{font-size:1.0625rem;white-space:nowrap;gap:0.375rem;padding:0 0.5rem}
+/* 장비 — 스캐너 재초기화 버튼을 넓고 두툼하게(혜원님 10/14). */
+.dv-reset{min-height:5.5rem;font-size:1.25rem;font-weight:800}
+@media (max-height:700px){.dv-reset{min-height:4rem;font-size:1.0625rem}}
