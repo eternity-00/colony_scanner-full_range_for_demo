@@ -16,10 +16,6 @@ interface Props {
   slot?: number;
 }
 
-interface Done {
-  place: string;
-}
-
 export function RegisterScreen({state, send, setTab, device = 1, slot: picked}: Props) {
   const [deviceId, setDeviceId] = useState(device);
 
@@ -30,8 +26,11 @@ export function RegisterScreen({state, send, setTab, device = 1, slot: picked}: 
 
   // 현황에서 누른 칸이 있으면 그 칸으로 시작한다. 그새 찼으면 첫 빈 칸으로 떨어진다.
   const [slot, setSlot] = useState(() => (picked && free.includes(picked) ? picked : free[0] || 0));
-  const [done, setDone] = useState<Done | null>(null);
-  /** 「완료」를 누를 때까지 이어서 넣은 매수. 팝업을 닫아도 유지된다. */
+  /** 「등록」을 눌러 확인을 기다리는 중. */
+  const [ask, setAsk] = useState(false);
+  /** 방금 등록한 위치. 화면에 남겨 이어서 넣는 동안 무엇을 넣었는지 보이게 한다. */
+  const [last, setLast] = useState('');
+  /** 「완료」를 누를 때까지 이어서 넣은 매수. */
   const [batch, setBatch] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [blockOpen, setBlockOpen] = useState(false);
@@ -60,20 +59,22 @@ export function RegisterScreen({state, send, setTab, device = 1, slot: picked}: 
             ? '빈 슬롯이 없습니다. 다른 스캐너를 선택하세요.'
             : '';
 
+  /**
+   * 등록 — 확인 팝업에서 「확인」을 누르면 보낸다. 끝나면 팝업 없이 이 화면에 남고,
+   * 다음 빈 칸이 골라진다. 「계속 등록할까요?」를 따로 묻지 않는다 — 완료 / 계속 등록은
+   * 예 · 아니오처럼 읽히지 않아 헷갈렸다(혜원님 10/14). 끝낼 때는 왼쪽 아래 「완료」.
+   */
   const register = async () => {
+    setAsk(false);
     setSubmitting(true);
-    const place = `${d.name} · ${pos(slot)}`;
+    const place = pos(slot);
     // 투입 시각은 서버가 찍는다. 화면은 무엇이 기록될지 미리 보여줄 뿐이다.
     const result = await send('register', deviceId, {slot});
     if (result) {
       setBatch(n => n + 1);
-      setDone({place});
-    } else setSubmitting(false);
-  };
-
-  const closeDone = () => {
+      setLast(place);
+    }
     setSubmitting(false);
-    setDone(null);
   };
 
   /**
@@ -81,8 +82,8 @@ export function RegisterScreen({state, send, setTab, device = 1, slot: picked}: 
    * 여기서 풀어 줘야 밀어 둔 것들이 한꺼번에 돌기 시작한다.
    */
   const finish = () => {
-    closeDone();
     setBatch(0);
+    setLast('');
     void send('registerDone', 0);
     setTab('overview');
   };
@@ -208,7 +209,11 @@ export function RegisterScreen({state, send, setTab, device = 1, slot: picked}: 
                 </b>
               </span>
             </div>
-            {batch > 0 && <p className="rg-batch">이번에 {batch}매 등록했습니다 · 완료를 누르면 촬영이 시작됩니다</p>}
+            {batch > 0 && (
+              <p className="rg-batch">
+                {last} 등록 완료 · 이번에 {batch}매 · 다 넣었으면 「완료」를 누르세요
+              </p>
+            )}
           </section>
 
           <div className="rg-acts">
@@ -217,7 +222,7 @@ export function RegisterScreen({state, send, setTab, device = 1, slot: picked}: 
             </button>
             <button
               className="primary p-btn"
-              onClick={() => (blockReason ? setBlockOpen(true) : register())}
+              onClick={() => (blockReason ? setBlockOpen(true) : setAsk(true))}
             >
               등록
             </button>
@@ -245,31 +250,16 @@ export function RegisterScreen({state, send, setTab, device = 1, slot: picked}: 
         </Modal>
       )}
 
-      {done && (
-        <Modal
-          bare
-          title="등록 완료"
-          onClose={finish}
-        >
-          <div className="done-box">
-            <i />
+      {ask && (
+        <Modal title="플레이트 등록" confirmLabel="확인" onConfirm={register} onClose={() => setAsk(false)}>
+          <div className="pick-box">
+            <i className="pick-cell" aria-hidden />
             <div>
-              <b>{done.place}</b>
-              <span>
-                이번에 {batch}매 등록 ·{' '}
-                {state.routine.delay
-                  ? `첫 촬영은 완료 ${state.routine.delay}분 뒤`
-                  : '완료를 누르면 촬영 시작'}
-              </span>
+              <b>{pos(slot)}</b>
+              <span>투입 시각은 확인을 누르는 순간으로 기록됩니다</span>
             </div>
           </div>
-          <p className="done-ask">플레이트를 이어서 등록하시겠습니까?</p>
-          <div className="actions">
-            <button onClick={finish}>완료</button>
-            <button className="primary" data-autofocus onClick={closeDone}>
-              계속 등록
-            </button>
-          </div>
+          <p className="pick-ask">이 위치에 플레이트를 등록하시겠습니까?</p>
         </Modal>
       )}
     </>

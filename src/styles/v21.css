@@ -190,10 +190,6 @@
 .rg-acts .p-btn{min-height:4rem;font-size:1.0625rem}
 .rg-acts .p-btn.primary{font-size:1.25rem;font-weight:800}
 
-/* 등록 완료 팝업 — 초안의 체크 원 + 회색 상자 */
-.done-box{background:#f7f8fa;border-color:var(--p-bd2);border-radius:8px}
-.done-box i{background:var(--p-green-soft)}
-.done-box i:after{border-color:var(--p-green)}
 
 @media (max-height:700px){
   .rg-where{padding:0.625rem 1rem}
