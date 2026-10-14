@@ -27,15 +27,10 @@
 button.hsum:disabled{opacity:1;cursor:default}
 .hsum-head{flex:none;display:flex;align-items:center;gap:0.625rem;min-height:3.5rem;padding:0.625rem 1.125rem;
   border-bottom:1px solid var(--g3)}
-.hsum-head .stat-ic{width:1.75rem;height:1.75rem}
-.hsum-head .stat-ic svg{width:1.0625rem;height:1.0625rem}
-.hsum-head small{flex:1;font-size:1.125rem;font-weight:800;color:var(--gt)}
-.hsum-head>em{font-style:normal;font-size:1.0625rem;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
+.hsum-head small{flex:1;font-size:1.375rem;font-weight:800;color:var(--gt)}
+.hsum-head>em{font-style:normal;font-size:1.25rem;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums}
 .hsum-head>em.bad{color:#c01d27}
 .hsum-head>em.none{color:#8f8f8f;font-weight:600}
-.stat-ic.scanner{background:var(--blue)}
-.stat-ic.todo{background:#5c636e}
-.stat-ic.alarm{background:#5c636e}
 /* 배지는 상세 스캐너 카드와 같은 말을 같은 꼴로 한다(평상시 회색, 촬영 중·점검만 색면). */
 .hsum .badge{border:1px solid #d2d2d2;border-radius:2px;padding:0.375rem 0.75rem;
   font-size:0.8125rem;font-weight:700;background:#e6e6e6;color:var(--gt)}
@@ -60,23 +55,18 @@ button.hsum:disabled{opacity:1;cursor:default}
 /* 시각이 없을 때의 --:-- 는 값이 아니라 빈칸이다. */
 .hsum-facts b.idle{color:#8f8f8f;font-weight:500}
 
-/* 할 일 — 줄 셋이 몸을 나눠 갖는다. 줄 = 색 칩 · 이름 · 숫자 · 화살표. */
+/* 할 일 — 줄 셋이 몸을 나눠 갖는다. 줄 = 이름 · 숫자. */
 .hsum-todo{flex:1;min-height:0;display:flex;flex-direction:column;padding:0.25rem 0.5rem}
 .hsum-todo button{flex:1 1 0;min-height:3rem;max-height:5.5rem;display:flex;align-items:center;gap:0.75rem;
   padding:0 0.75rem;background:none;border:0;border-radius:var(--rr);color:var(--gt);text-align:left}
 .hsum-todo button+button{border-top:1px solid var(--g3);border-radius:0}
-.hsum-todo .stat-ic{width:2rem;height:2rem}
-.hsum-todo .stat-ic svg{width:1.125rem;height:1.125rem}
 .hsum-todo span{flex:1;font-size:1.125rem;font-weight:700}
 .hsum-todo b{font-size:1.875rem;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1}
 .hsum-todo b em{font-style:normal;font-size:0.9375rem;font-weight:600;color:var(--gt);margin-left:0.25rem}
 .hsum-todo .fault:not(:disabled) b{color:#c01d27}
-.hsum-go{width:1rem;font-style:normal;font-size:1.5rem;line-height:1;color:var(--gt);text-align:center}
-/* 0 인 줄 — 누를 데가 없다. 흐리지 않고 칩을 중립 회색으로, 숫자와 화살표를 낮춘다. */
+/* 0 인 줄 — 누를 데가 없다. 흐리지 않고 숫자만 회색으로 낮춘다. */
 .hsum-todo button:disabled{opacity:1;cursor:default}
-.hsum-todo button:disabled .stat-ic{background:#c9ccd1}
 .hsum-todo button:disabled b{color:#8f8f8f}
-.hsum-todo button:disabled .hsum-go{visibility:hidden}
 
 /* 알람 — 위에서부터 세 줄. 줄 꼴은 알람 팝업과 같다. */
 /* 높이가 모자라면 다 들어가지 않는 줄은 통째로 감춘다 — 반쯤 잘린 줄은 읽히지도 눌리지도 않는다.
@@ -94,7 +84,6 @@ button.hsum:disabled{opacity:1;cursor:default}
 .hsum-more{flex:none;display:flex;align-items:center;justify-content:flex-end;gap:0.375rem;min-height:3rem;
   padding:0 1.25rem;background:none;border:0;border-top:1px solid var(--g3);border-radius:0;
   font-size:0.9375rem;font-weight:800;color:var(--blue)}
-.hsum-more span{font-size:1.375rem;line-height:1}
 .hsum-clear{align-items:center;text-align:center}
 .hsum-clear b{font-size:1.25rem;font-weight:800;color:var(--gt)}
 @media (hover:hover) and (pointer:fine){
