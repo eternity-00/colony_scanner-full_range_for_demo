@@ -56,7 +56,6 @@ export function DetailScreen({
             state={state}
             deviceId={deviceId}
             selected={slot}
-            showDue
             onSelect={n => setSlot(deviceId, n)}
           />
         </div>

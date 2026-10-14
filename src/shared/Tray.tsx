@@ -1,6 +1,6 @@
 import type {AppState} from '../api/types.ts';
 import {WELL_LABEL} from '../config/defines.ts';
-import {dueToday, platesFor, pos, wellState} from '../utils/plate.ts';
+import {platesFor, pos, wellState} from '../utils/plate.ts';
 
 interface Props {
   state: AppState;
@@ -11,8 +11,6 @@ interface Props {
   compact?: boolean;
   /** 등록 화면: 비어있는 칸만 고를 수 있다. */
   registration?: boolean;
-  /** 오늘 찍을 차례인 칸에 「오늘」을 적는다(초안 260911). */
-  showDue?: boolean;
 }
 
 /** 8단 × 3열 = 24슬롯 수납도. */
@@ -23,7 +21,6 @@ export function Tray({
   onSelect,
   compact = false,
   registration = false,
-  showDue = false,
 }: Props) {
   const plates = platesFor(state, deviceId);
   const bySlot = new Map(plates.map(p => [p.slot, p]));
@@ -55,7 +52,6 @@ export function Tray({
                 >
                   {/* 등록 화면은 고르는 자리라 상태 원 대신 위치 이름을 적는다(초안 260911). */}
                   <b>{registration ? (plate ? '사용 중' : `${tier}단 ${col}열`) : `${tier}-${col}`}</b>
-                  {showDue && plate && dueToday(state, plate) && <small>오늘</small>}
                 </button>
               );
             })}

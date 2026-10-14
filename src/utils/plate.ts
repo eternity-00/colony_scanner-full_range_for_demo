@@ -36,7 +36,7 @@ export const dueNow = (s: AppState, p: Plate) =>
 
 /**
  * 오늘 안에 찍을 차례가 오는 플레이트인지 — 이미 시각이 지난 것도 포함한다.
- * 현황의 「오늘 촬영 n매」와 트레이 칸의 「오늘」이 같은 값을 쓴다.
+ * 현황 · 상세의 「오늘 촬영 n매」가 쓴다.
  */
 export const dueToday = (s: AppState, p: Plate) => {
   if (p.paused || p.runs.length >= totalRuns(s)) return false;
