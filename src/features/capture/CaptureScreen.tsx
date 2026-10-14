@@ -1,5 +1,5 @@
 import type {AppState} from '../../api/types.ts';
-import {SHORT_STAGES, STAGES, WELLS, type SendCommand} from '../../config/defines.ts';
+import {SHORT_STAGES, STAGES, type SendCommand} from '../../config/defines.ts';
 import {ActIcon} from '../../shared/ActIcon.tsx';
 import {scannerNext} from '../../shared/ScannerHead.tsx';
 import {hm} from '../../utils/datetime.ts';
@@ -34,7 +34,11 @@ export function CaptureScreen({state, send, openDetail}: Props) {
   const running = d.job?.status === 'running';
   const capture = !job || job.type === 'capture';
   const stages = capture ? STAGES.slice(0, SHOWN) : SHORT_STAGES;
-  const well = job && capture ? Math.min(WELLS, Math.floor((job.progress / 100) * WELLS) + 1) : 0;
+  /*
+   * 지금 단계. Well 번호는 장비가 주지 않아 진행률로 어림하면 틀린다(이송 중에도 WELL 1).
+   * 장비가 주는 단계만 적는다. 띠에 없는 뒤 단계(전송 · PC 저장)는 「전송 중」.
+   */
+  const stage = !job ? '' : job.step < stages.length ? stages[job.step] : '전송 중';
   const plates = platesFor(state, d.id);
   const current = job?.plateId ? plates.find(p => p.id === job.plateId) : undefined;
   const queue = active(state)
@@ -58,7 +62,7 @@ export function CaptureScreen({state, send, openDetail}: Props) {
             {running && <span className="p-tag bad">REC</span>}
             <span className="p-tag mute">
               {job?.slot ? pos(job.slot) : d.name}
-              {well ? ` · WELL ${well} / ${WELLS}` : ''}
+              {stage ? ` · ${stage}` : ''}
             </span>
           </span>
           <span className="cp-cam-foot">
@@ -98,8 +102,8 @@ export function CaptureScreen({state, send, openDetail}: Props) {
           {job ? (
             <>
               <span className="cp-prog-main">
-                <b>{capture ? well : Math.round(job.progress)}</b>
-                <em>{capture ? `/ ${WELLS} Well` : '%'}</em>
+                <b className="stage">{stage}</b>
+                <em>{Math.min(job.step + 1, stages.length)} / {stages.length} 단계</em>
                 <strong>{job.status === 'paused' ? '일시정지' : `${Math.round(job.progress)}%`}</strong>
               </span>
               <i className="p-bar">
