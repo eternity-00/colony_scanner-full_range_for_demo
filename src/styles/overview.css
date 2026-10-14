@@ -149,8 +149,9 @@ button.hsum:disabled{opacity:1;cursor:default}
 .overview-head .legend{margin-left:auto}
 
 .scanner-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0.75rem;flex:1;min-height:0}
-/* 스캐너가 한 대면 카드 한 장. 3열 트레이가 화면 끝까지 늘어나지 않게 폭을 묶는다. */
-.scanner-grid.n1{grid-template-columns:minmax(0,40rem);justify-content:center}
+/* 스캐너가 한 대면 카드 한 장이 화면을 다 쓴다. 폭을 40rem 으로 묶었더니
+   양옆이 비어 보였다 — 칸이 가로로 길어지는 편이 낫다(혜원님, 10/14). */
+.scanner-grid.n1{grid-template-columns:minmax(0,1fr)}
 .app[data-w="sm"] .scanner-grid,.app[data-w="md"] .scanner-grid{gap:0.625rem}
 /*
  * 스캐너 4대는 기본이 한 줄이다. 2×2 로 접으면 폭은 넉넉해지지만 카드 높이가 절반이 되어
