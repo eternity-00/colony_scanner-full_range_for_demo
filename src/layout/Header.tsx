@@ -1,7 +1,5 @@
 import type {AppState} from '../api/types.ts';
 import {TABS, type TabKey} from '../config/defines.ts';
-import logoUrl from '../assets/logo-white.svg';
-import {TabIcon} from '../shared/TabIcon.tsx';
 import {tempAbnormal} from '../utils/plate.ts';
 
 interface Props {
@@ -45,30 +43,23 @@ export function Header({state, tab, clock, day, operator, onMenu, onAccount, onH
   return (
     <header>
       {/*
-        * 왼쪽 파란 띠 = 메뉴(≡) · 로고 · 홈(⌂). 메뉴는 왼쪽에 있어야 찾고, 홈도 같은
-        * 띠에 묶었다(혜원님 10/14). 그 오른쪽은 흰 바탕 — 화면 이름 · 상태 칩 · 계정.
+        * 왼쪽 끝 파란 칸 = 메뉴. 오른쪽 변을 비스듬히 세운 1.5 · 1.6 의 사선 칸이다.
+        * 로고(글자)를 누르면 홈 — 따로 홈 버튼을 두지 않는다(혜원님 10/14, 캔버스 2-C 사선판).
         */}
-      <div className="hd-brand">
-        <button className="hd-menu" onClick={onMenu} aria-label="메뉴 열기">
-          <span />
-          <span />
-          <span />
-        </button>
-        <img src={logoUrl} alt="ColonyScanner" />
-        <i aria-hidden="true" />
-        <button
-          className={`hd-home ${tab === 'overview' ? 'on' : ''}`}
-          onClick={onHome}
-          aria-label="홈으로"
-          aria-current={tab === 'overview' ? 'page' : undefined}
-        >
-          <TabIcon tab="overview" />
-        </button>
-      </div>
-      <span className="hd-name">
-        <b>{name?.[1]}</b>
-        <em>{name?.[2]}</em>
-      </span>
+      <button className="hd-menu" onClick={onMenu} aria-label="메뉴 열기">
+        <span />
+        <span />
+        <span />
+      </button>
+      <button
+        className="wm wm-home"
+        onClick={onHome}
+        aria-label="홈으로"
+        aria-current={tab === 'overview' ? 'page' : undefined}
+      >
+        Colony<i>Scanner</i>
+      </button>
+      <span className="sub">{name?.[1]}</span>
 
       <div className="head-status">
         <span className={`hstat ${abnormal ? 'bad' : ''}`}>

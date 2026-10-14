@@ -591,26 +591,16 @@
 .dv-reset{min-height:5.5rem;font-size:1.25rem;font-weight:800}
 @media (max-height:700px){.dv-reset{min-height:4rem;font-size:1.0625rem}}
 
-/* 헤더(혜원님 10/14) — 왼쪽 파란 띠: 메뉴(≡) · 흰 로고 · 홈(⌂). 나머지는 흰 바탕. 서랍은 왼쪽에서 연다. */
-.hd-brand{flex:none;height:5rem;display:flex;align-items:center;gap:0.75rem;padding-right:1.5rem;background:var(--blue)}
-.hd-brand img{height:3.375rem;width:auto;display:block}
-.hd-name{flex:none;display:flex;align-items:baseline;gap:0.5rem;padding:0 1.5rem;white-space:nowrap}
-.hd-name b{font-size:1.375rem;font-weight:800;color:var(--p-tx)}
-.hd-name em{font-style:normal;font-size:0.875rem;font-weight:600;color:var(--p-tx2)}
-.app>header .head-status{padding-right:0.75rem}
-.hd-brand{gap:0.5rem;padding-right:0}
-.hd-brand>i{width:1px;height:2.375rem;margin-left:0.75rem;background:#ffffff59}
-.hd-home{width:5rem;height:5rem;min-height:0;flex:none;margin:0;padding:0;display:grid;place-items:center;
-  border:0;border-radius:0;background:transparent;color:#fff}
-.hd-home svg{width:2rem;height:2rem;stroke-width:2.2}
-.hd-home.on{background:#ffffff1f}
-@media (hover:hover) and (pointer:fine){.hd-home:hover{background:#ffffff1f;filter:none}}
-.app[data-w="sm"] .hd-brand img,.app[data-w="md"] .hd-brand img{height:2.75rem}
+/* 헤더(혜원님 10/14) — 왼쪽 끝 사선 파란 칸 = 메뉴, 글자 로고 = 홈 버튼, 나머지 흰 바탕. */
+.app>header .hd-menu{width:6.5rem;padding-right:1.5rem;clip-path:polygon(0 0,100% 0,calc(100% - 1.75rem) 100%,0 100%)}
+.wm-home{min-height:0;height:5rem;margin:0;padding:0 0.5rem 0 1rem;border:0;border-radius:0;background:transparent;
+  font-size:1.5rem;font-weight:800;letter-spacing:-.02em;color:var(--gt);white-space:nowrap}
+.wm-home i{font-style:normal;color:var(--blue)}
+@media (hover:hover) and (pointer:fine){.wm-home:hover{filter:none;opacity:.85}}
+.app>header .head-status{padding-right:1rem}
 
 /* 메뉴 서랍 바닥 — 제조사 로고 · 앱 버전 */
 .drawer-foot{flex:none;display:flex;align-items:center;justify-content:space-between;gap:0.75rem;
   margin-top:0.5rem;padding:0.75rem 0.625rem 0.25rem;border-top:1px solid var(--p-bd2)}
 .drawer-foot img{height:1.5rem;width:auto}
 .drawer-foot span{font-size:0.75rem;font-weight:600;color:var(--p-tx3);font-variant-numeric:tabular-nums}
-/* 폭이 좁으면(10.1" 1024 등) 영문 화면 이름을 먼저 접는다. */
-@media (max-width:1150px){.hd-name em{display:none}.app>header .clock{display:none}}
