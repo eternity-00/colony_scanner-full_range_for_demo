@@ -488,8 +488,10 @@
 .hm-big small{font-size:1rem;font-weight:700;color:var(--p-tx2)}
 .hm-big b{font-size:3rem;font-weight:800;line-height:1;letter-spacing:-.02em;color:var(--p-tx);font-variant-numeric:tabular-nums}
 .hm-big b em{font-style:normal;font-size:1.125rem;font-weight:600;color:var(--p-tx2);margin-left:0.375rem;letter-spacing:0}
-.hm-big>span.hot{background:var(--p-amber-soft);border-color:#ebc27a}
-.hm-big>span.hot small,.hm-big>span.hot b,.hm-big>span.hot b em{color:var(--p-amber)}
+.hm-big>span.grow{background:#fdf4e1;border-color:#ecc77d}
+.hm-big>span.grow small,.hm-big>span.grow b,.hm-big>span.grow b em{color:#8a5a00}
+.hm-big>span.ready{background:var(--p-green-soft);border-color:#a9d3b6}
+.hm-big>span.ready small,.hm-big>span.ready b,.hm-big>span.ready b em{color:var(--p-green)}
 .hm-big>span.calm b{color:var(--p-tx3)}
 .hm-small{display:flex;gap:1.5rem;font-size:0.9375rem;font-weight:600;color:var(--p-tx2)}
 .hm-small b{margin-left:0.25rem;font-weight:800;color:var(--p-tx);font-variant-numeric:tabular-nums}

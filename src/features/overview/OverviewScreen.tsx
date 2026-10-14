@@ -89,16 +89,16 @@ export function OverviewScreen({
             * 「몇 판이 들어 있고, 몇 판을 꺼내야 하는지」다. 다음 촬영 시각은 아래 작은 줄로
             * 내렸다(혜원님 10/14).
             */}
+          {/* 색은 트레이 원과 같은 뜻으로 맞춘다 — 배양 중 = 노랑(Well 있음), 반출 대기 = 초록(작업 완료). */}
           <span className="hm-big">
-            <span>
+            <span className={plates.length ? 'grow' : 'calm'}>
               <small>배양 중</small>
               <b>
                 {plates.length}
                 <em>/ {SLOTS_PER_DEVICE} 매</em>
               </b>
             </span>
-            {/* 반출 대기는 사람이 꺼내야 끝나는 일이라 0 이 아니면 칸째 강조한다. */}
-            <span className={done.length ? 'hot' : 'calm'}>
+            <span className={done.length ? 'ready' : 'calm'}>
               <small>반출 대기</small>
               <b>
                 {done.length}
