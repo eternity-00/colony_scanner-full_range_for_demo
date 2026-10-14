@@ -1,5 +1,5 @@
 import type {AppState} from '../api/types.ts';
-import {active, faultLabel, pending, plateBad, pos, totalRuns} from './plate.ts';
+import {active, failedWells, faultLabel, pending, plateBad, pos, totalRuns} from './plate.ts';
 
 export type AlertKind = 'device' | 'plate' | 'done';
 
@@ -53,7 +53,11 @@ export function alertItems(state: AppState, {onDevice, onPlate, onNeedAdmin}: Go
       id: `b${p.id}`,
       kind: 'plate',
       where: at(p.deviceId, p.slot),
-      what: p.runs.at(-1)?.imageState === 'failed' ? '촬영 실패' : `미전송 ${pending(p)}건`,
+      what: p.runs.at(-1)?.imageState === 'failed'
+        ? '촬영 실패'
+        : failedWells(p.runs.at(-1)!).length
+          ? `Well ${failedWells(p.runs.at(-1)!).join('·')} 촬영 실패`
+          : `미전송 ${pending(p)}건`,
       go: () => onPlate(p.deviceId, p.slot),
     })),
     ...plates

@@ -47,12 +47,15 @@ export const dueToday = (s: AppState, p: Plate) => {
 
 /**
  * 손이 필요한 플레이트인지. 두 가지를 한 뜻으로 묶는다 —
- * 마지막 회차 촬영이 실패했거나(다시 찍어야 한다), PC 로 못 보낸 영상이
+ * 마지막 회차 촬영이 실패했거나 — 회차 전체든 Well 일부든 — (다시 찍어야 한다), PC 로 못 보낸 영상이
  * 2건 이상 쌓였거나(보관 기한 안에 보내야 한다).
  *
  * 트레이의 빨간 원과 현황의 「문제 발생」이 같은 값을 써야 하므로 여기 한 곳에 둔다.
  */
-export const plateBad = (p: Plate) => p.runs.at(-1)?.imageState === 'failed' || pending(p) >= 2;
+export const plateBad = (p: Plate) => {
+  const last = p.runs.at(-1);
+  return last?.imageState === 'failed' || (!!last && failedWells(last).length > 0) || pending(p) >= 2;
+};
 
 export const wellState = (s: AppState, p: Plate | undefined, d: Device | undefined): WellState => {
   if (!p) return 'empty';
