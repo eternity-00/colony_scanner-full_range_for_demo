@@ -24,7 +24,7 @@ html{font-size:calc(16px * var(--ui-scale, 1))}
  * 글자 없는 원·점이면 밝은 톤(--dot). 밝은 톤에 흰 글씨는 2.3:1 이라 못 쓴다.
  * --deep 은 계정 이니셜과 종료 화면의 짙은 남색이다.
  */
-:root{--ui-scale:1;--rr:6px;--rc:10px;font-family:Pretendard,'Noto Sans CJK KR',system-ui,sans-serif;color:#121215;background:#f3f4f6;font-synthesis:none;--navy:#24384f;--blue:#2c5f8a;--line:#dcdfe3;--blue7:#2c5f8a;--dot:#4a8bbf;--deep:#24384f;--g3:#e5e5e5;--gt:#121215;--ink:#121215}
+:root{--ui-scale:1;--rr:6px;--rc:10px;font-family:Pretendard,'Noto Sans CJK KR',system-ui,sans-serif;color:#121215;background:#f2f4f7;font-synthesis:none;--navy:#131f4d;--blue:#0063b3;--line:#dcdfe3;--blue7:#0063b3;--dot:#0088df;--deep:#112453;--g3:#e5e5e5;--gt:#121215;--ink:#121215}
 *{box-sizing:border-box}
 body{margin:0}
 button,input,select{font:inherit}
