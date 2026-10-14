@@ -35,17 +35,6 @@ export const dueNow = (s: AppState, p: Plate) =>
   !p.paused && p.runs.length < totalRuns(s) && nextAt(s, p) <= s.serverTime;
 
 /**
- * 오늘 안에 찍을 차례가 오는 플레이트인지 — 이미 시각이 지난 것도 포함한다.
- * 현황 · 상세의 「오늘 촬영 n매」가 쓴다.
- */
-export const dueToday = (s: AppState, p: Plate) => {
-  if (p.paused || p.runs.length >= totalRuns(s)) return false;
-  const end = new Date(s.serverTime);
-  end.setHours(23, 59, 59, 999);
-  return nextAt(s, p) <= end.getTime();
-};
-
-/**
  * 손이 필요한 플레이트인지. 두 가지를 한 뜻으로 묶는다 —
  * 마지막 회차 촬영이 실패했거나 — 회차 전체든 Well 일부든 — (다시 찍어야 한다), PC 로 못 보낸 영상이
  * 2건 이상 쌓였거나(보관 기한 안에 보내야 한다).

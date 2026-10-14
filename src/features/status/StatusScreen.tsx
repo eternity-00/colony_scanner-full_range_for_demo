@@ -9,7 +9,7 @@ import {Tray} from '../../shared/Tray.tsx';
 import {ALERT_TAG, actionable, alertItems} from '../../utils/alerts.ts';
 import {elapsedLabel, kdt} from '../../utils/datetime.ts';
 import {
-  dueToday,
+  dueNow,
   nextAt,
   pending,
   platesFor,
@@ -65,12 +65,14 @@ export function StatusScreen({
   const plates = platesFor(state, d.id);
   const need = totalRuns(state);
   const free = SLOTS_PER_DEVICE - plates.length;
-  const today = plates.filter(p => dueToday(state, p)).length;
   const waiting = plates.filter(p => p.runs.length >= need).length;
   const unsent = plates.reduce((a, p) => a + pending(p), 0);
   const next = scannerNext(state, d);
   const job = d.job && ['running', 'paused'].includes(d.job.status) ? d.job : null;
   const capturing = job?.type === 'capture';
+  /** 지금 찍을 차례가 와 줄 서 있는 판 수(촬영 중인 판 제외). 「오늘」로 자르지 않는다 —
+   *  등록하면 루틴은 언제든 이어 붙는다(혜원님 10/14). */
+  const waitingShots = plates.filter(p => p.id !== job?.plateId && dueNow(state, p)).length;
   const well = job ? Math.min(WELLS, Math.floor((job.progress / 100) * WELLS) + 1) : 0;
   const alerts = alertItems(state, {
     onDevice,
@@ -112,7 +114,7 @@ export function StatusScreen({
               </i>
               <span className="st-run-foot">
                 <small>{job.status === 'paused' ? '일시정지됨' : '진행 중'}</small>
-                <small>오늘 남은 촬영 {today} 매</small>
+                <small>대기 중인 촬영 {waitingShots} 매</small>
               </span>
             </>
           ) : (
@@ -123,7 +125,7 @@ export function StatusScreen({
               </span>
               <span className="st-run-foot">
                 <small>배양 중 {plates.length} 매</small>
-                <small>오늘 촬영 {today} 매</small>
+                <small>대기 중인 촬영 {waitingShots} 매</small>
               </span>
             </>
           )}
