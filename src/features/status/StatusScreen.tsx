@@ -6,7 +6,7 @@ import {WellLegend} from '../../shared/Legend.tsx';
 import {Modal} from '../../shared/Modal.tsx';
 import {scannerNext} from '../../shared/ScannerHead.tsx';
 import {Tray} from '../../shared/Tray.tsx';
-import {ALERT_TAG, actionable, alertItems} from '../../utils/alerts.ts';
+import {ALERT_TAG, alertItems} from '../../utils/alerts.ts';
 import {elapsedLabel, hm, kdt} from '../../utils/datetime.ts';
 import {
   nextAt,
@@ -132,9 +132,6 @@ export function StatusScreen({
         <section className="p-card st-alerts">
           <div className="p-card-head">
             <h3>알람</h3>
-            <em className={actionable(alerts) ? '' : 'none'}>
-              {actionable(alerts) ? `${actionable(alerts)}건` : '없음'}
-            </em>
           </div>
           {/* 시간순 한 줄 목록(최신이 위) — 꼬리표가 무슨 일인지, 오른쪽 끝이 언제인지. */}
           {alerts.length ? (
