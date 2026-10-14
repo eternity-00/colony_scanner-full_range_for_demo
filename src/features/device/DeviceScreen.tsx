@@ -123,6 +123,8 @@ export function DeviceScreen({state, send}: Props) {
               <button className="danger" onClick={() => send('home', d.id)}>
                 원점 복귀
               </button>
+              {/* 원점 복귀로 안 풀릴 때의 다음 단계. 오류 때 한자리에서 다 하게 둔다. */}
+              <button onClick={() => send('reset', d.id)}>모듈 초기화</button>
               <button
                 disabled={!d.fault || d.doorOpen}
                 onClick={() =>
