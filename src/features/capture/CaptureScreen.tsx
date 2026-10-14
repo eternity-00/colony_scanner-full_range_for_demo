@@ -160,17 +160,18 @@ export function CaptureScreen({state, send, openDetail}: Props) {
           * 비상 정지는 고장 상황의 조치라 관리자에게만 보인다.
           */}
         <div className={`cp-acts ${isAdmin ? '' : 'one'}`}>
-          {d.job?.status === 'paused' ? (
-            <button className="p-btn" onClick={() => send('resume', d.id)}>
-              <ActIcon name="play" />
-              재개
-            </button>
-          ) : (
-            <button className="p-btn" disabled={!running} onClick={() => send('pause', d.id)}>
-              <ActIcon name="pause" />
-              일시정지
-            </button>
-          )}
+          <button className="p-btn" disabled={!running} onClick={() => send('pause', d.id)}>
+            <ActIcon name="pause" />
+            일시정지
+          </button>
+          <button
+            className="p-btn"
+            disabled={d.job?.status !== 'paused'}
+            onClick={() => send('resume', d.id)}
+          >
+            <ActIcon name="play" />
+            재개
+          </button>
           {isAdmin && (
             <button
               className="p-btn danger"
