@@ -31,6 +31,7 @@ BIN=$(command -v chromium || command -v chromium-browser || true)
 # 두어 v5 · v6 의 웹 주소와 아이콘이 바로 다시 열린다.
 pkill -f 'user-data-dir=/tmp/colony-v5' 2>/dev/null || true
 pkill -f 'user-data-dir=/tmp/colony-v6' 2>/dev/null || true
+pkill -f 'user-data-dir=/tmp/colony-v21' 2>/dev/null || true
 
 wait_for() {
   n=0
