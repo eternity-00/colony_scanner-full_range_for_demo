@@ -85,7 +85,7 @@ export function OverviewScreen({
             </button>
           </span>
           {/*
-            * 크게 적는 것은 배양 중 · 반출 대기 둘이다. 장비 앞의 사람이 먼저 알아야 하는 것은
+            * 크게 적는 것은 배양 중 · 반출 대기 · 빈 슬롯 셋이다. 장비 앞의 사람이 먼저 알아야 하는 것은
             * 「몇 판이 들어 있고, 몇 판을 꺼내야 하는지」다. 다음 촬영 시각은 아래 작은 줄로
             * 내렸다(혜원님 10/14).
             */}
@@ -105,11 +105,15 @@ export function OverviewScreen({
                 <em>매</em>
               </b>
             </span>
+            <span className={free ? '' : 'calm'}>
+              <small>빈 슬롯</small>
+              <b>
+                {free}
+                <em>칸</em>
+              </b>
+            </span>
           </span>
           <span className="hm-small">
-            <span>
-              빈 슬롯 <b>{free}칸</b>
-            </span>
             <span>
               다음 촬영{' '}
               {/* 찍고 있는 동안은 다음 시각이 아직 없다. 빈칸 대신 「지금」이라고 답한다. */}
