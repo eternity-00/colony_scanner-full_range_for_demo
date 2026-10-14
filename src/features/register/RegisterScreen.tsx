@@ -1,7 +1,6 @@
 import {useEffect, useMemo, useState} from 'react';
 import type {AppState} from '../../api/types.ts';
 import {SLOTS_PER_DEVICE, type SendCommand, type TabKey} from '../../config/defines.ts';
-import {WellLegend} from '../../shared/Legend.tsx';
 import {Modal} from '../../shared/Modal.tsx';
 import {Tray} from '../../shared/Tray.tsx';
 import {kdt} from '../../utils/datetime.ts';
@@ -88,31 +87,39 @@ export function RegisterScreen({state, send, setTab, device = 1, slot: picked}: 
     setTab('overview');
   };
 
+  const firstShot = !state.autoRun
+    ? '자동 촬영 꺼짐'
+    : state.routine.delay
+      ? kdt(state.serverTime + state.routine.delay * 60000)
+      : '등록 완료 직후';
+
   return (
     <>
-      <div className="reg-page">
-        <div className="overview-head">
-          <WellLegend simple />
-        </div>
-        <div className="register-layout">
-          <section className="card stack">
-            {/* 스캐너가 둘 이상일 때만 고르는 탭을 둔다. */}
-            {state.devices.length > 1 && (
-              <div className="device-tabs">
-                {state.devices.map(x => (
-                  <button
-                    key={x.id}
-                    className={x.id === deviceId ? 'selected' : ''}
-                    onClick={() => setDeviceId(x.id)}
-                  >
-                    {x.name}
-                    <small>
-                      {status(x)} · 빈 슬롯 {SLOTS_PER_DEVICE - platesFor(state, x.id).length}
-                    </small>
-                  </button>
-                ))}
-              </div>
-            )}
+      <div className="rg-page">
+        <section className="p-card rg-left">
+          <div className="p-card-head">
+            <h3>수납 위치 선택</h3>
+            <p>빈 슬롯을 눌러 지정합니다 · 플레이트 1 매 = 1 슬롯</p>
+            <em>빈 슬롯 {free.length}</em>
+          </div>
+          {/* 스캐너가 둘 이상일 때만 고르는 탭을 둔다. */}
+          {state.devices.length > 1 && (
+            <div className="device-tabs">
+              {state.devices.map(x => (
+                <button
+                  key={x.id}
+                  className={x.id === deviceId ? 'selected' : ''}
+                  onClick={() => setDeviceId(x.id)}
+                >
+                  {x.name}
+                  <small>
+                    {status(x)} · 빈 슬롯 {SLOTS_PER_DEVICE - platesFor(state, x.id).length}
+                  </small>
+                </button>
+              ))}
+            </div>
+          )}
+          <div className="p-tray rg-tray">
             <Tray
               state={state}
               deviceId={deviceId}
@@ -120,52 +127,94 @@ export function RegisterScreen({state, send, setTab, device = 1, slot: picked}: 
               selected={slot}
               onSelect={setSlot}
             />
+          </div>
+          <div className="legend rg-legend">
+            <span>
+              <i className="rg-sel" />
+              선택
+            </span>
+            <span>
+              <i className="rg-free" />빈 슬롯
+            </span>
+            <span>
+              <i className="rg-used" />
+              사용 중
+            </span>
+          </div>
+        </section>
+
+        <aside className="rg-side">
+          <div className="p-panel rg-where">
+            <small>선택된 수납 위치</small>
+            <b>{slot ? pos(slot) : '선택 불가'}</b>
+            <small>
+              {slot
+                ? `6-well 플레이트 1 매 · 남은 빈 슬롯 ${free.length}`
+                : '등록 가능한 빈 슬롯이 없습니다'}
+            </small>
+          </div>
+
+          {/*
+            * 투입 시각은 고르는 것이 아니라 등록한 순간으로 찍힌다.
+            * 고를 수 있게 두면 촬영 일정 전체를 앞뒤로 옮길 수 있다.
+            */}
+          <section className="p-card rg-times">
+            <div>
+              <small className="p-label">투입 시각</small>
+              <span className="rg-box now">
+                <b>{kdt(state.serverTime)}</b>
+                <em>등록하는 순간으로 기록</em>
+              </span>
+            </div>
+            <div>
+              <small className="p-label">첫 촬영 예정 (자동 산정)</small>
+              <span className="rg-box">
+                <b>{firstShot}</b>
+                <em>등록을 마쳐야 촬영이 시작됩니다</em>
+              </span>
+            </div>
           </section>
 
-          <aside className="stack">
-            <section className="card dark">
-              <small>선택된 수납 위치</small>
-              <h2>
-                {d.name} · {slot ? pos(slot) : '선택 불가'}
-              </h2>
-            </section>
-
-            <section className="card stack">
-              {/*
-                * 투입 시각은 고르는 것이 아니라 등록한 순간으로 찍힌다.
-                * 고를 수 있게 두면 촬영 일정 전체를 앞뒤로 옮길 수 있다.
-                */}
-              <dl>
-                <dt>투입 시각</dt>
-                <dd>{kdt(state.serverTime)}<em>등록하는 순간으로 기록됩니다</em></dd>
-                <dt>검사 루틴</dt>
-                <dd>
-                  {state.routine.cycleHours}시간 · {state.routine.days}일
-                </dd>
-                <dt>총 촬영</dt>
-                <dd>
-                  {totalRuns(state)}회
-                  <em>Well당 {state.routine.wellShots}장</em>
-                </dd>
-    <dt>첫 촬영</dt>
-                <dd>
-                  {state.routine.delay ? `등록 완료 ${state.routine.delay}분 뒤` : '등록 완료 직후'}
-                  <em>등록을 마쳐야 촬영이 시작됩니다</em>
-                </dd>
-              </dl>
+          <section className="rg-routine">
+            <div className="p-card-head">
+              <h3>검사 루틴</h3>
               <button className="link" onClick={() => setTab('settings')}>
                 설정에서 변경 →
               </button>
-            </section>
+            </div>
+            <div className="rg-facts">
+              <span>
+                <small>촬영 주기</small>
+                <b>{state.routine.cycleHours} 시간</b>
+              </span>
+              <span>
+                <small>총 배양 기간</small>
+                <b>{state.routine.days} 일</b>
+              </span>
+              <span>
+                <small>총 촬영 회차</small>
+                <b>{totalRuns(state)} 회</b>
+              </span>
+              <span>
+                <small>Well 당</small>
+                <b>{state.routine.wellShots} 장</b>
+              </span>
+            </div>
+            {batch > 0 && <p className="rg-batch">이번에 {batch}매 등록했습니다 · 완료를 누르면 촬영이 시작됩니다</p>}
+          </section>
 
+          <div className="rg-acts">
+            <button className="p-btn" onClick={() => (batch ? finish() : setTab('overview'))}>
+              {batch ? '완료' : '취소'}
+            </button>
             <button
-              className="primary large"
+              className="primary p-btn"
               onClick={() => (blockReason ? setBlockOpen(true) : register())}
             >
               등록
             </button>
-          </aside>
-        </div>
+          </div>
+        </aside>
       </div>
 
       {blockOpen && (
@@ -208,9 +257,9 @@ export function RegisterScreen({state, send, setTab, device = 1, slot: picked}: 
           </div>
           <p className="done-ask">플레이트를 이어서 등록하시겠습니까?</p>
           <div className="actions">
-            <button onClick={closeDone}>계속 등록</button>
-            <button className="primary" data-autofocus onClick={finish}>
-              완료
+            <button onClick={finish}>완료</button>
+            <button className="primary" data-autofocus onClick={closeDone}>
+              계속 등록
             </button>
           </div>
         </Modal>

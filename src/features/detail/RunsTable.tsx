@@ -1,48 +1,44 @@
 import {useLayoutEffect, useRef, useState} from 'react';
-import type {ImageState, Plate, Run} from '../../api/types.ts';
+import type {AppState, Plate, Run} from '../../api/types.ts';
 import {RUN_ROW_HEIGHT_REM, WELLS} from '../../config/defines.ts';
-import {Badge} from '../../shared/Badge.tsx';
 import {fmt} from '../../utils/datetime.ts';
-import {shots} from '../../utils/plate.ts';
+import {nextAt, pending, shots, totalRuns} from '../../utils/plate.ts';
 import {rootFontPx} from '../../utils/viewport.ts';
 
 interface Props {
+  state: AppState;
   plate: Plate;
   onView: (run: Run, wellIndex: number) => void;
-  /** 남은 높이를 채우고, 높이에 맞춰 페이지당 행 수를 계산한다. */
-  fill?: boolean;
+  onHistory: () => void;
 }
 
-/** 한 페이지에 두는 최대 줄 수. 남는 높이는 줄 키가 가져간다. */
-const MAX_ROWS = 4;
+/** 한 줄 = 한 회차(초안 260911). 남는 높이는 줄 키가 가져간다. */
+const MAX_ROWS = 6;
 
-interface Shot {
-  run: Run;
+interface Row {
   n: number;
-  well: number;
   at: number;
-  transferred: boolean;
-  state: ImageState;
-  image?: string;
+  run?: Run;
 }
 
-export function RunsTable({plate, onView, fill = false}: Props) {
+/**
+ * 플레이트 촬영 이력 — 회차마다 한 줄.
+ *
+ * 1.x 에서는 회차 하나를 Well 여섯 줄로 펼쳤다. 초안은 회차 한 줄에 상태 · 영상 ·
+ * 「보기」를 두고, Well 은 영상 뷰어 안에서 고른다. 맨 위에는 다음 회차를 「예정」으로
+ * 한 줄 세워, 지금까지와 앞으로가 한 표에서 이어진다.
+ */
+export function RunsTable({state, plate, onView, onHistory}: Props) {
   const [page, setPage] = useState(0);
   const [per, setPer] = useState(MAX_ROWS);
   const wrap = useRef<HTMLDivElement>(null);
 
-  // 표 높이가 바뀌면 한 페이지에 들어갈 행 수를 다시 센다.
-  // useLayoutEffect 인 이유: useEffect 로 재면 처음 그린 뒤에 줄여서, 넘친 표가
-  // 한 번 그려졌다가 접힌다. 느린 화면에서는 그 사이 스크롤바가 떴다 사라진다.
-  //
-  // 위아래로 남는 높이는 줄 수가 아니라 줄 키로 간다(MAX_ROWS). 한 화면에 여섯
-  // 줄이 들어가도 네 줄만 두는 편이 손가락으로 누르기 쉽다.
+  // 표 높이에 맞춰 페이지당 줄 수를 센다. 그리기 전에 재야 넘친 표가 한 번 보였다가 접히지 않는다.
   useLayoutEffect(() => {
-    if (!fill) return;
     const el = wrap.current;
     if (!el) return;
     const calc = () => {
-      const head = el.querySelector('thead')?.offsetHeight || 38;
+      const head = el.querySelector('.rt-head')?.clientHeight || 36;
       const rowPx = RUN_ROW_HEIGHT_REM * rootFontPx();
       setPer(Math.max(2, Math.min(MAX_ROWS, Math.floor((el.clientHeight - head) / rowPx))));
     };
@@ -50,113 +46,96 @@ export function RunsTable({plate, onView, fill = false}: Props) {
     const ro = new ResizeObserver(calc);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [fill]);
+  }, []);
 
-  // 계산 결과가 1행 넘칠 때가 있어 렌더 후 한 번 더 줄인다.
-  useLayoutEffect(() => {
-    if (!fill) return;
-    const el = wrap.current;
-    const table = el?.querySelector('table');
-    if (el && table && table.getBoundingClientRect().height > el.clientHeight + 1) {
-      setPer(x => Math.max(2, x - 1));
-    }
-  });
-
-  // 회차 하나가 Well 6칸이므로 표에서는 펼쳐서 보여준다. 최신 회차·마지막 Well 이 위.
-  const rows: Shot[] = [];
-  for (const run of [...plate.runs].reverse()) {
-    const images = shots(run);
-    for (let i = WELLS - 1; i >= 0; i--) {
-      rows.push({
-        run,
-        n: run.n,
-        well: i + 1,
-        at: run.at,
-        transferred: run.transferred,
-        state: run.imageState,
-        image: images[i],
-      });
-    }
-  }
-
+  const done = plate.runs.length >= totalRuns(state);
+  const rows: Row[] = [
+    ...(done || plate.paused ? [] : [{n: plate.runs.length + 1, at: nextAt(state, plate)}]),
+    ...[...plate.runs].reverse().map(run => ({n: run.n, at: run.at, run})),
+  ];
   const last = Math.max(0, Math.ceil(rows.length / per) - 1);
   const pg = Math.min(page, last);
   const shown = rows.slice(pg * per, pg * per + per);
+  const held = plate.runs.filter(r => r.imageState === 'held').length;
+  const sent = plate.runs.filter(r => r.transferred).length;
 
   return (
-    <section className={`card runs ${fill ? 'fill' : ''}`}>
-      <div className="row between">
-        <div>
-          <h3>플레이트 촬영 이력</h3>
-        </div>
-        <div
-          className="holdcnt"
-          title="스캐너에 아직 남아있는(PC 미전송) 영상. 최근 5회차까지만 보관됩니다."
+    <section className="p-card dt-runs">
+      <div className="p-card-head">
+        <h3>플레이트 촬영 이력</h3>
+        <p>촬영 · 전송까지 기록됩니다 · 판독 결과는 PC 에서 확인</p>
+        <span
+          className="p-tag mute dt-hold"
+          title="스캐너에 아직 남아 있는 영상. 최근 5회차까지만 보관됩니다."
         >
-          <small>기기 보관</small>
-          <b>
-            {plate.runs.filter(r => r.imageState === 'held').length}
-            <em>/5 회차</em>
-          </b>
-        </div>
-      </div>
-
-      <div className="table-wrap" ref={wrap}>
-        <table className={shown.length >= per ? 'fillrows' : ''}>
-          <thead>
-            <tr>
-              <th>회차</th>
-              <th>Well 번호</th>
-              <th>시각</th>
-              <th>전송</th>
-              <th>촬영 영상</th>
-            </tr>
-          </thead>
-          <tbody>
-            {shown.map(row => (
-              <tr key={`${row.n}-${row.well}`}>
-                <td>
-                  <b className="runno">{row.n}</b>
-                </td>
-                <td>
-                  <b className="wellno">{row.well}</b>
-                </td>
-                <td>{fmt(row.at)}</td>
-                <td>
-                  <Badge type={row.transferred ? 'good' : 'warn'}>
-                    {row.transferred ? '전송 완료' : '미전송'}
-                  </Badge>
-                </td>
-                {/*
-                  * 미리보기 그림은 44px 이라 무엇이 찍혔는지 알아볼 수 없었고,
-                  * 그 옆에 같은 일을 하는 「보기」가 또 있었다. 한 칸으로 합친다.
-                  * 볼 것이 없는 줄은 왜 없는지(촬영 실패 · 보존기간 경과)를 적는다.
-                  */}
-                <td>
-                  {row.state === 'held' && row.image ? (
-                    <button onClick={() => onView(row.run, row.well - 1)}>보기</button>
-                  ) : (
-                    <span className={`shotcount ${row.state === 'failed' ? 'fail' : 'gone'}`}>
-                      {row.state === 'failed' ? '촬영 실패' : '보존기간 경과'}
-                    </span>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="pager">
-        <span>
-          총 {plate.runs.length}회차 · {rows.length}컷 · {pg + 1}/{last + 1} 페이지
+          기기 보관 {held}/5 회차
         </span>
-        <button disabled={!pg} onClick={() => setPage(pg - 1)}>
-          이전
+        <button className="p-soft" onClick={onHistory}>
+          전체 이력
         </button>
-        <button disabled={pg >= last} onClick={() => setPage(pg + 1)}>
-          다음
-        </button>
+      </div>
+
+      <div className="rt" ref={wrap}>
+        <div className="rt-head">
+          <span>회차</span>
+          <span>촬영 시각</span>
+          <span>상태</span>
+          <span>촬영 영상</span>
+          <span>동작</span>
+        </div>
+        {shown.map(row => {
+          const run = row.run;
+          const has = !!run && run.imageState === 'held' && shots(run).length > 0;
+          const tag = !run
+            ? ['mute', '예정', '다음 촬영 예정']
+            : run.imageState === 'failed'
+              ? ['bad', '촬영 실패', run.error || '다시 촬영이 필요합니다']
+              : run.transferred
+                ? ['good', '전송 완료', run.n === 1 ? '기준 영상' : 'PC 로 유선 전송']
+                : ['warn', '미전송', 'PC 전송 대기'];
+          return (
+            <div className={`rt-row ${run ? '' : 'plan'}`} key={row.n}>
+              <b className="rt-n">{row.n}</b>
+              <span className="rt-at">{fmt(row.at)}</span>
+              <span className="rt-st">
+                <span className={`p-tag ${tag[0]}`}>{tag[1]}</span>
+                <small>{tag[2]}</small>
+              </span>
+              <span className={`rt-shot ${has ? 'has' : ''}`}>
+                {has
+                  ? `Well ${shots(run).length || WELLS}장`
+                  : !run
+                    ? '없음'
+                    : run.imageState === 'expired'
+                      ? '보존기간 경과'
+                      : '없음'}
+              </span>
+              <span className="rt-act">
+                <button disabled={!has} onClick={() => run && onView(run, 0)}>
+                  보기
+                </button>
+              </span>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="dt-send">
+        <small>전송 상태</small>
+        <b>
+          촬영 {plate.runs.length} 회 · PC 전송 완료 {sent} 건 · 미전송 {pending(plate)} 건
+        </b>
+        <span className="dt-pager">
+          <em>
+            {pg + 1} / {last + 1}
+          </em>
+          <button disabled={!pg} onClick={() => setPage(pg - 1)}>
+            이전
+          </button>
+          <button disabled={pg >= last} onClick={() => setPage(pg + 1)}>
+            다음
+          </button>
+        </span>
       </div>
     </section>
   );

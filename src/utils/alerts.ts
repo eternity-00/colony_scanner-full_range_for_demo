@@ -31,7 +31,10 @@ interface Go {
  */
 export function alertItems(state: AppState, {onDevice, onPlate, onNeedAdmin}: Go): AlertItem[] {
   const isAdmin = state.session.role === 'admin';
+  // 스캐너가 한 대면 이름은 늘 같다 — 위치만 적는다.
+  const one = state.devices.length === 1;
   const name = (id: number) => state.devices.find(d => d.id === id)?.name ?? `SCANNER ${id}`;
+  const at = (id: number, slot: number) => (one ? pos(slot) : `${name(id)} · ${pos(slot)}`);
   const need = totalRuns(state);
   const plates = active(state);
 
@@ -49,7 +52,7 @@ export function alertItems(state: AppState, {onDevice, onPlate, onNeedAdmin}: Go
     ...plates.filter(plateBad).map<AlertItem>(p => ({
       id: `b${p.id}`,
       kind: 'plate',
-      where: `${name(p.deviceId)} · ${pos(p.slot)}`,
+      where: at(p.deviceId, p.slot),
       what: p.runs.at(-1)?.imageState === 'failed' ? '촬영 실패' : `미전송 ${pending(p)}건`,
       go: () => onPlate(p.deviceId, p.slot),
     })),
@@ -58,7 +61,7 @@ export function alertItems(state: AppState, {onDevice, onPlate, onNeedAdmin}: Go
       .map<AlertItem>(p => ({
         id: `w${p.id}`,
         kind: 'done',
-        where: `${name(p.deviceId)} · ${pos(p.slot)}`,
+        where: at(p.deviceId, p.slot),
         what: `촬영 완료 ${p.runs.length}/${need}`,
         go: () => onPlate(p.deviceId, p.slot),
       })),

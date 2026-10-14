@@ -118,7 +118,7 @@ export const SLOTS_PER_DEVICE = 24;
 export const ROW_HEIGHT_REM = 2.75;
 
 /** 촬영 이력 표 한 행 높이(rem). */
-export const RUN_ROW_HEIGHT_REM = 3.5;
+export const RUN_ROW_HEIGHT_REM = 3.25;
 
 /**
  * 최대 배양 기간(일). 피드백 4.3 — 확정 균 작업은 일수 제한이 무의미하지만

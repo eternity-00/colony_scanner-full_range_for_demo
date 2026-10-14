@@ -189,7 +189,16 @@ export default function App() {
         onNeedAdmin={(where, what) => setAdminAsk({where, what})}
       />
     ),
-    status: <StatusScreen state={state} openDetail={openDetail} openRegister={openRegister} />,
+    status: (
+      <StatusScreen
+        state={state}
+        openDetail={openDetail}
+        openRegister={openRegister}
+        onRunning={() => setTab('running')}
+        onDevice={() => setTab('device')}
+        onNeedAdmin={(where, what) => setAdminAsk({where, what})}
+      />
+    ),
     detail: (
       <DetailScreen
         state={state}
@@ -199,6 +208,7 @@ export default function App() {
         send={execute}
         openRegister={openRegister}
         openViewer={openViewer}
+        onHistory={() => setTab('history')}
       />
     ),
     register: (
