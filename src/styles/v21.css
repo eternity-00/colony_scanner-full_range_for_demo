@@ -616,7 +616,7 @@
 /* 화면 이름 옆 영문(혜원님 10/14) — 한 단계 작고 옅게. 좁은 화면에서는 접는다. */
 .app>header .sub em{margin-left:0.5rem;font-style:normal;font-size:0.9375rem;font-weight:600;color:var(--p-tx2)}
 @media (max-width:1150px){.app>header .sub em{display:none}}
-/* 헤더 사선 칸은 짙은 남색 — 홈의 파란 「플레이트 등록」 버튼과 같은 파랑이라 겹쳐 보였다(혜원님 10/14). */
-.hd-brand{background:#1b2c4f}
+/* 헤더 사선 칸은 채도를 낮춘 강청색(짙은 남색은 너무 어두웠다) — 홈의 파란 「플레이트 등록」 버튼과 같은 파랑이라 겹쳐 보였다(혜원님 10/14). */
+.hd-brand{background:#3a6187}
 .hd-brand .hd-menu{background:transparent}
-.wm-home i{color:#8fc0ec}
+.wm-home i{color:#cfe3f5}
