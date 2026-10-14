@@ -604,3 +604,8 @@
   margin-top:0.5rem;padding:0.75rem 0.625rem 0.25rem;border-top:1px solid var(--p-bd2)}
 .drawer-foot img{height:1.5rem;width:auto}
 .drawer-foot span{font-size:0.75rem;font-weight:600;color:var(--p-tx3);font-variant-numeric:tabular-nums}
+/* 헤더 로고 — 글자 대신 SVG 원본 */
+.wm-logo{height:3.375rem;width:auto;margin-left:1rem;flex:none}
+.app[data-w="sm"] .wm-logo{height:2.75rem;margin-left:0.5rem}
+/* 홈 버튼이 들어와 헤더가 빠듯하다 — 폭이 좁으면(10.1" 1024 등) 부제(화면 이름)를 먼저 접는다. */
+@media (max-width:1150px){.app>header .sub{display:none}}
