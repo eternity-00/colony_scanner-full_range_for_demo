@@ -426,9 +426,9 @@
 .hm-acts>.home-act{height:100%;min-height:7rem;display:flex;align-items:center;justify-content:center;gap:1.5rem;
   padding:1rem 1.5rem;border-radius:var(--rc);border:2px solid var(--blue);background:#fff;color:var(--blue);
   box-shadow:0 4px 0 #b9cde2,0 10px 22px #1b1f2414;transition:transform .06s,box-shadow .06s}
-.hm-acts>.home-act.primary{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 4px 0 #00467f,0 10px 22px #0063b333}
+.hm-acts>.home-act.primary{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 4px 0 #165a92,0 10px 22px #1f78c133}
 .hm-acts>.home-act:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 #b9cde2}
-.hm-acts>.home-act.primary:active:not(:disabled){box-shadow:0 1px 0 #00467f}
+.hm-acts>.home-act.primary:active:not(:disabled){box-shadow:0 1px 0 #165a92}
 .hm-acts>.home-act>svg{width:3rem;height:3rem;flex:none;stroke-width:2}
 .hm-acts>.home-act span{display:flex;flex-direction:column;align-items:flex-start;gap:0.375rem}
 .hm-acts>.home-act b{font-size:1.875rem;font-weight:800;letter-spacing:-.02em;white-space:nowrap}
@@ -616,7 +616,8 @@
 /* 화면 이름 옆 영문(혜원님 10/14) — 한 단계 작고 옅게. 좁은 화면에서는 접는다. */
 .app>header .sub em{margin-left:0.5rem;font-style:normal;font-size:0.9375rem;font-weight:600;color:var(--p-tx2)}
 @media (max-width:1150px){.app>header .sub em{display:none}}
-/* 헤더 사선 칸과 주 버튼은 같은 파랑(--blue #0063b3) — 혜원님 10/14, 색을 갈라 본 뒤 같은 색으로 결정. */
-.hd-brand{background:var(--blue)}
+/* 헤더 사선 칸은 원래 파랑(#0063b3), 주 버튼(--blue)은 살짝 하늘 쪽으로 밝힌 #1f78c1 — 혜원님 10/14. */
+:root{--blue:#1f78c1;--blue7:#1f78c1}
+.hd-brand{background:#0063b3}
 .hd-brand .hd-menu{background:transparent}
 .wm-home i{color:#bcd9f5}
