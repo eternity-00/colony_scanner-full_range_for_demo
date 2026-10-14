@@ -192,7 +192,6 @@ export function OverviewScreen({
           ) : (
             <span className="hsum-body hsum-clear">
               <b>처리할 알람이 없습니다</b>
-              <small>장비와 플레이트가 모두 정상입니다.</small>
             </span>
           )}
         </section>

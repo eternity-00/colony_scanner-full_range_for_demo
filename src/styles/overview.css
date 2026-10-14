@@ -88,7 +88,8 @@ button.hsum:disabled{opacity:1;cursor:default}
   padding:0 1.25rem;background:none;border:0;border-top:1px solid var(--g3);border-radius:0;
   font-size:0.9375rem;font-weight:800;color:var(--blue)}
 .hsum-clear{align-items:center;text-align:center}
-.hsum-clear b{font-size:1.25rem;font-weight:800;color:var(--gt)}
+/* 알람이 없을 때는 값이 아니라 빈칸이다 — 다른 빈 값(--:--, 0)과 같은 회색. */
+.hsum-clear b{font-size:1.25rem;font-weight:700;color:#8f8f8f}
 @media (hover:hover) and (pointer:fine){
  .hsum-todo button:not(:disabled):hover,.hsum-alerts button:not(:disabled):hover,.hsum-more:hover{background:#f2f2f2}
 }
