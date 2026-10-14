@@ -16,7 +16,8 @@ interface Props {
 }
 
 /**
- * 홈 (v2.1) — 윗줄 큰 버튼 둘(등록 · 반출), 가운데 스캐너 한 줄, 아랫줄 정보 넷.
+ * 홈 (v2.1) — 위에 스캐너 한 줄과 정보 넷(현황), 아래에 큰 버튼 둘(등록 · 반출).
+ * 처음엔 버튼이 위였는데 현황을 먼저 읽게 위아래를 바꿨다(혜원님 10/14).
  *
  * 디자인 캔버스 「홈 화면 배치안」에서 혜원님이 고른 꼴(10/14). 알람 목록은 홈에서 빼고
  * 메뉴의 현황에서 본다. 대신 「문제 발생」 칸이 손봐야 할 플레이트 수를 말한다.
@@ -48,24 +49,6 @@ export function OverviewScreen({state, openDetail, openRegister, onStatus}: Prop
 
   return (
     <div className="hm-page">
-      {/* 등록 · 반출 — 홈에서 가장 큰 두 칸. */}
-      <div className="hm-acts">
-        <button className="home-act primary" onClick={() => openRegister(device.id)} disabled={!free}>
-          <ActIcon name="plus" />
-          <span>
-            <b>플레이트 등록</b>
-            <small>{free ? `빈 슬롯 ${free}칸` : '빈 슬롯 없음'}</small>
-          </span>
-        </button>
-        <button className="home-act" onClick={openRemove} disabled={!plates.length}>
-          <ActIcon name="eject" />
-          <span>
-            <b>플레이트 반출</b>
-            <small>{done.length ? `반출 대기 ${done.length}매` : `배양 중 ${plates.length}매`}</small>
-          </span>
-        </button>
-      </div>
-
       {/* 스캐너 한 줄 — 이름 · 상태 · 다음 촬영, 오른쪽 끝에 현황으로 가는 버튼. */}
       <div className="hm-bar">
         <b>{device.name}</b>
@@ -115,6 +98,24 @@ export function OverviewScreen({state, openDetail, openRegister, onStatus}: Prop
             <em>매</em>
           </b>
         </span>
+      </div>
+
+      {/* 등록 · 반출 — 홈에서 가장 큰 두 칸. */}
+      <div className="hm-acts">
+        <button className="home-act primary" onClick={() => openRegister(device.id)} disabled={!free}>
+          <ActIcon name="plus" />
+          <span>
+            <b>플레이트 등록</b>
+            <small>{free ? `빈 슬롯 ${free}칸` : '빈 슬롯 없음'}</small>
+          </span>
+        </button>
+        <button className="home-act" onClick={openRemove} disabled={!plates.length}>
+          <ActIcon name="eject" />
+          <span>
+            <b>플레이트 반출</b>
+            <small>{done.length ? `반출 대기 ${done.length}매` : `배양 중 ${plates.length}매`}</small>
+          </span>
+        </button>
       </div>
     </div>
   );
