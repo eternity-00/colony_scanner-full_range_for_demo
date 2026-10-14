@@ -1,12 +1,12 @@
 import {useState} from 'react';
 import type {AppState} from '../../api/types.ts';
-import {SLOTS_PER_DEVICE, STAGES, type SendCommand} from '../../config/defines.ts';
+import {SLOTS_PER_DEVICE, type SendCommand} from '../../config/defines.ts';
 import {ActIcon} from '../../shared/ActIcon.tsx';
 import {Badge} from '../../shared/Badge.tsx';
 import {Modal} from '../../shared/Modal.tsx';
 import {scannerNext} from '../../shared/ScannerHead.tsx';
 import {alertItems} from '../../utils/alerts.ts';
-import {active, pending, plateBad, pos, totalRuns} from '../../utils/plate.ts';
+import {active, pending, plateBad, totalRuns} from '../../utils/plate.ts';
 import {RemoveDialog} from './RemoveDialog.tsx';
 
 interface Props {
@@ -82,7 +82,7 @@ export function OverviewScreen({
   const bad = plates.filter(plateBad);
   const free = SLOTS_PER_DEVICE - plates.length;
   const next = scannerNext(state, device);
-  const job = device.job && ['running', 'paused'].includes(device.job.status) ? device.job : null;
+  const capturing = device.job?.status === 'running' && device.job.type === 'capture';
   const alerts = alertItems(state, {
     onDevice,
     onPlate: (deviceId, slot) => openDetail(deviceId, slot),
@@ -116,9 +116,6 @@ export function OverviewScreen({
     },
   ];
   const todoSum = todos.reduce((a, t) => a + t.value, 0);
-  const jobLabel = job
-    ? `${job.slot ? pos(job.slot) : ''} ${job.status === 'paused' ? '일시정지' : STAGES[job.step] ?? '진행 중'}`.trim()
-    : '대기 중';
 
   return (
     <div className="home">
@@ -153,20 +150,31 @@ export function OverviewScreen({
             <small>스캐너 상태</small>
             <Badge type={next.badgeType}>{next.badge}</Badge>
           </span>
+          {/*
+            * 크게 적는 것은 다음 촬영 시각이다. 장비 앞에 선 사람이 궁금한 것은
+            * 「지금 몇 단계인지」가 아니라 「언제 찍히는지」다 — 단계는 몇 초마다 바뀌어
+            * 지나가며 볼 값이 아니고, 촬영 중인지는 배지가 말한다. 단계는 촬영 화면에서 본다.
+            */}
           <span className="hsum-body">
-            <small>지금 하는 일</small>
-            <b className={`hsum-job ${job ? '' : 'idle'}`}>{jobLabel}</b>
+            <small>다음 촬영</small>
+            {/* 찍고 있는 동안은 다음 시각이 아직 없다. 빈칸 대신 「지금」이라고 답한다. */}
+            <b className={`hsum-big ${capturing ? 'now' : next.scheduled ? '' : 'idle'}`}>
+              {capturing ? '지금 촬영 중' : next.label}
+            </b>
           </span>
           <span className="hsum-facts">
-            <span>
-              <small>다음 촬영</small>
-              <b className={next.scheduled ? '' : 'idle'}>{next.label}</b>
-            </span>
             <span>
               <small>배양 중</small>
               <b>
                 {plates.length}
                 <em>/ {SLOTS_PER_DEVICE}칸</em>
+              </b>
+            </span>
+            <span>
+              <small>빈 슬롯</small>
+              <b>
+                {free}
+                <em>칸</em>
               </b>
             </span>
           </span>

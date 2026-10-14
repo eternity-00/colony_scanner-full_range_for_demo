@@ -49,9 +49,12 @@ button.hsum:disabled{opacity:1;cursor:default}
 /* 몸 — 칸의 주인공 하나. 남는 높이의 한가운데. */
 .hsum-body{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;gap:0.375rem;padding:0.75rem 1.25rem}
 .hsum-body small{font-size:0.9375rem;font-weight:700;color:var(--gt)}
-.hsum-job{font-size:2.125rem;font-weight:800;letter-spacing:-.02em;line-height:1.2;color:var(--ink);
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hsum-job.idle{color:#8f8f8f}
+.hsum-big{font-size:3rem;font-weight:800;letter-spacing:-.02em;line-height:1.1;color:var(--ink);
+  white-space:nowrap;font-variant-numeric:tabular-nums}
+/* 시각이 없을 때의 --:-- 는 값이 아니라 빈칸이다. */
+.hsum-big.idle{color:#8f8f8f;font-weight:500}
+/* 「지금 촬영 중」은 시각이 아니라 낱말이라 시각보다 한 단계 작게. */
+.hsum-big.now{font-size:2.25rem;line-height:1.47}
 
 /* 발 — 값 두 개를 반씩. 칸 몸과는 선으로 가른다. */
 .hsum-facts{flex:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border-top:1px solid var(--g3)}
