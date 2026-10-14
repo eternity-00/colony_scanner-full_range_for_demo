@@ -240,14 +240,6 @@
 .cp-steps li.now>strong{color:var(--p-tx)}
 
 .cp-side{min-height:0;display:flex;flex-direction:column;gap:0.75rem}
-.cp-prog{flex:none;display:flex;flex-direction:column;gap:0.5rem;padding:1rem 1.125rem}
-.cp-prog>small,.cp-prog-foot small{font-size:0.78125rem;font-weight:600;color:var(--p-tx2)}
-.cp-prog-main{display:flex;align-items:baseline;gap:0.5rem}
-.cp-prog-main b{font-size:2.5rem;font-weight:800;line-height:1;color:var(--p-tx);font-variant-numeric:tabular-nums}
-.cp-prog-main b.idle{color:var(--p-tx3);font-weight:500}
-.cp-prog-main em{font-style:normal;font-size:1.0625rem;font-weight:600;color:var(--p-tx2)}
-.cp-prog-main strong{margin-left:auto;font-size:1.1875rem;font-weight:700;color:var(--blue);white-space:nowrap}
-.cp-prog-foot{display:flex;justify-content:space-between;gap:0.5rem}
 
 .cp-queue{flex:1;display:flex;flex-direction:column;padding:0.875rem 1rem;overflow:hidden}
 .cp-queue ul{list-style:none;margin:0.625rem 0 0;padding:0;display:flex;flex-direction:column;gap:0.375rem;overflow-y:auto;min-height:0}
@@ -270,8 +262,7 @@
   .cp-cycle{padding:0.75rem 1rem}
   .cp-steps{margin-top:0.625rem}
   .cp-steps li>small{display:none}
-  .cp-prog-main b{font-size:2rem}
-}
+  }
 
 /* ── 이력 ── */
 .hs-page{height:100%;min-height:0;display:flex;flex-direction:column;gap:0.75rem}
@@ -526,7 +517,6 @@
 .hm-big b{font-size:2.75rem}
 @media (max-height:700px){.hm-page{grid-template-rows:minmax(0,2.4fr) auto minmax(5.5rem,1fr)}.hm-big b{font-size:2.125rem}}
 
-.cp-prog-main b.stage{font-size:2rem}
 
 /* 현황 알람 — 묶음별 소제목(요약 칸과 같은 이름 · 색) + 한 줄짜리 항목 */
 /* 현황 알람 — 시간순 한 줄 목록: 꼬리표 · 위치 · 내용 · 시각 */
@@ -565,3 +555,7 @@
   .st-list button,.st-alerts .st-list li button{min-height:2.75rem}
   .st-reg{min-height:3.25rem}
 }
+.cp-next{margin-left:auto;font-size:0.8125rem;font-weight:600;color:var(--p-tx2)}
+.cp-next b{margin-left:0.125rem;font-weight:800;color:var(--p-tx)}
+.cp-next b.idle{color:var(--p-tx3);font-weight:600}
+.cp-queue .p-card-head .cp-next+em{margin-left:0.75rem}

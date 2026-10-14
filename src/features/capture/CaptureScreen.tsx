@@ -97,41 +97,16 @@ export function CaptureScreen({state, send, openDetail}: Props) {
       </div>
 
       <div className="cp-side">
-        <div className="p-panel cp-prog">
-          <small>{job ? '이번 작업 진행' : '다음 촬영'}</small>
-          {job ? (
-            <>
-              <span className="cp-prog-main">
-                <b className="stage">{stage}</b>
-                <em>{Math.min(job.step + 1, stages.length)} / {stages.length} 단계</em>
-                <strong>{job.status === 'paused' ? '일시정지' : `${Math.round(job.progress)}%`}</strong>
-              </span>
-              <i className="p-bar">
-                <i style={{width: `${Math.max(2, job.progress)}%`}} />
-              </i>
-              <span className="cp-prog-foot">
-                <small>시작 {hm(job.startedAt)}</small>
-                <small>
-                  {current ? `${pos(current.slot)} · ${current.runs.length + 1}/${totalRuns(state)}회차` : ''}
-                </small>
-              </span>
-            </>
-          ) : (
-            <>
-              <span className="cp-prog-main">
-                <b className={next.scheduled ? '' : 'idle'}>{next.label}</b>
-                <strong>{next.badge}</strong>
-              </span>
-              <span className="cp-prog-foot">
-                <small>대기 중인 촬영 {queue.length} 매</small>
-              </span>
-            </>
-          )}
-        </div>
-
+        {/* 「이번 작업 진행」 칸은 뺐다 — 진행은 아래 촬영 단계 띠가 이미 말한다(혜원님 10/14).
+            지금 찍는 판은 큐 맨 윗줄, 쉬고 있을 때의 다음 촬영 시각은 큐 머리에 적는다. */}
         <section className="p-card cp-queue">
           <div className="p-card-head">
             <h3>촬영 큐</h3>
+            {!job && (
+              <span className="cp-next">
+                다음 촬영 <b className={next.scheduled ? '' : 'idle'}>{next.label}</b>
+              </span>
+            )}
             <em>{queue.length + (current ? 1 : 0)} 매</em>
           </div>
           <ul>
@@ -139,7 +114,9 @@ export function CaptureScreen({state, send, openDetail}: Props) {
               <li>
                 <button className="now" onClick={() => openDetail(d.id, current.slot)}>
                   <b>{pos(current.slot)}</b>
-                  <small>{current.runs.length + 1}회차</small>
+                  <small>
+                    {current.runs.length + 1}/{totalRuns(state)}회차 · {hm(job!.startedAt)} 시작
+                  </small>
                   <em>{running ? '촬영 중' : '일시정지'}</em>
                 </button>
               </li>
