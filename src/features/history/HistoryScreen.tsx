@@ -3,7 +3,7 @@ import type {AppState, Plate} from '../../api/types.ts';
 import {ROW_HEIGHT_REM} from '../../config/defines.ts';
 import {fmt} from '../../utils/datetime.ts';
 import {download} from '../../utils/download.ts';
-import {coord, nextAt, pending, pos, totalRuns} from '../../utils/plate.ts';
+import {coord, failedWells, nextAt, pending, pos, totalRuns} from '../../utils/plate.ts';
 import {rootFontPx} from '../../utils/viewport.ts';
 
 interface Props {
@@ -152,7 +152,7 @@ export function HistoryScreen({state, openDetail, openPlateViewer}: Props) {
             <span>회차</span>
             <span>투입 시각</span>
             <span>다음 촬영</span>
-            <span>영상</span>
+            <span>기기 보관</span>
             <span>최근 촬영</span>
             <span>전송</span>
           </div>
@@ -174,11 +174,18 @@ export function HistoryScreen({state, openDetail, openPlateViewer}: Props) {
                 </span>
                 <span>{fmt(p.registeredAt)}</span>
                 <strong>{p.removedAt ? '–' : fmt(nextAt(state, p))}</strong>
-                <span className="hs-shot">영상 {p.runs.filter(r => r.imageState === 'held').length}</span>
+                {/* 스캐너에 영상이 남아 있는 회차 수(최근 5회차까지). 사진 장수가 아니다. */}
+                <span className="hs-shot">{p.runs.filter(r => r.imageState === 'held').length} 회차</span>
                 <span className="hs-last">
                   {lr
                     ? `${fmt(lr.at)} · ${
-                        lr.imageState === 'failed' ? '촬영 실패' : lr.transferred ? '촬영 후 전송' : '전송 대기'
+                        lr.imageState === 'failed'
+                          ? '촬영 실패'
+                          : failedWells(lr).length
+                            ? `Well ${failedWells(lr).join('·')} 실패`
+                            : lr.transferred
+                              ? '촬영 후 전송'
+                              : '전송 대기'
                       }`
                     : '–'}
                 </span>
