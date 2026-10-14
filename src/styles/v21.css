@@ -580,3 +580,13 @@
   .app>nav.drawer .drawer-x{width:5rem;height:5rem}
 }
 @media (hover:hover) and (pointer:fine){.app>nav.drawer .drawer-x:hover{background:var(--blue);filter:brightness(.92)}}
+
+/* 촬영 — 아랫줄을 한 줄로 맞춘다: 왼쪽 「촬영 단계」 칸과 오른쪽 일시정지 · 재개 버튼이 같은 높이(혜원님 10/14). */
+.cp-page{grid-template-rows:minmax(0,1fr) auto;row-gap:0.75rem}
+.cp-main,.cp-side{display:contents}
+.cp-cam{grid-column:1;grid-row:1}
+.cp-cycle{grid-column:1;grid-row:2}
+.cp-queue{grid-column:2;grid-row:1}
+.cp-acts{grid-column:2;grid-row:2;align-self:stretch}
+.cp-acts .p-btn{min-height:0;height:100%}
+.app[data-w="sm"] .cp-main,.app[data-w="sm"] .cp-side{display:flex}
