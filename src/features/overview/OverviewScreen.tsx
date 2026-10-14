@@ -26,8 +26,28 @@ interface Todo {
   label: string;
   value: number;
   unit: string;
+  /** 줄 앞의 선 그림. 24 격자, 선 굵기 2. */
+  path: string;
   go?: () => void;
 }
+
+/** 칸 이름 앞의 선 그림. */
+const HEAD_ICON = {
+  scanner: 'M4 5h16v14H4zM4 9.7h16M4 14.3h16M9.3 5v14M14.7 5v14',
+  todo: 'M10 6h10M10 12h10M10 18h10M4 6l1.2 1.2L7.5 5M4 12l1.2 1.2 2.3-2.2M4 18l1.2 1.2 2.3-2.2',
+  alarm: 'M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15zM10 20.5h4',
+};
+
+/**
+ * 색 없는 선 아이콘. 색은 글자와 같다 — 색 칩을 붙이면 칸마다 색이 하나씩 늘어
+ * 정작 빨강(문제)이 묻힌다. 모양만으로 칸을 가른다.
+ */
+const Glyph = ({path}: {path: string}) => (
+  <svg className="hsum-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+    strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d={path} />
+  </svg>
+);
 
 
 /**
@@ -75,6 +95,7 @@ export function OverviewScreen({
       label: '반출 대기',
       value: done.length,
       unit: '매',
+      path: 'M12 3v10M8 9l4 4 4-4M4 20h16',
       go: done.length ? () => setRemoving(true) : undefined,
     },
     {
@@ -82,6 +103,7 @@ export function OverviewScreen({
       label: '미전송',
       value: unsent.reduce((a, p) => a + pending(p), 0),
       unit: '건',
+      path: 'M12 19V7M6.5 12.5L12 7l5.5 5.5M4 4h16',
       go: unsent.length ? () => openDetail(device.id, unsent[0].slot) : undefined,
     },
     {
@@ -89,6 +111,7 @@ export function OverviewScreen({
       label: '문제 발생',
       value: bad.length,
       unit: '매',
+      path: 'M12 4.5l8.5 15h-17zM12 10v4M12 17h.01',
       go: bad.length ? () => openDetail(device.id, bad[0].slot) : undefined,
     },
   ];
@@ -126,6 +149,7 @@ export function OverviewScreen({
         {/* 스캐너 상태 — 누르면 칸별로 보는 현황으로 간다. */}
         <button className="card hsum" onClick={onStatus}>
           <span className="hsum-head">
+            <Glyph path={HEAD_ICON.scanner} />
             <small>스캐너 상태</small>
             <Badge type={next.badgeType}>{next.badge}</Badge>
           </span>
@@ -151,13 +175,15 @@ export function OverviewScreen({
         {/* 할 일 — 줄마다 그 일을 하러 간다. 0 인 줄은 누를 데가 없다. */}
         <section className="card hsum">
           <span className="hsum-head">
+            <Glyph path={HEAD_ICON.todo} />
             <small>할 일</small>
             <em className={todoSum ? '' : 'none'}>{todoSum ? `${todoSum}건` : '없음'}</em>
           </span>
           <div className="hsum-todo">
             {todos.map(t => (
               <button key={t.key} className={t.key} disabled={!t.go} onClick={t.go}>
-                    <span>{t.label}</span>
+                <Glyph path={t.path} />
+                <span>{t.label}</span>
                 <b>
                   {t.value}
                   <em>{t.unit}</em>
@@ -170,6 +196,7 @@ export function OverviewScreen({
         {/* 알람 — 위에서부터 몇 줄을 바로 보여 준다. 줄을 누르면 그 일로, 아래 「전체 보기」는 목록 팝업. */}
         <section className="card hsum">
           <span className="hsum-head">
+            <Glyph path={HEAD_ICON.alarm} />
             <small>알람</small>
             <em className={alerts.length ? 'bad' : 'none'}>{alerts.length ? `${alerts.length}건` : '없음'}</em>
           </span>
