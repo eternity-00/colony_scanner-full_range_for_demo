@@ -33,7 +33,7 @@ const JOB_NAME = {capture: '촬영', home: '원점 복귀', calibrate: '캘리�
 /**
  * 현황 (v2.1) — 초안(260911) 홈을 스캐너 한 대로 줄인 꼴.
  *
- * 왼쪽: 스캐너 카드 하나 — 수납 매수 · 오늘 촬영 매수 · 24칸 트레이.
+ * 왼쪽: 스캐너 카드 하나 — 이름 · 상태 · 범례 · 24칸 트레이.
  * 오른쪽: 촬영 진행 · 요약 셋 · 알람 · 등록 버튼.
  * 칸을 누르면 플레이트가 있으면 요약 팝업, 비어 있으면 등록 확인 팝업이 뜬다.
  */
@@ -86,11 +86,6 @@ export function StatusScreen({
           <h3>{d.name}</h3>
           <Badge type={next.badgeType}>{next.badge}</Badge>
           <WellLegend />
-        </div>
-        <div className="st-count">
-          <b>{plates.length}</b>
-          <span>/ {SLOTS_PER_DEVICE} 매 수납</span>
-          <em>오늘 촬영 {today} 매</em>
         </div>
         <div className="p-tray st-tray">
           <Tray state={state} deviceId={d.id} compact onSelect={slot => tap(d.id, slot)} />
