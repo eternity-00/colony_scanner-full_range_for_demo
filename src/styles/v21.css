@@ -581,6 +581,3 @@
 .cp-acts{grid-column:2;grid-row:2;align-self:stretch}
 .cp-acts .p-btn{min-height:0;height:100%}
 .app[data-w="sm"] .cp-main,.app[data-w="sm"] .cp-side{display:flex}
-/* 홈 순서: 스캐너 줄 · 정보 넷(위) → 등록 · 반출(아래). */
-.hm-page{grid-template-rows:auto minmax(7.5rem,1fr) minmax(0,2.4fr)}
-@media (max-height:700px){.hm-page{grid-template-rows:auto minmax(5.5rem,1fr) minmax(0,2.4fr)}}
