@@ -183,8 +183,8 @@
 .rg-facts small{font-size:0.75rem;font-weight:600;color:var(--p-tx2)}
 .rg-facts b{font-size:1.625rem;font-weight:800;line-height:1;color:var(--p-tx);white-space:nowrap;font-variant-numeric:tabular-nums}
 .rg-facts b em{font-style:normal;font-size:0.875rem;font-weight:600;color:var(--p-tx2);margin-left:0.25rem}
-/* 취소 · 등록은 6.5rem 으로 키우고, 남는 높이는 검사 루틴이 받되 내용을 가운데에 세운다. */
-.rg-acts{flex:none;height:6.5rem;display:grid;grid-template-columns:1fr 2fr;gap:0.75rem}
+/* 등록 버튼 하나(6.5rem).  남는 높이는 검사 루틴이 받되 내용을 가운데에 세운다. */
+.rg-acts{flex:none;height:6.5rem;display:grid;grid-template-columns:minmax(0,1fr);gap:0.75rem}
 .rg-acts .p-btn{height:100%}
 .rg-acts .p-btn{min-height:4rem;font-size:1.0625rem}
 .rg-acts .p-btn.primary{font-size:1.25rem;font-weight:800}

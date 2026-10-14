@@ -28,8 +28,6 @@ export function RegisterScreen({state, send, setTab, device = 1, slot: picked}: 
   const [slot, setSlot] = useState(() => (picked && free.includes(picked) ? picked : free[0] || 0));
   /** 「등록」을 눌러 확인을 기다리는 중. */
   const [ask, setAsk] = useState(false);
-  /** 「완료」를 누를 때까지 이어서 넣은 매수. */
-  const [batch, setBatch] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [blockOpen, setBlockOpen] = useState(false);
 
@@ -59,35 +57,27 @@ export function RegisterScreen({state, send, setTab, device = 1, slot: picked}: 
 
   /**
    * 등록 — 확인 팝업에서 「확인」을 누르면 보낸다. 끝나면 팝업 없이 이 화면에 남고,
-   * 다음 빈 칸이 골라진다. 「계속 등록할까요?」를 따로 묻지 않는다 — 완료 / 계속 등록은
-   * 예 · 아니오처럼 읽히지 않아 헷갈렸다(혜원님 10/14). 끝낼 때는 왼쪽 아래 「완료」.
+   * 다음 빈 칸이 골라진다.
+   *
+   * 버튼은 「등록」 하나다. 누르면 그 판의 주기가 바로 시작된다고 다들 생각해서
+   * (혜원님 10/14), 서버가 등록마다 걸어 두는 촬영 붙잡기(5분)를 곧장 푼다.
+   * 판을 넣는 동안 장비가 움직이지 않게 하는 일은 도어 인터록이 맡는다 —
+   * 도어가 열려 있으면 스케줄러가 촬영을 시작하지 않는다.
    */
   const register = async () => {
     setAsk(false);
     setSubmitting(true);
     // 투입 시각은 서버가 찍는다. 화면은 무엇이 기록될지 미리 보여줄 뿐이다.
     const result = await send('register', deviceId, {slot});
-    if (result) {
-      setBatch(n => n + 1);
-    }
+    if (result) await send('registerDone', 0);
     setSubmitting(false);
-  };
-
-  /**
-   * 등록을 끝낸다. 서버는 등록이 들어올 때마다 촬영을 붙잡아 두므로,
-   * 여기서 풀어 줘야 밀어 둔 것들이 한꺼번에 돌기 시작한다.
-   */
-  const finish = () => {
-    setBatch(0);
-    void send('registerDone', 0);
-    setTab('overview');
   };
 
   const firstShot = !state.autoRun
     ? '자동 촬영 꺼짐'
     : state.routine.delay
       ? kdt(state.serverTime + state.routine.delay * 60000)
-      : '등록 완료 직후';
+      : '등록 직후';
 
   return (
     <>
@@ -162,7 +152,7 @@ export function RegisterScreen({state, send, setTab, device = 1, slot: picked}: 
               <small className="p-label">첫 촬영 예정 (자동 산정)</small>
               <span className="rg-box">
                 <b>{firstShot}</b>
-                <em>등록을 마쳐야 촬영이 시작됩니다</em>
+                <em>등록하면 바로 주기가 시작됩니다</em>
               </span>
             </div>
           </section>
@@ -207,9 +197,6 @@ export function RegisterScreen({state, send, setTab, device = 1, slot: picked}: 
           </section>
 
           <div className="rg-acts">
-            <button className="p-btn" onClick={() => (batch ? finish() : setTab('overview'))}>
-              {batch ? '완료' : '취소'}
-            </button>
             <button
               className="primary p-btn"
               onClick={() => (blockReason ? setBlockOpen(true) : setAsk(true))}
