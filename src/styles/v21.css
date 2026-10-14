@@ -592,11 +592,14 @@
 @media (max-height:700px){.dv-reset{min-height:4rem;font-size:1.0625rem}}
 
 /* 헤더(혜원님 10/14) — 왼쪽 끝 사선 파란 칸 = 메뉴, 글자 로고 = 홈 버튼, 나머지 흰 바탕. */
-.app>header .hd-menu{width:6.5rem;padding-right:1.5rem;clip-path:polygon(0 0,100% 0,calc(100% - 1.75rem) 100%,0 100%)}
-.wm-home{min-height:0;height:5rem;margin:0;padding:0 0.5rem 0 1rem;border:0;border-radius:0;background:transparent;
-  font-size:1.5rem;font-weight:800;letter-spacing:-.02em;color:var(--gt);white-space:nowrap}
-.wm-home i{font-style:normal;color:var(--blue)}
+/* 메뉴와 로고를 한 사선 파란 칸에 담는다(혜원님 10/14). */
+.hd-brand{flex:none;height:5rem;display:flex;align-items:center;padding-right:2.75rem;background:var(--blue);
+  clip-path:polygon(0 0,100% 0,calc(100% - 1.75rem) 100%,0 100%)}
+.wm-home{min-height:0;height:5rem;margin:0;padding:0 0.5rem 0 0.75rem;border:0;border-radius:0;background:transparent;
+  font-size:1.5rem;font-weight:800;letter-spacing:-.02em;color:#fff;white-space:nowrap}
+.wm-home i{font-style:normal;color:#bcd9f5}
 @media (hover:hover) and (pointer:fine){.wm-home:hover{filter:none;opacity:.85}}
+.app>header .sub{margin-left:0.5rem;border-left:0;padding-left:0}
 .app>header .head-status{padding-right:1rem}
 
 /* 메뉴 서랍 바닥 — 제조사 로고 · 앱 버전 */
