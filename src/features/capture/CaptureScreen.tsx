@@ -11,16 +11,12 @@ interface Props {
   openDetail: (deviceId: number, slot?: number) => void;
 }
 
-/** 단계 아래에 적는 한 줄 — 초안(260911)의 설명을 그대로 쓴다. */
-const STAGE_NOTE = [
-  '엘리베이터 → 스테이션',
-  '히팅플레이트 접촉',
-  '하부 면조명',
-  '원 슬롯 반환',
-  '유선 → 인큐베이터',
-  '판독은 PC 에서 수행',
-];
-const SHORT_NOTE = ['장비 확인', '축 이동', '상태 점검'];
+/**
+ * 띠에 그리는 촬영 단계 수. 장비는 여섯 단계(… 전송 · PC 저장)를 돌지만,
+ * 뒤의 둘은 카메라 화면에서 지켜볼 일이 아니다 — 전송은 상세 · 이력이 말한다(혜원님 10/14).
+ * 전송 중에는 넷이 모두 끝난 것으로 보인다.
+ */
+const SHOWN = 4;
 const JOB_NAME = {capture: '촬영', home: '원점 복귀', calibrate: '캘리브레이션', reset: '모듈 초기화'};
 
 /**
@@ -37,8 +33,7 @@ export function CaptureScreen({state, send, openDetail}: Props) {
   const job = d.job && ['running', 'paused'].includes(d.job.status) ? d.job : null;
   const running = d.job?.status === 'running';
   const capture = !job || job.type === 'capture';
-  const stages = capture ? STAGES : SHORT_STAGES;
-  const notes = capture ? STAGE_NOTE : SHORT_NOTE;
+  const stages = capture ? STAGES.slice(0, SHOWN) : SHORT_STAGES;
   const well = job && capture ? Math.min(WELLS, Math.floor((job.progress / 100) * WELLS) + 1) : 0;
   const plates = platesFor(state, d.id);
   const current = job?.plateId ? plates.find(p => p.id === job.plateId) : undefined;
@@ -74,12 +69,7 @@ export function CaptureScreen({state, send, openDetail}: Props) {
 
         <section className="p-card cp-cycle">
           <div className="p-card-head">
-            <h3>{capture ? '촬영 1 사이클' : `${JOB_NAME[job?.type ?? 'capture']} 단계`}</h3>
-            <p>
-              {capture
-                ? '수납은 최초 1회 · 이후 ①~⑥ 만 반복 · 판독은 PC 에서 수행'
-                : '장비 작업이 끝나면 촬영을 이어 갑니다'}
-            </p>
+            <h3>{capture ? '촬영 단계' : `${JOB_NAME[job?.type ?? 'capture']} 단계`}</h3>
           </div>
           <ol className="cp-steps">
             {stages.map((label, i) => {
@@ -95,7 +85,6 @@ export function CaptureScreen({state, send, openDetail}: Props) {
                   <i />
                   <b>{i + 1}</b>
                   <strong>{label}</strong>
-                  <small>{notes[i]}</small>
                 </li>
               );
             })}
