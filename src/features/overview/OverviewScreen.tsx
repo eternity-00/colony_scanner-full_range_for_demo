@@ -3,7 +3,7 @@ import {SLOTS_PER_DEVICE} from '../../config/defines.ts';
 import {ActIcon} from '../../shared/ActIcon.tsx';
 import {Badge} from '../../shared/Badge.tsx';
 import {scannerNext} from '../../shared/ScannerHead.tsx';
-import {alertItems} from '../../utils/alerts.ts';
+import {ALERT_TAG, actionable, alertItems} from '../../utils/alerts.ts';
 import {active, totalRuns} from '../../utils/plate.ts';
 
 interface Props {
@@ -33,7 +33,6 @@ interface Props {
  * 아랫줄: 스캐너가 지금 어떤지 · 내가 할 일 · 알람. 숫자만 짧게 적고,
  * 자세한 것은 눌러서 들어간다.
  */
-const ALERT_TAG = {device: '오류', plate: '주의', done: '완료'} as const;
 
 export function OverviewScreen({
   state,
@@ -125,7 +124,9 @@ export function OverviewScreen({
         <div className="hm-alerts">
           <div className="p-card-head">
             <h3>알람</h3>
-            <em className={alerts.length ? 'bad' : 'none'}>{alerts.length ? `${alerts.length}건` : '없음'}</em>
+            <em className={actionable(alerts) ? 'bad' : 'none'}>
+              {actionable(alerts) ? `${actionable(alerts)}건` : '없음'}
+            </em>
           </div>
           {alerts.length ? (
             <ul>

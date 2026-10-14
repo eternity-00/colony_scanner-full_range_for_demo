@@ -6,7 +6,7 @@ import {WellLegend} from '../../shared/Legend.tsx';
 import {Modal} from '../../shared/Modal.tsx';
 import {scannerNext} from '../../shared/ScannerHead.tsx';
 import {Tray} from '../../shared/Tray.tsx';
-import {alertItems} from '../../utils/alerts.ts';
+import {ALERT_TAG, actionable, alertItems} from '../../utils/alerts.ts';
 import {elapsedLabel, kdt} from '../../utils/datetime.ts';
 import {
   dueToday,
@@ -27,7 +27,6 @@ interface Props {
   onNeedAdmin: (where: string, what: string) => void;
 }
 
-const ALERT_TAG = {device: '오류', plate: '주의', done: '완료'} as const;
 const JOB_NAME = {capture: '촬영', home: '원점 복귀', calibrate: '캘리브레이션', reset: '모듈 초기화'};
 
 /**
@@ -157,8 +156,8 @@ export function StatusScreen({
         <section className="p-card st-alerts">
           <div className="p-card-head">
             <h3>알람</h3>
-            <em className={alerts.length ? '' : 'none'}>
-              {alerts.length ? `${alerts.length}건` : '없음'}
+            <em className={actionable(alerts) ? '' : 'none'}>
+              {actionable(alerts) ? `${actionable(alerts)}건` : '없음'}
             </em>
           </div>
           {alerts.length ? (

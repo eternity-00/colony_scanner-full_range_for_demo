@@ -501,3 +501,8 @@
   .hm-big b{font-size:2.125rem}
   .hm-small{font-size:0.875rem}
 }
+
+/* 알람 목록 — 스크롤 막대와 글자 사이를 띄운다(혜원님 10/14). */
+.hm-alerts ul,.st-alerts ul{padding-right:0.875rem;scrollbar-gutter:stable}
+/* 촬영 완료 알림 — 손댈 일이 아니라 파란 옅은 꼬리표 */
+.p-tag.shot{background:var(--p-pri-soft);color:var(--blue)}

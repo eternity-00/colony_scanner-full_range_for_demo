@@ -132,7 +132,7 @@ export function DetailScreen({
                   <ActIcon name="send" />
                   재전송
                 </button>
-                {/* 반출은 영상을 지우고 슬롯을 비우는 일이라 버튼 넷 중 가장 눈에 띄게 둔다.
+                {/* 반출은 버튼 넷 중 눈에 띄게 둔다 — 홈 「반출 대기」와 같은 초록.
                     촬영을 다 마친 판이면 꽉 찬 면으로 — 지금 해야 할 일이다. */}
                 <button
                   className={`remove-btn ${done ? 'due' : ''}`}
