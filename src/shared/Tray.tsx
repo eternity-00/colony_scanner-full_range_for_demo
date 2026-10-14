@@ -50,8 +50,8 @@ export function Tray({
                   onClick={() => onSelect?.(slot)}
                   title={`${pos(slot)} · ${plate ? plate.id : '빈 슬롯'} · ${WELL_LABEL[cell]}`}
                 >
-                  {/* 등록 화면은 고르는 자리라 상태 원 대신 위치 이름을 적는다(초안 260911). */}
-                  <b>{registration ? (plate ? '사용 중' : `${tier}단 ${col}열`) : `${tier}-${col}`}</b>
+                  {/* 등록 화면은 상태 원 대신 빈 칸 번호 / 「사용 중」을 적는다. 번호는 다른 화면과 같은 「2-1」 꼴. */}
+                  <b>{registration && plate ? '사용 중' : `${tier}-${col}`}</b>
                 </button>
               );
             })}
