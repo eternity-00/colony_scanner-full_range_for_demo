@@ -98,15 +98,6 @@
 .st-hint{margin-top:0.5rem;font-size:0.78125rem;font-weight:500;color:var(--p-tx3)}
 
 .st-side{min-height:0;display:flex;flex-direction:column;gap:0.75rem}
-.st-run{flex:none;display:flex;flex-direction:column;align-items:stretch;gap:0.5rem;padding:1rem 1.125rem;text-align:left;min-height:0}
-.st-run-top,.st-run-foot{display:flex;justify-content:space-between}
-.st-run-top small,.st-run-foot small{font-size:0.78125rem;font-weight:600;color:var(--p-tx2)}
-.st-run-main{display:flex;align-items:baseline;gap:0.625rem}
-.st-run-main b{font-size:2.25rem;font-weight:800;line-height:1.05;color:var(--p-tx);font-variant-numeric:tabular-nums;white-space:nowrap}
-.st-run-main b.idle{color:var(--p-tx3);font-weight:500}
-.st-run-main em{margin-left:auto;font-style:normal;font-size:1.0625rem;font-weight:700;color:var(--blue);white-space:nowrap}
-.st-run-main em.bad{color:var(--p-red)}
-.st-run-main em.warn{color:var(--p-amber)}
 
 .st-facts{flex:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));overflow:hidden}
 .st-facts>span{display:flex;flex-direction:column;align-items:center;gap:0.375rem;padding:0.75rem 0.5rem}
@@ -135,16 +126,13 @@
 .st-reg{flex:none;min-height:3.75rem;border-radius:var(--rc);font-size:1.0625rem;font-weight:700}
 
 @media (max-height:700px){
-  .st-run{padding:0.75rem 1rem;gap:0.375rem}
-  .st-run-main b{font-size:1.75rem}
-  .st-reg{min-height:3.25rem}
+      .st-reg{min-height:3.25rem}
   .st-count b{font-size:1.75rem}
 }
 
 @media (hover:hover) and (pointer:fine){
   .st-alerts li button:hover{filter:brightness(.97)}
-  .st-run:hover{filter:brightness(.98)}
-}
+  }
 
 /* 뷰어에서 찍히지 못한 Well 칸 */
 .well-card>.wc-miss.fail{background:var(--p-red-soft);color:var(--p-red)}
@@ -541,21 +529,16 @@
 .cp-prog-main b.stage{font-size:2rem}
 
 /* 현황 알람 — 묶음별 소제목(요약 칸과 같은 이름 · 색) + 한 줄짜리 항목 */
-.st-groups{flex:1;min-height:0;margin-top:0.5rem;padding-right:0.875rem;overflow-y:auto;display:flex;flex-direction:column;gap:0.75rem;
+/* 현황 알람 — 시간순 한 줄 목록: 꼬리표 · 위치 · 내용 · 시각 */
+.st-list{flex:1;min-height:0;margin:0.5rem 0 0;padding:0 0.875rem 0 0;list-style:none;overflow-y:auto;
   -webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain}
-.st-groups h4{margin:0 0 0.25rem;display:flex;align-items:center;gap:0.375rem;font-size:0.8125rem;font-weight:800;color:var(--p-tx2)}
-.st-groups h4 em{font-style:normal;min-width:1.375rem;height:1.375rem;padding:0 0.375rem;display:inline-grid;place-items:center;
-  border-radius:999px;background:#eceef1;font-size:0.75rem;font-weight:800}
-.st-groups .bad h4{color:var(--p-red)}.st-groups .bad h4 em{background:var(--p-red-soft)}
-.st-groups .ready h4{color:var(--p-green)}.st-groups .ready h4 em{background:var(--p-green-soft)}
-.st-groups .shot h4{color:var(--blue)}.st-groups .shot h4 em{background:var(--p-pri-soft)}
-.st-groups ul{margin:0;padding:0;list-style:none}
-.st-groups li+li{border-top:1px solid var(--p-bd2)}
-.st-groups li button{width:100%;min-height:2.75rem;display:flex;align-items:center;gap:0.75rem;padding:0.25rem 0.25rem;
+.st-list li+li{border-top:1px solid var(--p-bd2)}
+.st-list button{width:100%;min-height:2.875rem;display:flex;align-items:center;gap:0.625rem;padding:0.25rem 0.125rem;
   border:0;border-radius:0;background:transparent;text-align:left}
-.st-groups li b{font-size:0.9375rem;font-weight:700;color:var(--p-tx);white-space:nowrap}
-.st-groups li small{margin-left:auto;font-size:0.8125rem;font-weight:600;color:var(--p-tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.st-groups .bad li small{color:var(--p-red)}
-@media (hover:hover) and (pointer:fine){.st-groups li button:hover{background:#f7f8fa}}
-.st-more{min-height:2.25rem;margin-top:0.125rem;padding:0 0.25rem;border:0;background:transparent;font-size:0.8125rem;font-weight:700;color:var(--blue)}
-@media (max-height:700px){.st-groups{gap:0.375rem}.st-groups li button{min-height:2.375rem}.st-more{min-height:1.75rem}}
+.st-list .p-tag{flex:none;width:2.75rem;justify-content:center;padding:0.3125rem 0;font-size:0.6875rem}
+.st-list b{font-size:0.9375rem;font-weight:700;color:var(--p-tx);white-space:nowrap}
+.st-list small{flex:1;min-width:0;font-size:0.8125rem;font-weight:600;color:var(--p-tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.st-list button.device small,.st-list button.plate small{color:var(--p-red)}
+.st-list time{flex:none;font-size:0.75rem;font-weight:600;color:var(--p-tx3);font-variant-numeric:tabular-nums}
+@media (hover:hover) and (pointer:fine){.st-list button:hover{background:#f7f8fa}}
+.st-alerts .st-list li button{background:transparent;border-radius:0;padding:0.25rem 0.125rem;min-height:2.875rem}

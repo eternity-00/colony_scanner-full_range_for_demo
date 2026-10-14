@@ -194,7 +194,6 @@ export default function App() {
         state={state}
         openDetail={openDetail}
         openRegister={openRegister}
-        onRunning={() => setTab('running')}
         onDevice={() => setTab('device')}
         onNeedAdmin={(where, what) => setAdminAsk({where, what})}
       />

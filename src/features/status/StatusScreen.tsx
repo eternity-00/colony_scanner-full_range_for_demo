@@ -6,10 +6,9 @@ import {WellLegend} from '../../shared/Legend.tsx';
 import {Modal} from '../../shared/Modal.tsx';
 import {scannerNext} from '../../shared/ScannerHead.tsx';
 import {Tray} from '../../shared/Tray.tsx';
-import {actionable, alertItems} from '../../utils/alerts.ts';
-import {elapsedLabel, kdt} from '../../utils/datetime.ts';
+import {ALERT_TAG, actionable, alertItems} from '../../utils/alerts.ts';
+import {elapsedLabel, hm, kdt} from '../../utils/datetime.ts';
 import {
-  dueNow,
   nextAt,
   plateBad,
   platesFor,
@@ -22,12 +21,10 @@ interface Props {
   state: AppState;
   openDetail: (deviceId: number, slot?: number) => void;
   openRegister: (deviceId: number, slot?: number) => void;
-  onRunning: () => void;
   onDevice: () => void;
   onNeedAdmin: (where: string, what: string) => void;
 }
 
-const JOB_NAME = {capture: '촬영', home: '원점 복귀', calibrate: '캘리브레이션', reset: '모듈 초기화'};
 
 /**
  * 현황 (v2.1) — 초안(260911) 홈을 스캐너 한 대로 줄인 꼴.
@@ -40,14 +37,11 @@ export function StatusScreen({
   state,
   openDetail,
   openRegister,
-  onRunning,
   onDevice,
   onNeedAdmin,
 }: Props) {
   const [picked, setPicked] = useState<{deviceId: number; slot: number} | null>(null);
   const [emptyPick, setEmptyPick] = useState<{deviceId: number; slot: number} | null>(null);
-  /** 「외 n건」으로 펼친 알람 묶음. */
-  const [open, setOpen] = useState<string[]>([]);
 
   const d = state.devices[0];
   if (!d) return null;
@@ -70,27 +64,11 @@ export function StatusScreen({
   const waiting = plates.filter(p => p.runs.length >= need).length;
   const bad = plates.filter(plateBad).length;
   const next = scannerNext(state, d);
-  const job = d.job && ['running', 'paused'].includes(d.job.status) ? d.job : null;
-  const capturing = job?.type === 'capture';
-  /** 지금 찍을 차례가 와 줄 서 있는 판 수(촬영 중인 판 제외). 「오늘」로 자르지 않는다 —
-   *  등록하면 루틴은 언제든 이어 붙는다(혜원님 10/14). */
-  const waitingShots = plates.filter(p => p.id !== job?.plateId && dueNow(state, p)).length;
   const alerts = alertItems(state, {
     onDevice,
     onPlate: (deviceId, slot) => openDetail(deviceId, slot),
     onNeedAdmin,
   });
-  /*
-   * LCD 에는 몇 줄밖에 안 들어가서, 한 묶음이 칸을 다 차지하지 않게 묶음마다 앞의 몇 줄만
-   * 보이고 나머지는 「외 n건」을 눌러 편다(혜원님 10/14).
-   */
-  // 키가 낮은 패널(10.1" 1024×600 등)은 묶음마다 한 줄씩만.
-  const short = window.innerHeight < 700;
-  const groups = [
-    {key: 'bad', title: '문제 발생', show: short ? 1 : 2, items: alerts.filter(a => a.kind === 'device' || a.kind === 'plate')},
-    {key: 'ready', title: '반출 대기', show: short ? 1 : 2, items: alerts.filter(a => a.kind === 'done')},
-    {key: 'shot', title: '최근 촬영', show: 1, items: alerts.filter(a => a.kind === 'shot')},
-  ].filter(g => g.items.length);
 
   return (
     <div className="st-page">
@@ -113,37 +91,8 @@ export function StatusScreen({
       </section>
 
       <div className="st-side">
-        {/* 지금 도는 작업 — 없으면 다음 촬영 시각. 누르면 촬영 화면. */}
-        <button className="p-panel st-run" onClick={onRunning}>
-          <span className="st-run-top">
-            <small>{job ? (capturing ? '지금 촬영' : '장비 작업') : '다음 촬영'}</small>
-            <small>자세히 →</small>
-          </span>
-          {job ? (
-            <>
-              {/* 실시간 진행(막대 · Well 번호)은 두지 않는다 — 여기서는 「무엇을 찍는지」만.
-                  진행은 촬영 화면에서 본다(혜원님 10/14). */}
-              <span className="st-run-main">
-                <b>{job.slot ? pos(job.slot) : JOB_NAME[job.type]}</b>
-                <em>{job.status === 'paused' ? '일시정지' : capturing ? '촬영 중' : '작업 중'}</em>
-              </span>
-              <span className="st-run-foot">
-                <small>대기 중인 촬영 {waitingShots} 매</small>
-              </span>
-            </>
-          ) : (
-            <>
-              <span className="st-run-main">
-                <b className={next.scheduled ? '' : 'idle'}>{next.label}</b>
-                <em className={next.badgeType}>{next.badge}</em>
-              </span>
-              <span className="st-run-foot">
-                <small>대기 중인 촬영 {waitingShots} 매</small>
-              </span>
-            </>
-          )}
-        </button>
-
+        {/* 「지금 촬영」 칸은 뺐다 — 촬영 중인지는 트레이의 파란 원과 왼쪽 위 배지가
+            이미 말한다(혜원님 10/14). 진행은 촬영 화면에서 본다. */}
         {/* 홈 아랫줄과 같은 넷, 같은 색(혜원님 10/14). 미전송은 따로 세지 않고 문제 발생에 든다. */}
         <div className="p-card st-facts">
           <span className={plates.length ? 'grow' : ''}>
@@ -183,41 +132,20 @@ export function StatusScreen({
               {actionable(alerts) ? `${actionable(alerts)}건` : '없음'}
             </em>
           </div>
-          {/*
-            * 알람은 묶어서 적는다 — 위 요약 칸과 같은 이름 · 색의 소제목 아래 한 줄씩.
-            * 줄마다 붙던 꼬리표(주의 · 반출 · 촬영)는 소제목이 대신한다(혜원님 10/14, 「정보가 겹친다」).
-            */}
+          {/* 시간순 한 줄 목록(최신이 위) — 꼬리표가 무슨 일인지, 오른쪽 끝이 언제인지. */}
           {alerts.length ? (
-            <div className="st-groups">
-              {groups.map(g => (
-                <section key={g.key} className={g.key}>
-                  <h4>
-                    {g.title}
-                    <em>{g.items.length}</em>
-                  </h4>
-                  <ul>
-                    {(open.includes(g.key) ? g.items : g.items.slice(0, g.show)).map(a => (
-                      <li key={a.id}>
-                        <button onClick={a.go}>
-                          <b>{a.where}</b>
-                          <small>{a.what}</small>
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                  {g.items.length > g.show && (
-                    <button
-                      className="st-more"
-                      onClick={() =>
-                        setOpen(o => (o.includes(g.key) ? o.filter(k => k !== g.key) : [...o, g.key]))
-                      }
-                    >
-                      {open.includes(g.key) ? '접기' : `외 ${g.items.length - g.show}건`}
-                    </button>
-                  )}
-                </section>
+            <ul className="st-list">
+              {alerts.map(a => (
+                <li key={a.id}>
+                  <button className={a.kind} onClick={a.go}>
+                    <span className={`p-tag ${a.kind}`}>{ALERT_TAG[a.kind]}</span>
+                    <b>{a.where}</b>
+                    <small>{a.what}</small>
+                    <time>{a.kind === 'device' ? '지금' : hm(a.at)}</time>
+                  </button>
+                </li>
               ))}
-            </div>
+            </ul>
           ) : (
             <p className="st-clear">처리할 알람이 없습니다</p>
           )}

@@ -1,5 +1,4 @@
 import type {AppState} from '../api/types.ts';
-import {hm} from './datetime.ts';
 import {active, failedWells, faultLabel, pending, plateBad, pos, totalRuns} from './plate.ts';
 
 export type AlertKind = 'device' | 'plate' | 'done' | 'shot';
@@ -25,6 +24,8 @@ export interface AlertItem {
   where: string;
   /** 무슨 일인지 */
   what: string;
+  /** 언제 난 일인지(ms). 목록은 이 값의 최신순이다. 장비 오류는 지금 걸려 있는 일이라 현재 시각. */
+  at: number;
   go?: () => void;
 }
 
@@ -54,6 +55,7 @@ export function alertItems(state: AppState, {onDevice, onPlate, onNeedAdmin}: Go
   const need = totalRuns(state);
   const plates = active(state);
 
+  // 시간순(최신이 위) — 혜원님 10/14. 꼬리표가 무슨 일인지를 가른다.
   return [
     ...state.devices
       .filter(d => faultLabel(d))
@@ -62,6 +64,7 @@ export function alertItems(state: AppState, {onDevice, onPlate, onNeedAdmin}: Go
         kind: 'device',
         where: d.name,
         what: faultLabel(d) as string,
+        at: state.serverTime,
         // 관리자는 고치러 가고, 분석자는 왜 못 고치는지를 듣는다.
         go: isAdmin ? onDevice : () => onNeedAdmin(d.name, faultLabel(d) as string),
       })),
@@ -74,6 +77,7 @@ export function alertItems(state: AppState, {onDevice, onPlate, onNeedAdmin}: Go
         : failedWells(p.runs.at(-1)!).length
           ? `Well ${failedWells(p.runs.at(-1)!).join('·')} 촬영 실패`
           : `미전송 ${pending(p)}건`,
+      at: p.runs.at(-1)?.at ?? p.registeredAt,
       go: () => onPlate(p.deviceId, p.slot),
     })),
     ...plates
@@ -83,6 +87,7 @@ export function alertItems(state: AppState, {onDevice, onPlate, onNeedAdmin}: Go
         kind: 'done',
         where: at(p.deviceId, p.slot),
         what: `촬영 완료 ${p.runs.length}/${need} · 반출 대기`,
+        at: p.runs.at(-1)?.at ?? p.registeredAt,
         go: () => onPlate(p.deviceId, p.slot),
       })),
     ...plates
@@ -101,8 +106,9 @@ export function alertItems(state: AppState, {onDevice, onPlate, onNeedAdmin}: Go
         id: `s${p.id}-${r.n}`,
         kind: 'shot',
         where: at(p.deviceId, p.slot),
-        what: `${r.n}회차 촬영 완료 · ${hm(r.at)}`,
+        what: `${r.n}회차 촬영 완료`,
+        at: r.at,
         go: () => onPlate(p.deviceId, p.slot),
       })),
-  ];
+  ].sort((a, b) => b.at - a.at);
 }
