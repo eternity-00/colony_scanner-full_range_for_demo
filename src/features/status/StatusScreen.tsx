@@ -89,7 +89,13 @@ export function StatusScreen({
           <WellLegend />
         </div>
         <div className="p-tray st-tray">
-          <Tray state={state} deviceId={d.id} compact onSelect={slot => tap(d.id, slot)} />
+          <Tray
+            state={state}
+            deviceId={d.id}
+            compact
+            selected={picked?.slot ?? emptyPick?.slot}
+            onSelect={slot => tap(d.id, slot)}
+          />
         </div>
         <p className="st-hint">칸을 누르면 플레이트 요약, 빈 칸을 누르면 등록으로 갑니다.</p>
       </section>
