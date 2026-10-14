@@ -198,6 +198,9 @@ button.hsum:disabled{opacity:1;cursor:default}
 .scanner .badge.info{background:#e6e6e6;border-color:#d2d2d2;color:var(--gt)}
 
 .tray-box{margin:0 0.625rem 0 0.375rem;background:transparent;border:0;padding:0 0 0.75rem}
+/* 한 대일 때는 칸이 화면 폭만큼 커지므로 원과 칸 번호도 같이 키운다. */
+.scanner-grid.n1 .cell{gap:0.75rem;font-size:1.0625rem}
+.scanner-grid.n1 .cell::before{width:2rem;height:2rem}
 
 
 /*
