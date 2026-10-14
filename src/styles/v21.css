@@ -425,3 +425,7 @@
   .sg-block .p-card-head p{display:none}
 }
 .settings-shell>section{max-height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y}
+/* 이력 표는 머리글과 값을 칸 가운데에 맞춘다(혜원님 10/14). */
+.hs-head,.hs-row{text-align:center;justify-items:center}
+.hs-head span:last-child,.hs-st{text-align:center}
+.hs-shot{justify-self:center}
