@@ -8,7 +8,7 @@
  *   초안             →  여기
  *   #131F4D 남색 면   →  --p-panel 옅은 회청색 면 + 짙은 글자
  *   #7EE0B8 민트 글자 →  --blue 또는 짙은 글자
- *   #2A4BC7 쨍한 파랑 →  --blue(#0063b3) 한 가지
+ *   #2A4BC7 쨍한 파랑 →  --blue(#2c5f8a) 채도를 낮춘 강청색 한 가지
  *   #0B1020 바탕      →  --p-bg 밝은 회색
  *
  * 트레이 칸은 초안의 색 면 대신 Well 상태 원을 둔다 — 2차 피드백 3번
@@ -18,10 +18,10 @@
  */
 
 :root{
-  --p-bg:#f2f4f7;--p-bd:#dde2e8;--p-bd2:#eceff3;
-  --p-tx:#1b1f24;--p-tx2:#5c6672;--p-tx3:#98a1ad;
-  --p-pri-soft:#eaf2fa;--p-pri-bd:#bcd3ea;
-  --p-panel:#eef3f8;--p-panel-bd:#d6e2ee;
+  --p-bg:#f3f4f6;--p-bd:#dde1e6;--p-bd2:#eceef1;
+  --p-tx:#1f2329;--p-tx2:#5d6570;--p-tx3:#99a0a9;
+  --p-pri-soft:#ecf1f6;--p-pri-bd:#c3d2e1;
+  --p-panel:#f0f3f6;--p-panel-bd:#dbe2e9;
   --p-amber:#9a5b06;--p-amber-soft:#fdf3e1;
   --p-green:#2f7a4b;--p-green-soft:#e6f2ea;
   --p-red:#b42318;--p-red-soft:#fbeceb;
@@ -55,7 +55,7 @@
   color:var(--blue);font-size:0.8125rem;font-weight:700}
 
 /* 진행 막대 */
-.p-bar{display:block;height:0.625rem;border-radius:999px;background:#d9e3ed;overflow:hidden}
+.p-bar{display:block;height:0.625rem;border-radius:999px;background:#dde3e9;overflow:hidden}
 .p-bar>i{display:block;height:100%;border-radius:999px;background:var(--blue);transition:width .25s}
 
 /* 큰 단추(초안의 하단 버튼 줄) */
