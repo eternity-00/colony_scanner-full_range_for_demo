@@ -22,7 +22,7 @@ const JOB_NAME = {capture: '촬영', home: '원점 복귀', calibrate: '캘리�
 /**
  * 촬영 (v2.1) — 초안(260911)의 「진행」.
  *
- * 왼쪽: 카메라 영상과 촬영 1 사이클(①~⑥). 오른쪽: 이번 작업 진행 · 촬영 큐 · 버튼.
+ * 왼쪽: 카메라 영상과 촬영 단계(넷). 오른쪽: 이번 작업 진행 · 촬영 큐 · 버튼.
  * 스캐너가 한 대라 고르는 탭은 없다.
  */
 export function CaptureScreen({state, send, openDetail}: Props) {
@@ -127,7 +127,7 @@ export function CaptureScreen({state, send, openDetail}: Props) {
 
         <section className="p-card cp-queue">
           <div className="p-card-head">
-            <h3>촬영 큐 (플레이트 단위)</h3>
+            <h3>촬영 큐</h3>
             <em>{queue.length + (current ? 1 : 0)} 매</em>
           </div>
           <ul>
