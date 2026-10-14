@@ -489,3 +489,11 @@
 }
 /* 홈 정보 칸 — 이름과 숫자를 칸 한가운데로(혜원님 10/14). */
 .hm-big>span{align-items:center;text-align:center}
+
+/* 스크롤 막대 — 기본 막대가 투박해서(혜원님 10/14) 가늘고 둥근 회색 막대로. 칸 안쪽 여백을 두고 떠 있게 한다. */
+*{scrollbar-width:thin;scrollbar-color:#c3cad3 transparent}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#c3cad3;border-radius:999px;border:3px solid transparent;background-clip:padding-box}
+::-webkit-scrollbar-thumb:hover{background:#a3acb8;background-clip:padding-box}
+::-webkit-scrollbar-corner{background:transparent}
