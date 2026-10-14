@@ -564,3 +564,19 @@
 .cp-acts .p-btn{min-height:5.5rem;font-size:1.25rem;font-weight:800}
 .cp-acts .acti{width:1.5rem;height:1.5rem}
 @media (max-height:700px){.cp-acts .p-btn{min-height:4rem;font-size:1.0625rem}}
+
+/* 메뉴 서랍 머리(혜원님 10/14) — 헤더와 같은 높이 · 같은 파란 칸에 ×, 옆에 글자 로고 */
+.app>nav.drawer{padding-top:0}
+.app>nav.drawer .drawer-head{height:5rem;flex:none;display:flex;align-items:center;justify-content:flex-start;gap:1rem;
+  margin:0 -0.875rem 0.5rem;padding:0 0.875rem 0 0;border-bottom:1px solid var(--p-bd2)}
+.app>nav.drawer .drawer-x{width:5rem;height:5rem;flex:none;display:grid;place-items:center;border-radius:0;background:var(--blue);color:#fff}
+.app>nav.drawer .drawer-x svg{width:1.875rem;height:1.875rem}
+.dh-title{display:flex;flex-direction:column;gap:0.125rem;min-width:0}
+.dh-title b{font-size:1.375rem;font-weight:800;letter-spacing:-.02em;color:var(--p-tx);white-space:nowrap}
+.dh-title b i{font-style:normal;color:var(--blue)}
+.dh-title small{font-size:0.8125rem;font-weight:600;color:var(--p-tx2);letter-spacing:.04em}
+@media (max-height:700px){
+  .app>nav.drawer .drawer-head{height:5rem;margin:0 -0.75rem 0.25rem;padding:0}
+  .app>nav.drawer .drawer-x{width:5rem;height:5rem}
+}
+@media (hover:hover) and (pointer:fine){.app>nav.drawer .drawer-x:hover{background:var(--blue);filter:brightness(.92)}}

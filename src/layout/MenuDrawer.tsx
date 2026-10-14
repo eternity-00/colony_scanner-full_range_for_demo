@@ -35,11 +35,20 @@ export function MenuDrawer({open, tab, isAdmin, onSelect, onClose}: Props) {
     <>
       {open && <div className="drawer-scrim" role="presentation" onMouseDown={onClose} />}
       <nav className={`drawer ${open ? 'open' : ''}`} aria-hidden={!open}>
+        {/* 머리 — 헤더의 메뉴 버튼과 같은 자리 · 같은 파란 칸에 닫기(×)를 둔다. 누른 자리에서
+            그대로 닫힌다. 옆에는 헤더와 같은 글자 로고(혜원님 10/14). */}
         <div className="drawer-head">
-          <b>메뉴</b>
-          <button className="drawer-x" onClick={onClose} aria-label="닫기" tabIndex={open ? 0 : -1}>
-            ×
+          <button className="drawer-x" onClick={onClose} aria-label="메뉴 닫기" tabIndex={open ? 0 : -1}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
+              <path d="M6 6l12 12M18 6L6 18" />
+            </svg>
           </button>
+          <span className="dh-title">
+            <b>
+              Colony<i>Scanner</i>
+            </b>
+            <small>메뉴</small>
+          </span>
         </div>
         <div className="drawer-list">
           {tabsFor(isAdmin).map(([key, ko, en]) => (
