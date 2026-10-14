@@ -426,9 +426,9 @@
 .hm-acts>.home-act{height:100%;min-height:7rem;display:flex;align-items:center;justify-content:center;gap:1.5rem;
   padding:1rem 1.5rem;border-radius:var(--rc);border:2px solid var(--blue);background:#fff;color:var(--blue);
   box-shadow:0 4px 0 #b9cde2,0 10px 22px #1b1f2414;transition:transform .06s,box-shadow .06s}
-.hm-acts>.home-act.primary{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 4px 0 #00467f,0 10px 22px #0063b333}
+.hm-acts>.home-act.primary{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 4px 0 #1d4466,0 10px 22px #2c5f8a33}
 .hm-acts>.home-act:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 #b9cde2}
-.hm-acts>.home-act.primary:active:not(:disabled){box-shadow:0 1px 0 #00467f}
+.hm-acts>.home-act.primary:active:not(:disabled){box-shadow:0 1px 0 #1d4466}
 .hm-acts>.home-act>svg{width:3rem;height:3rem;flex:none;stroke-width:2}
 .hm-acts>.home-act span{display:flex;flex-direction:column;align-items:flex-start;gap:0.375rem}
 .hm-acts>.home-act b{font-size:1.875rem;font-weight:800;letter-spacing:-.02em;white-space:nowrap}
@@ -616,7 +616,9 @@
 /* 화면 이름 옆 영문(혜원님 10/14) — 한 단계 작고 옅게. 좁은 화면에서는 접는다. */
 .app>header .sub em{margin-left:0.5rem;font-style:normal;font-size:0.9375rem;font-weight:600;color:var(--p-tx2)}
 @media (max-width:1150px){.app>header .sub em{display:none}}
-/* 헤더 사선 칸은 채도를 낮춘 강청색(짙은 남색은 너무 어두웠다) — 홈의 파란 「플레이트 등록」 버튼과 같은 파랑이라 겹쳐 보였다(혜원님 10/14). */
-.hd-brand{background:#3a6187}
+/* 헤더 사선 칸은 원래 파랑(#0063b3) 그대로, 대신 앱의 주 버튼 색(--blue)을 한 톤 차분한 #2c5f8a 로
+   눌러 둘이 겹쳐 보이지 않게 한다(캔버스 「헤더 · 버튼 색 비교」 A안, 혜원님 10/14). */
+:root{--blue:#2c5f8a;--blue7:#2c5f8a}
+.hd-brand{background:#0063b3}
 .hd-brand .hd-menu{background:transparent}
-.wm-home i{color:#cfe3f5}
+.wm-home i{color:#bcd9f5}
