@@ -1,6 +1,7 @@
 import type {AppState, Device} from '../api/types.ts';
 import {hm} from '../utils/datetime.ts';
 import {nextAt, platesFor, status, tone, totalRuns} from '../utils/plate.ts';
+import {Badge} from './Badge.tsx';
 
 /** 다음 촬영 시각과 배지 문구. 홈과 상세가 같은 말을 해야 해서 한 곳에서 셈한다. */
 export function scannerNext(state: AppState, d: Device) {
@@ -30,4 +31,24 @@ export function scannerNext(state: AppState, d: Device) {
     badge,
     badgeType: badge === '자동 꺼짐' ? ('warn' as const) : tone(d),
   };
+}
+
+/**
+ * 스캐너 카드 머리 — 이름 · NEXT · 상태 배지.
+ *
+ * NEXT 는 시각만 적는다. 상태를 말하는 낱말은 옆 배지의 몫이다 — 같은 줄에서
+ * 둘이 같은 말을 하면 어느 쪽을 읽어야 할지 흐려진다.
+ */
+export function ScannerHead({state, device}: {state: AppState; device: Device}) {
+  const n = scannerNext(state, device);
+  return (
+    <div className="card-head">
+      <h3>{device.name}</h3>
+      <span className="head-next">
+        <small>NEXT</small>
+        <b className={n.scheduled ? '' : 'idle'}>{n.label}</b>
+      </span>
+      <Badge type={n.badgeType}>{n.badge}</Badge>
+    </div>
+  );
 }

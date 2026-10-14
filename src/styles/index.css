@@ -6,9 +6,9 @@
  *   layout     앱 껍데기 · 헤더 · 드로어
  *   components 화면 공통 부품
  *   tray       수납도 (화면별 파일이 위치·크기를 덮어쓴다)
- *   화면별      overview → register → settings (옛 꼴이 남은 것)
+ *   화면별      overview → detail → register → settings (옛 꼴이 남은 것. 상세는 2.0 구성)
  *   card-chrome 전 화면 공통 머리글 — 화면별 파일보다 뒤여야 한다
- *   v21        v2.1 초안 구성(현황·상세·등록·촬영·이력·장비·설정) — 맨 끝
+ *   v21        v2.1 초안 구성(현황·등록·촬영·이력·장비·설정) + 전 화면 공통 무드 — 맨 끝
  */
 
 @import './base.css';
@@ -16,6 +16,7 @@
 @import './components.css';
 @import './tray.css';
 @import './overview.css';
+@import './detail.css';
 @import './register.css';
 @import './settings.css';
 @import './card-chrome.css';

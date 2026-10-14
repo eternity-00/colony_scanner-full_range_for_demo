@@ -208,7 +208,6 @@ export default function App() {
         send={execute}
         openRegister={openRegister}
         openViewer={openViewer}
-        onHistory={() => setTab('history')}
       />
     ),
     register: (
