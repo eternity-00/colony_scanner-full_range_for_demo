@@ -2,7 +2,7 @@ import {useLayoutEffect, useRef, useState} from 'react';
 import type {AppState, Plate, Run} from '../../api/types.ts';
 import {RUN_ROW_HEIGHT_REM, WELLS} from '../../config/defines.ts';
 import {fmt} from '../../utils/datetime.ts';
-import {nextAt, pending, shots, totalRuns} from '../../utils/plate.ts';
+import {failedWells, nextAt, pending, shots, totalRuns} from '../../utils/plate.ts';
 import {rootFontPx} from '../../utils/viewport.ts';
 
 interface Props {
@@ -85,14 +85,23 @@ export function RunsTable({state, plate, onView, onHistory}: Props) {
         </div>
         {shown.map(row => {
           const run = row.run;
-          const has = !!run && run.imageState === 'held' && shots(run).length > 0;
+          const ok = run ? shots(run).filter(Boolean).length : 0;
+          const has = !!run && run.imageState === 'held' && ok > 0;
+          const fails = run ? failedWells(run) : [];
+          const sent = run?.transferred ? 'PC 전송 완료' : 'PC 전송 대기';
+          /*
+           * 부분 실패 — 회차는 한 줄로 두고, 몇 장이 찍혔는지와 어느 Well 이 빠졌는지를
+           * 같은 줄에 적는다. 전송 여부는 꼬리표 대신 옆 글자로 내려간다.
+           */
           const tag = !run
             ? ['mute', '예정', '다음 촬영 예정']
             : run.imageState === 'failed'
               ? ['bad', '촬영 실패', run.error || '다시 촬영이 필요합니다']
-              : run.transferred
-                ? ['good', '전송 완료', run.n === 1 ? '기준 영상' : 'PC 로 유선 전송']
-                : ['warn', '미전송', 'PC 전송 대기'];
+              : fails.length
+                ? ['warn', `일부 실패 ${ok}/${WELLS}`, `Well ${fails.join('·')} 실패 · ${sent}`]
+                : run.transferred
+                  ? ['good', '전송 완료', run.n === 1 ? '기준 영상' : 'PC 로 유선 전송']
+                  : ['warn', '미전송', 'PC 전송 대기'];
           return (
             <div className={`rt-row ${run ? '' : 'plan'}`} key={row.n}>
               <b className="rt-n">{row.n}</b>
@@ -101,17 +110,17 @@ export function RunsTable({state, plate, onView, onHistory}: Props) {
                 <span className={`p-tag ${tag[0]}`}>{tag[1]}</span>
                 <small>{tag[2]}</small>
               </span>
-              <span className={`rt-shot ${has ? 'has' : ''}`}>
+              <span className={`rt-shot ${has ? 'has' : ''} ${fails.length ? 'part' : ''}`}>
                 {has
-                  ? `Well ${shots(run).length || WELLS}장`
-                  : !run
-                    ? '없음'
-                    : run.imageState === 'expired'
-                      ? '보존기간 경과'
-                      : '없음'}
+                  ? fails.length
+                    ? `Well ${ok}/${WELLS}장`
+                    : `Well ${ok}장`
+                  : run?.imageState === 'expired'
+                    ? '보존기간 경과'
+                    : '없음'}
               </span>
               <span className="rt-act">
-                <button disabled={!has} onClick={() => run && onView(run, 0)}>
+                <button disabled={!has} onClick={() => run && onView(run, fails.length ? fails[0] - 1 : 0)}>
                   보기
                 </button>
               </span>

@@ -70,7 +70,7 @@ export class Controller extends EventEmitter {
   }
   this.persist();this.publish();
  }
- expire(r){const list=r.images||(r.image?[r.image]:[]);for(const f of list)if(!/^https?:\/\//.test(f)&&!/^well-\d+\.png$/.test(f)&&existsSync(join(this.dataDir,'images',f)))unlinkSync(join(this.dataDir,'images',f));r.images=null;r.image=null;r.imageState='expired';}
+ expire(r){const list=(r.images||(r.image?[r.image]:[])).filter(Boolean);for(const f of list)if(!/^https?:\/\//.test(f)&&!/^well-\d+\.png$/.test(f)&&existsSync(join(this.dataDir,'images',f)))unlinkSync(join(this.dataDir,'images',f));r.images=null;r.image=null;r.imageState='expired';}
  async execute(input,source='ui'){
   const {command,deviceId,args={},requestId}=input;
   assert(typeof requestId==='string'&&/^[a-zA-Z0-9_-]{8,100}$/.test(requestId),'INVALID_REQUEST_ID','8~100자 requestId가 필요합니다.',400);

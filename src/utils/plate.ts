@@ -90,9 +90,15 @@ export const status = (d: Device) => {
   return '촬영 대기';
 };
 
-/** 회차가 보유한 영상 파일 목록. 레거시 단일 영상도 배열로 맞춰준다. */
-export const shots = (r: Run): string[] =>
+/** 회차가 보유한 영상 파일 목록(Well 순서). 레거시 단일 영상도 배열로 맞춰준다. 실패한 Well 은 null. */
+export const shots = (r: Run): (string | null)[] =>
   r.images?.length ? r.images : r.image ? [r.image] : [];
+
+/** 찍힌 회차에서 촬영에 실패한 Well 번호(1부터). 다 찍혔으면 빈 배열. */
+export const failedWells = (r: Run): number[] =>
+  r.imageState !== 'held' || !r.images?.length
+    ? []
+    : r.images.flatMap((f, i) => (f ? [] : [i + 1]));
 
 export const imgSrc = (file: string) =>
   file.startsWith('http') ? file : `/api/images/${file}`;

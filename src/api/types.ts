@@ -59,8 +59,11 @@ export interface Run {
   imageState: ImageState;
   /** 레거시 단일 영상. 6-well 세트로 옮겨간 뒤로는 null. */
   image: string | null;
-  /** well-1..9 중 6장. 만료되면 null. */
-  images?: string[] | null;
+  /**
+   * Well 1~6 의 영상. 만료되면 null.
+   * 칸이 null 이면 그 Well 만 촬영에 실패한 것이다(부분 실패) — 회차는 held 로 남는다.
+   */
+  images?: (string | null)[] | null;
   transferred: boolean;
   error?: string | null;
 }

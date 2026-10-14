@@ -176,6 +176,9 @@
 .rt-shot{height:2.25rem;display:grid;place-items:center;border-radius:5px;border:1px dashed #dfe3e8;background:#f7f8fa;
   font-size:0.6875rem;font-weight:600;color:#aab1ba;white-space:nowrap}
 .rt-shot.has{border-color:var(--p-pri-bd);background:var(--p-pri-soft);color:var(--blue)}
+.rt-shot.has.part{border-color:#ebc27a;background:var(--p-amber-soft);color:var(--p-amber)}
+/* 뷰어에서 찍히지 못한 Well 칸 */
+.well-card>.wc-miss.fail{background:var(--p-red-soft);color:var(--p-red)}
 .rt-act{text-align:right}
 .rt-act button{min-height:2.25rem;padding:0.25rem 0.75rem;border-color:var(--p-pri-bd);color:var(--blue);font-size:0.8125rem;font-weight:600}
 .rt-act button:disabled{opacity:1;border-color:var(--p-bd2);color:#c0c6ce;background:#fff}

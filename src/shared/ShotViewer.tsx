@@ -1,7 +1,7 @@
 import type {Plate, Run} from '../api/types.ts';
 import {WELLS} from '../config/defines.ts';
 import {fmt} from '../utils/datetime.ts';
-import {imgSrc, pos, shots} from '../utils/plate.ts';
+import {failedWells, imgSrc, pos, shots} from '../utils/plate.ts';
 import {Badge} from './Badge.tsx';
 import {Modal} from './Modal.tsx';
 
@@ -41,7 +41,8 @@ export function ShotViewer({target, onClose}: Props) {
           </>
         )}
         <span className="sm-count">
-          Well 1–{WELLS} · {WELLS}장
+          Well 1–{WELLS} · {images.filter(Boolean).length}장
+          {run && failedWells(run).length ? ` · ${failedWells(run).length}장 실패` : ''}
         </span>
       </div>
       {run && (
@@ -56,7 +57,9 @@ export function ShotViewer({target, onClose}: Props) {
                 {file ? (
                   <img src={imgSrc(file)} alt={`Well ${i + 1}`} />
                 ) : (
-                  <span className="wc-miss">미촬영</span>
+                  <span className={`wc-miss ${run.imageState === 'held' ? 'fail' : ''}`}>
+                    {run.imageState === 'held' ? '촬영 실패' : '미촬영'}
+                  </span>
                 )}
                 <b className="wc-no">{i + 1}</b>
                 <figcaption>Well {i + 1}</figcaption>
