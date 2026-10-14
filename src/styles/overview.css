@@ -1,8 +1,5 @@
 /* 홈 — 배치는 v21.css(.hm-*). 여기에는 알람 목록 팝업과 현황 칸 팝업만 남았다. */
 
-/* 알람 목록 팝업. */
-.home-alert-list{max-height:min(28rem,60vh);overflow-y:auto;padding:0}
-.home-alert-list button{min-height:3.75rem}
 
 
 /*

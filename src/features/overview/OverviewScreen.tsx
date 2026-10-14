@@ -1,9 +1,7 @@
-import {useState} from 'react';
 import type {AppState} from '../../api/types.ts';
 import {SLOTS_PER_DEVICE} from '../../config/defines.ts';
 import {ActIcon} from '../../shared/ActIcon.tsx';
 import {Badge} from '../../shared/Badge.tsx';
-import {Modal} from '../../shared/Modal.tsx';
 import {scannerNext} from '../../shared/ScannerHead.tsx';
 import {alertItems} from '../../utils/alerts.ts';
 import {active, totalRuns} from '../../utils/plate.ts';
@@ -45,7 +43,6 @@ export function OverviewScreen({
   onStatus,
   onNeedAdmin,
 }: Props) {
-  const [alertsOpen, setAlertsOpen] = useState(false);
   const device = state.devices[0];
   if (!device) return null;
 
@@ -124,21 +121,16 @@ export function OverviewScreen({
           </span>
         </div>
 
-        {/* 알람 — 위에서부터 세 줄. 줄을 누르면 그 일로, 「전체 보기」는 목록 팝업. */}
+        {/* 알람 — 전부 적고, 넘치면 끌어서 넘긴다. 줄을 누르면 그 일로. 「전체 보기」 팝업은 뺐다(혜원님 10/14). */}
         <div className="hm-alerts">
           <div className="p-card-head">
             <h3>알람</h3>
             <em className={alerts.length ? 'bad' : 'none'}>{alerts.length ? `${alerts.length}건` : '없음'}</em>
-            {alerts.length > 3 && (
-              <button className="p-soft" onClick={() => setAlertsOpen(true)}>
-                전체 보기
-              </button>
-            )}
           </div>
           {alerts.length ? (
             <ul>
               {/* 맨 윗줄이 가장 급한 일이다(장비 오류 → 플레이트 문제 → 반출 대기 순). 그 줄만 크게. */}
-              {alerts.slice(0, 3).map((a, i) => (
+              {alerts.map((a, i) => (
                 <li key={a.id} className={i ? '' : 'top'}>
                   <button className={a.kind} disabled={!a.go} onClick={() => a.go?.()}>
                     <span className={`p-tag ${a.kind}`}>{ALERT_TAG[a.kind]}</span>
@@ -171,27 +163,6 @@ export function OverviewScreen({
           </span>
         </button>
       </div>
-
-      {alertsOpen && (
-        <Modal title={`알람 · ${alerts.length}건`} onClose={() => setAlertsOpen(false)} bare>
-          <ul className="alert-list home-alert-list">
-            {alerts.map(i => (
-              <li key={i.id} className={i.kind}>
-                <button
-                  disabled={!i.go}
-                  onClick={() => {
-                    setAlertsOpen(false);
-                    i.go?.();
-                  }}
-                >
-                  <b>{i.where}</b>
-                  <span>{i.what}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </Modal>
-      )}
 
     </div>
   );
