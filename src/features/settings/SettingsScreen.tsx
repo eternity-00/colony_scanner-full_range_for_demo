@@ -20,7 +20,7 @@ interface Props {
   operator: string;
   setOperator: (name: string) => void;
   onRole: () => void;
-  /** 프로그램 종료. 서랍 맨 아래에도 있다. */
+  /** 프로그램 종료. 종료는 여기 한 곳에만 있다. */
   onExit: () => void;
 }
 
@@ -352,8 +352,8 @@ export function SettingsScreen({state, send, operator, setOperator, onRole,
           <dd>미등록</dd>
         </dl>
         {/*
-          * 프로그램 종료. 서랍 맨 아래에도 있지만, 장비 정보를 보러 온 사람이
-          * 찾는 자리도 여기라 함께 둔다. 잘못 눌려도 확인 팝업이 받는다.
+          * 프로그램 종료. 종료는 이 한 곳에만 둔다(메뉴 서랍에서는 뺐다) — 장비
+          * 정보를 보러 온 사람이 찾는 자리가 여기다. 잘못 눌려도 확인 팝업이 받는다.
           */}
         <div className="quit">
           <p>

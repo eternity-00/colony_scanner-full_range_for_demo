@@ -261,10 +261,6 @@ export default function App() {
           setTab(key);
           setMenu(false);
         }}
-        onExit={() => {
-          setMenu(false);
-          setExitAsk(true);
-        }}
         onClose={() => setMenu(false)}
       />
 

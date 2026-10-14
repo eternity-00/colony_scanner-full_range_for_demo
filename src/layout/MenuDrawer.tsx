@@ -1,5 +1,5 @@
 import {useEffect} from 'react';
-import {APP_VERSION, tabsFor, type TabKey} from '../config/defines.ts';
+import {tabsFor, type TabKey} from '../config/defines.ts';
 import {TabIcon} from '../shared/TabIcon.tsx';
 
 interface Props {
@@ -7,7 +7,6 @@ interface Props {
   tab: TabKey;
   isAdmin: boolean;
   onSelect: (tab: TabKey) => void;
-  onExit: () => void;
   onClose: () => void;
 }
 
@@ -20,8 +19,11 @@ interface Props {
  *
  * 항목 칸은 1.6 의 판보다 크게 잡았다(2차 피드백: 메뉴 버튼 1.2~1.5배).
  * 장갑을 낀 손가락도 옆 칸을 건드리지 않도록 칸 높이와 칸 사이를 같이 키운다.
+ *
+ * 종료와 버전은 두지 않는다 — 둘 다 사용자 설정에 있다. 서랍 높이는 전부
+ * 메뉴 칸이 쓴다.
  */
-export function MenuDrawer({open, tab, isAdmin, onSelect, onExit, onClose}: Props) {
+export function MenuDrawer({open, tab, isAdmin, onSelect, onClose}: Props) {
   useEffect(() => {
     if (!open) return;
     const fn = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
@@ -55,18 +57,6 @@ export function MenuDrawer({open, tab, isAdmin, onSelect, onExit, onClose}: Prop
               <small>{en}</small>
             </button>
           ))}
-        </div>
-        {/* 하루에 한 번 쓸까 말까 한 것이라 맨 아래에 둔다. 실수로 눌려도 확인 팝업이 받는다. */}
-        <div className="drawer-foot">
-          <button className="exit-btn" onClick={onExit} tabIndex={open ? 0 : -1}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"
-              strokeLinecap="round" strokeLinejoin="round">
-              <path d="M15 4h3a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-3" />
-              <path d="M10 12H3M3 12l3-3M3 12l3 3" />
-            </svg>
-            종료
-          </button>
-          <em>{APP_VERSION.replace(/^v/, '')}</em>
         </div>
       </nav>
     </>
