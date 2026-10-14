@@ -248,14 +248,16 @@
 .rg-box.now{border-color:var(--p-pri-bd);background:#f5f9fd}
 .rg-box b{font-size:1.125rem;font-weight:700;color:var(--p-tx);font-variant-numeric:tabular-nums;white-space:nowrap}
 .rg-box em{margin-left:auto;font-style:normal;font-size:0.75rem;font-weight:500;color:var(--p-tx2);text-align:right}
-.rg-routine{flex:1;min-height:0;padding:0.875rem 1.125rem;background:#f7f8fa;border:1px solid var(--p-bd2);border-radius:var(--rc)}
+.rg-routine{flex:none;padding:0.875rem 1.125rem;background:#f7f8fa;border:1px solid var(--p-bd2);border-radius:var(--rc)}
 .rg-routine .link{margin-left:auto;min-height:0;padding:0;font-size:0.8125rem;font-weight:600}
 .rg-facts{display:flex;gap:1.5rem;margin-top:0.75rem}
 .rg-facts span{display:flex;flex-direction:column;gap:0.25rem}
 .rg-facts small{font-size:0.75rem;font-weight:500;color:var(--p-tx2)}
 .rg-facts b{font-size:1.125rem;font-weight:700;color:var(--p-tx);white-space:nowrap}
 .rg-batch{margin-top:0.75rem;padding:0.625rem 0.75rem;border-radius:8px;background:var(--p-green-soft);color:var(--p-green);font-size:0.8125rem;font-weight:700}
-.rg-acts{flex:none;display:grid;grid-template-columns:1fr 2fr;gap:0.75rem}
+/* 검사 루틴은 내용만큼만 두고, 남는 높이는 취소 · 등록이 가져간다 — 이 화면에서 가장 많이 누르는 자리다. */
+.rg-acts{flex:1;min-height:4rem;display:grid;grid-template-columns:1fr 2fr;gap:0.75rem}
+.rg-acts .p-btn{height:100%}
 .rg-acts .p-btn{min-height:4rem;font-size:1.0625rem}
 .rg-acts .p-btn.primary{font-size:1.25rem;font-weight:800}
 
