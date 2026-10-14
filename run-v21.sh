@@ -17,6 +17,8 @@ export HOST=0.0.0.0
 # 크로뮴만 닫기 위한 것이다 — 없으면 /tmp/colony* 를 통째로 죽여 다른 버전까지 꺼진다.
 export COLONY_KIOSK=1
 export COLONY_PROFILE=/tmp/colony-v21-chromium
+# 알람 시험 페이지(/trigger.html)의 플레이트 시험을 받는다. 실제 장비에 붙일 때는 뺀다.
+export COLONY_TRIGGERS=1
 
 # UI 배율 — 패널의 화소 밀도(PPI)에 맞춘다. 해상도가 아니라 PPI 기준이다.
 UI_SCALE="${UI_SCALE:-1.0}"

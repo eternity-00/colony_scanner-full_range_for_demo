@@ -77,37 +77,44 @@ export function OverviewScreen({
           <span className="hm-scan-head">
             <b>{device.name}</b>
             <Badge type={next.badgeType}>{next.badge}</Badge>
-            <button className="link" onClick={onStatus}>
-              현황 보기 →
+            <button className="hm-go" onClick={onStatus}>
+              현황 보기
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M9 6l6 6-6 6" />
+              </svg>
             </button>
           </span>
-          <span className="hm-next">
-            <small>다음 촬영</small>
-            {/* 찍고 있는 동안은 다음 시각이 아직 없다. 빈칸 대신 「지금」이라고 답한다. */}
-            <b className={capturing ? 'now' : next.scheduled ? '' : 'idle'}>
-              {capturing ? '지금 촬영 중' : next.label}
-            </b>
-          </span>
-          <span className="hm-facts">
+          {/*
+            * 크게 적는 것은 배양 중 · 반출 대기 둘이다. 장비 앞의 사람이 먼저 알아야 하는 것은
+            * 「몇 판이 들어 있고, 몇 판을 꺼내야 하는지」다. 다음 촬영 시각은 아래 작은 줄로
+            * 내렸다(혜원님 10/14).
+            */}
+          <span className="hm-big">
             <span>
               <small>배양 중</small>
               <b>
                 {plates.length}
-                <em>/ {SLOTS_PER_DEVICE}</em>
+                <em>/ {SLOTS_PER_DEVICE} 매</em>
               </b>
             </span>
-            <span>
-              <small>빈 슬롯</small>
-              <b>
-                {free}
-                <em>칸</em>
-              </b>
-            </span>
-            <span>
+            {/* 반출 대기는 사람이 꺼내야 끝나는 일이라 0 이 아니면 칸째 강조한다. */}
+            <span className={done.length ? 'hot' : 'calm'}>
               <small>반출 대기</small>
-              <b className={done.length ? '' : 'zero'}>
+              <b>
                 {done.length}
                 <em>매</em>
+              </b>
+            </span>
+          </span>
+          <span className="hm-small">
+            <span>
+              빈 슬롯 <b>{free}칸</b>
+            </span>
+            <span>
+              다음 촬영{' '}
+              {/* 찍고 있는 동안은 다음 시각이 아직 없다. 빈칸 대신 「지금」이라고 답한다. */}
+              <b className={capturing || next.scheduled ? '' : 'idle'}>
+                {capturing ? '지금 촬영 중' : next.label}
               </b>
             </span>
           </span>
@@ -126,8 +133,9 @@ export function OverviewScreen({
           </div>
           {alerts.length ? (
             <ul>
-              {alerts.slice(0, 3).map(a => (
-                <li key={a.id}>
+              {/* 맨 윗줄이 가장 급한 일이다(장비 오류 → 플레이트 문제 → 반출 대기 순). 그 줄만 크게. */}
+              {alerts.slice(0, 3).map((a, i) => (
+                <li key={a.id} className={i ? '' : 'top'}>
                   <button className={a.kind} disabled={!a.go} onClick={() => a.go?.()}>
                     <span className={`p-tag ${a.kind}`}>{ALERT_TAG[a.kind]}</span>
                     <b>{a.where}</b>

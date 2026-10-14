@@ -16,6 +16,8 @@ export HOST=0.0.0.0
 # COLONY_PROFILE 로 v2.1 창만 닫으므로 웹으로 보는 쪽에는 영향이 없다.
 export COLONY_KIOSK=1
 export COLONY_PROFILE=/tmp/colony-v21-chromium
+# 알람 시험 페이지(/trigger.html)의 플레이트 시험을 받는다. 실제 장비에 붙일 때는 뺀다.
+export COLONY_TRIGGERS=1
 
 wait_for() {
   n=0

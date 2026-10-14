@@ -175,3 +175,6 @@
   .actbar button{font-size:0.9375rem;padding:0.375rem 0.25rem}
   .actbar .acti{display:none}
 }
+/* 플레이트 반출 — 굵은 빨강 테두리, 촬영을 다 마친 판이면 꽉 찬 면(혜원님 10/14). */
+.actbar button.remove-btn{border:2px solid var(--p-red);color:var(--p-red);background:#fff}
+.actbar button.remove-btn.due{background:var(--p-red);color:#fff}

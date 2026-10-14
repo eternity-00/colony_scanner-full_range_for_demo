@@ -132,8 +132,10 @@ export function DetailScreen({
                   <ActIcon name="send" />
                   재전송
                 </button>
+                {/* 반출은 영상을 지우고 슬롯을 비우는 일이라 버튼 넷 중 가장 눈에 띄게 둔다.
+                    촬영을 다 마친 판이면 꽉 찬 면으로 — 지금 해야 할 일이다. */}
                 <button
-                  className="outline-danger"
+                  className={`remove-btn ${done ? 'due' : ''}`}
                   onClick={() => send('remove', device.id, {plateId: plate.id}, null, true)}
                 >
                   <ActIcon name="eject" />

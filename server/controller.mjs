@@ -119,6 +119,28 @@ export class Controller extends EventEmitter {
    }else if(command==='environment'){
     assert(Number.isFinite(args.temperature)&&args.temperature>=4&&args.temperature<=55&&Number.isFinite(args.co2)&&args.co2>=0&&args.co2<=20,'INVALID_ENV','온도 4~55℃, CO₂ 0~20%를 입력하세요.',400);
     await this.adapter.environment?.(args,requestId);if(!this.adapter.environment)for(const d of this.adapter.devices){d.targetTemperature=args.temperature;d.targetCo2=args.co2;}this.log('INFO','환경 목표값 변경');
+   }else if(command==='sim.alarm'){
+    // 알람 시험(트리거 페이지 /trigger.html). 플레이트 이력에 시험용 회차를 붙여 알람을 띄우고,
+    // 「되돌리기」가 그 회차와 장비 입력을 걷어 낸다. COLONY_TRIGGERS=1 일 때만 받는다.
+    assert(process.env.COLONY_TRIGGERS==='1','TRIGGERS_OFF','알람 시험이 꺼져 있습니다.',403);
+    const kinds=['captureFail','partial','unsent','done','clear'];assert(kinds.includes(args.kind),'INVALID_VALUE','알 수 없는 시험입니다.',400);
+    if(args.kind==='clear'){
+     let n=0;for(const p of this.db.plates){const before=p.runs.length;p.runs=p.runs.filter(r=>!r.sim);n+=before-p.runs.length;
+      for(const r of p.runs)if(r.simHeld){r.images=r.simHeld;r.imageState='held';delete r.simHeld;}}
+     for(const d of this.adapter.devices)await this.adapter.inject(d.id,{fault:null,doorOpen:false,connected:true,pcConnected:true,failCamera:false},requestId);
+     this.log('INFO',`알람 시험 되돌리기 · 시험 회차 ${n}건 삭제`);result={removed:n};
+    }else{
+     const live=this.db.plates.filter(p=>!p.removedAt&&p.deviceId===deviceId).sort((a,b)=>a.slot-b.slot);
+     const p=args.slot?live.find(x=>x.slot===args.slot):live[0];assert(p,'PLATE_NOT_FOUND','시험할 플레이트가 없습니다. 먼저 등록하세요.',404);
+     const run=extra=>{const r={n:p.runs.length+1,at:Date.now(),imageState:'held',image:null,images:this.imageSet(),transferred:true,error:null,sim:true,...extra};p.runs.push(r);return r;};
+     if(args.kind==='captureFail')run({imageState:'failed',images:null,transferred:false,error:'카메라 응답 없음(시험)'});
+     if(args.kind==='partial'){const r=run({});r.images=r.images.map((f,i)=>[1,3,4].includes(i)?null:f);}
+     if(args.kind==='unsent'){run({transferred:false});run({transferred:false});}
+     if(args.kind==='done'){const total=Math.floor(this.db.routine.days*24/this.db.routine.cycleHours);while(p.runs.length<total)run({imageState:p.runs.length<total-5?'expired':'held',images:p.runs.length<total-5?null:this.imageSet()});}
+     // 기기 보관은 최근 5회차까지다. 시험 회차가 밀어낸 원래 회차는 simHeld 에 영상을 맡겨 두었다가 되돌리기에서 돌려준다.
+     const held=p.runs.filter(r=>r.imageState==='held');for(const r of held.slice(0,Math.max(0,held.length-5))){if(!r.sim)r.simHeld=r.images;r.images=null;r.imageState='expired';}
+     this.log('INFO',`알람 시험 · ${p.id} · ${args.kind}`);result={plateId:p.id,slot:p.slot};
+    }
    }else if(command==='sim.input')await this.adapter.inject(deviceId,args,requestId);
    else await this.adapter.command(deviceId,command,args,requestId);
    const ack={requestId,accepted:true,command,deviceId,...result};
