@@ -34,11 +34,6 @@ export function CaptureScreen({state, send, openDetail}: Props) {
   const running = d.job?.status === 'running';
   const capture = !job || job.type === 'capture';
   const stages = capture ? STAGES.slice(0, SHOWN) : SHORT_STAGES;
-  /*
-   * 지금 단계. Well 번호는 장비가 주지 않아 진행률로 어림하면 틀린다(이송 중에도 WELL 1).
-   * 장비가 주는 단계만 적는다. 띠에 없는 뒤 단계(전송 · PC 저장)는 「전송 중」.
-   */
-  const stage = !job ? '' : job.step < stages.length ? stages[job.step] : '전송 중';
   const plates = platesFor(state, d.id);
   const current = job?.plateId ? plates.find(p => p.id === job.plateId) : undefined;
   const queue = active(state)
@@ -60,15 +55,8 @@ export function CaptureScreen({state, send, openDetail}: Props) {
           )}
           <span className="cp-chips">
             {running && <span className="p-tag bad">REC</span>}
-            <span className="p-tag mute">
-              {job?.slot ? pos(job.slot) : d.name}
-              {stage ? ` · ${stage}` : ''}
-            </span>
           </span>
-          <span className="cp-cam-foot">
-            조명 {d.light ? 'ON' : 'OFF'} · 히팅 {d.heater ? 'ON' : 'OFF'} · 카메라{' '}
-            {d.failCamera ? '오류' : '정상'}
-          </span>
+          {/* 위치 칩 · 조명/히팅/카메라 줄은 뺐다 — 영상 위에 글자가 덮이지 않게(혜원님 10/14). */}
         </div>
 
         <section className="p-card cp-cycle">

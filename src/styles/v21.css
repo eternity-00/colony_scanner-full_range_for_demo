@@ -219,8 +219,6 @@
 .cp-chips{position:absolute;left:1rem;top:1rem;display:flex;gap:0.5rem}
 .cp-chips .p-tag{padding:0.5rem 0.75rem}
 .cp-chips .p-tag.bad{background:#c8312a;color:#fff}
-.cp-cam-foot{position:absolute;right:1rem;bottom:1rem;padding:0.5rem 0.75rem;border-radius:5px;background:#f2f4f7;
-  font-size:0.75rem;font-weight:600;color:var(--p-tx2)}
 
 .cp-cycle{flex:none;padding:0.625rem 1.125rem 0.75rem}
 /* 단계 칸은 낮게 — 남는 높이는 카메라 화면이 가져간다. */
