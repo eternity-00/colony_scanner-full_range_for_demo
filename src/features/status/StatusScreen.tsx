@@ -46,6 +46,8 @@ export function StatusScreen({
 }: Props) {
   const [picked, setPicked] = useState<{deviceId: number; slot: number} | null>(null);
   const [emptyPick, setEmptyPick] = useState<{deviceId: number; slot: number} | null>(null);
+  /** 「외 n건」으로 펼친 알람 묶음. */
+  const [open, setOpen] = useState<string[]>([]);
 
   const d = state.devices[0];
   if (!d) return null;
@@ -78,10 +80,16 @@ export function StatusScreen({
     onPlate: (deviceId, slot) => openDetail(deviceId, slot),
     onNeedAdmin,
   });
+  /*
+   * LCD 에는 몇 줄밖에 안 들어가서, 한 묶음이 칸을 다 차지하지 않게 묶음마다 앞의 몇 줄만
+   * 보이고 나머지는 「외 n건」을 눌러 편다(혜원님 10/14).
+   */
+  // 키가 낮은 패널(10.1" 1024×600 등)은 묶음마다 한 줄씩만.
+  const short = window.innerHeight < 700;
   const groups = [
-    {key: 'bad', title: '문제 발생', items: alerts.filter(a => a.kind === 'device' || a.kind === 'plate')},
-    {key: 'ready', title: '반출 대기', items: alerts.filter(a => a.kind === 'done')},
-    {key: 'shot', title: '최근 촬영', items: alerts.filter(a => a.kind === 'shot')},
+    {key: 'bad', title: '문제 발생', show: short ? 1 : 2, items: alerts.filter(a => a.kind === 'device' || a.kind === 'plate')},
+    {key: 'ready', title: '반출 대기', show: short ? 1 : 2, items: alerts.filter(a => a.kind === 'done')},
+    {key: 'shot', title: '최근 촬영', show: 1, items: alerts.filter(a => a.kind === 'shot')},
   ].filter(g => g.items.length);
 
   return (
@@ -188,7 +196,7 @@ export function StatusScreen({
                     <em>{g.items.length}</em>
                   </h4>
                   <ul>
-                    {g.items.map(a => (
+                    {(open.includes(g.key) ? g.items : g.items.slice(0, g.show)).map(a => (
                       <li key={a.id}>
                         <button onClick={a.go}>
                           <b>{a.where}</b>
@@ -197,6 +205,16 @@ export function StatusScreen({
                       </li>
                     ))}
                   </ul>
+                  {g.items.length > g.show && (
+                    <button
+                      className="st-more"
+                      onClick={() =>
+                        setOpen(o => (o.includes(g.key) ? o.filter(k => k !== g.key) : [...o, g.key]))
+                      }
+                    >
+                      {open.includes(g.key) ? '접기' : `외 ${g.items.length - g.show}건`}
+                    </button>
+                  )}
                 </section>
               ))}
             </div>
