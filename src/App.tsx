@@ -218,7 +218,7 @@ export default function App() {
         slot={registerAt.slot}
       />
     ),
-    running: <CaptureScreen state={state} send={execute} openDetail={openDetail} />,
+    running: <CaptureScreen state={state} send={execute} />,
     history: (
       <HistoryScreen
         state={state}

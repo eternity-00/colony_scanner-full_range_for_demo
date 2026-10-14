@@ -8,7 +8,6 @@ import {active, dueNow, nextAt, platesFor, pos, totalRuns} from '../../utils/pla
 interface Props {
   state: AppState;
   send: SendCommand;
-  openDetail: (deviceId: number, slot?: number) => void;
 }
 
 /**
@@ -25,7 +24,7 @@ const JOB_NAME = {capture: '촬영', home: '원점 복귀', calibrate: '캘리�
  * 왼쪽: 카메라 영상과 촬영 단계(넷). 오른쪽: 이번 작업 진행 · 촬영 큐 · 버튼.
  * 스캐너가 한 대라 고르는 탭은 없다.
  */
-export function CaptureScreen({state, send, openDetail}: Props) {
+export function CaptureScreen({state, send}: Props) {
   const d = state.devices[0];
   if (!d) return null;
 
@@ -87,6 +86,7 @@ export function CaptureScreen({state, send, openDetail}: Props) {
       <div className="cp-side">
         {/* 「이번 작업 진행」 칸은 뺐다 — 진행은 아래 촬영 단계 띠가 이미 말한다(혜원님 10/14).
             지금 찍는 판은 큐 맨 윗줄, 쉬고 있을 때의 다음 촬영 시각은 큐 머리에 적는다. */}
+        {/* 큐는 읽는 목록이다 — 줄을 눌러 상세로 가지 않는다(혜원님 10/14). */}
         <section className="p-card cp-queue">
           <div className="p-card-head">
             <h3>촬영 큐</h3>
@@ -100,24 +100,24 @@ export function CaptureScreen({state, send, openDetail}: Props) {
           <ul>
             {current && (
               <li>
-                <button className="now" onClick={() => openDetail(d.id, current.slot)}>
+                <div className="cp-row now">
                   <b>{pos(current.slot)}</b>
                   <small>
                     {current.runs.length + 1}/{totalRuns(state)}회차 · {hm(job!.startedAt)} 시작
                   </small>
                   <em>{running ? '촬영 중' : '일시정지'}</em>
-                </button>
+                </div>
               </li>
             )}
             {queue.map(p => (
               <li key={p.id}>
-                <button onClick={() => openDetail(p.deviceId, p.slot)}>
+                <div className="cp-row">
                   <b>{pos(p.slot)}</b>
                   <small>
                     {p.runs.length + 1}회차 · {hm(nextAt(state, p))} 예정
                   </small>
                   <em>대기</em>
-                </button>
+                </div>
               </li>
             ))}
             {!current && !queue.length && <li className="cp-empty">대기 중인 촬영이 없습니다</li>}
