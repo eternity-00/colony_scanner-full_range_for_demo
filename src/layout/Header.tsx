@@ -1,5 +1,6 @@
 import type {AppState} from '../api/types.ts';
-import type {TabKey} from '../config/defines.ts';
+import {TABS, type TabKey} from '../config/defines.ts';
+import logoUrl from '../assets/logo-white.svg';
 import {TabIcon} from '../shared/TabIcon.tsx';
 import {tempAbnormal} from '../utils/plate.ts';
 
@@ -19,21 +20,6 @@ interface Props {
   onHome: () => void;
 }
 
-/**
- * 상호는 고정하고 오른쪽 부제만 화면에 따라 바꾼다.
- * 현황 화면이 "Colony Scanner | Incubator #1" 이라, 다른 화면은 그 자리에
- * 화면 이름을 넣어 같은 자리에서 위치를 알 수 있게 한다.
- */
-const SUBTITLE: Record<TabKey, string> = {
-  overview: 'Incubator #1',
-  status: '현황',
-  detail: '상세',
-  register: '플레이트 등록',
-  running: '촬영',
-  history: '이력',
-  device: '장비',
-  settings: '사용자 설정',
-};
 
 /**
  * 헤더 (v2.0 · 도안 3-1).
@@ -51,31 +37,32 @@ export function Header({state, tab, clock, day, operator, onMenu, onAccount, onH
   const linked = devices.filter(d => d.connected).length;
   const abnormal = devices.some(tempAbnormal);
   const role = state.session.role === 'admin' ? '관리자' : '분석자';
+  const name = TABS.find(([key]) => key === tab);
 
   const avg = (pick: (d: (typeof devices)[number]) => number) =>
     (devices.reduce((a, d) => a + pick(d), 0) / (devices.length || 1)).toFixed(1);
 
   return (
     <header>
-      {/* 색면 자체를 버튼으로 쓴다 — 헤더 높이만큼 넉넉한 터치 타깃이다. */}
-      <button className="hd-menu" onClick={onMenu} aria-label="메뉴 열기">
-        <span />
-        <span />
-        <span />
-      </button>
-      {/* 홈 — 메뉴를 열지 않고 어디서든 한 번에 홈으로(혜원님 10/14). 홈에 있을 때는 옅은 면. */}
+      {/*
+        * 왼쪽 파란 칸 = 홈 버튼. 흰 로고 | 집 아이콘을 담고, 어느 화면에서든 같은 파란 칸이다.
+        * 지금 보는 화면 이름은 칸 밖(흰 바탕)에 적는다. 메뉴는 오른쪽 끝으로 옮겼다
+        * (디자인 캔버스 「홈 화면 배치안」, 혜원님 10/14).
+        */}
       <button
-        className={`hd-home ${tab === 'overview' ? 'on' : ''}`}
+        className="hd-home"
         onClick={onHome}
         aria-label="홈으로"
         aria-current={tab === 'overview' ? 'page' : undefined}
       >
+        <img src={logoUrl} alt="ColonyScanner" />
+        <i aria-hidden="true" />
         <TabIcon tab="overview" />
       </button>
-      <span className="wm">
-        Colony<i>Scanner</i>
+      <span className="hd-name">
+        <b>{name?.[1]}</b>
+        <em>{name?.[2]}</em>
       </span>
-      <span className="sub">{SUBTITLE[tab]}</span>
 
       <div className="head-status">
         <span className={`hstat ${abnormal ? 'bad' : ''}`}>
@@ -102,6 +89,12 @@ export function Header({state, tab, clock, day, operator, onMenu, onAccount, onH
           </span>
         </button>
       </div>
+      {/* 메뉴 — 오른쪽 끝 파란 칸. 서랍도 오른쪽에서 열린다. */}
+      <button className="hd-menu" onClick={onMenu} aria-label="메뉴 열기">
+        <span />
+        <span />
+        <span />
+      </button>
     </header>
   );
 }
