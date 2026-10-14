@@ -44,8 +44,8 @@ export function Header({state, tab, clock, day, operator, onMenu, onAccount, onH
   return (
     <header>
       {/*
-        * 왼쪽 파란 사선 칸 = 메뉴 + 글자 로고. 오른쪽 변을 비스듬히 세운 1.5 · 1.6 의 사선 칸이다.
-        * 로고(글자)를 누르면 홈 — 따로 홈 버튼을 두지 않는다(혜원님 10/14, 캔버스 2-C 사선판).
+        * 왼쪽 파란 사선 칸 = 메뉴. 오른쪽 변을 비스듬히 세운 1.5 · 1.6 의 사선 칸이다.
+        * 로고는 칸 밖 흰 바탕에 두고, 누르면 홈 — 따로 홈 버튼을 두지 않는다(혜원님 10/15).
         */}
       <div className="hd-brand">
         <button className="hd-menu" onClick={onMenu} aria-label="메뉴 열기">
@@ -53,19 +53,18 @@ export function Header({state, tab, clock, day, operator, onMenu, onAccount, onH
           <span />
           <span />
         </button>
-        <i className="hd-sep" aria-hidden="true" />
-        <button
-          className="wm wm-home"
-          onClick={onHome}
-          aria-label="홈으로"
-          aria-current={tab === 'overview' ? 'page' : undefined}
-        >
-          <TabIcon tab="overview" />
-          <span>
-            Colony<i>Scanner</i>
-          </span>
-        </button>
       </div>
+      <button
+        className="wm wm-home"
+        onClick={onHome}
+        aria-label="홈으로"
+        aria-current={tab === 'overview' ? 'page' : undefined}
+      >
+        <TabIcon tab="overview" />
+        <span>
+          Colony<i>Scanner</i>
+        </span>
+      </button>
       <span className="sub">
         {name?.[1]}
         <em>{name?.[2]}</em>

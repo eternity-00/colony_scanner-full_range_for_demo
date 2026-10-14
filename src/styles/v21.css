@@ -591,15 +591,17 @@
 .dv-reset{min-height:5.5rem;font-size:1.25rem;font-weight:800}
 @media (max-height:700px){.dv-reset{min-height:4rem;font-size:1.0625rem}}
 
-/* 헤더(혜원님 10/14) — 왼쪽 끝 사선 파란 칸 = 메뉴, 글자 로고 = 홈 버튼, 나머지 흰 바탕. */
-/* 메뉴와 로고를 한 사선 파란 칸에 담는다(혜원님 10/14). */
-.hd-brand{flex:none;height:5rem;display:flex;align-items:center;padding-right:2.75rem;background:var(--blue);
+/* 헤더(혜원님 10/15) — 왼쪽 끝 사선 파란 칸 = 메뉴만. 글자 로고(= 홈 버튼)부터는 흰 바탕. */
+.hd-brand{flex:none;height:5rem;display:flex;align-items:center;padding-right:1.75rem;background:#0063b3;
   clip-path:polygon(0 0,100% 0,calc(100% - 1.75rem) 100%,0 100%)}
-.wm-home{min-height:0;height:5rem;margin:0;padding:0 0.5rem 0 0.75rem;border:0;border-radius:0;background:transparent;
-  font-size:1.5rem;font-weight:800;letter-spacing:-.02em;color:#fff;white-space:nowrap}
-.wm-home i{font-style:normal;color:#bcd9f5}
-@media (hover:hover) and (pointer:fine){.wm-home:hover{filter:none;opacity:.85}}
-.app>header .sub{margin-left:0.5rem;border-left:0;padding-left:0}
+.hd-brand .hd-menu{background:transparent}
+.wm-home{display:inline-flex;align-items:center;gap:0.625rem;min-height:0;height:5rem;margin:0;padding:0 0.25rem 0 0.75rem;
+  border:0;border-radius:0;background:transparent;font-size:1.5rem;font-weight:800;letter-spacing:-.02em;color:var(--p-tx);white-space:nowrap}
+.wm-home i{font-style:normal;color:#0063b3}
+.wm-home svg{width:1.75rem;height:1.75rem;flex:none;stroke-width:2.2;color:#0063b3}
+@media (hover:hover) and (pointer:fine){.wm-home:hover{filter:none;opacity:.8}}
+/* 로고와 화면 이름 사이 구분선은 글자 높이만큼만. */
+.app>header .sub{margin-left:0.875rem;padding-left:0.875rem;border-left:1px solid #9ba2ac}
 .app>header .head-status{padding-right:1rem}
 
 /* 메뉴 서랍 바닥 — 제조사 로고 · 앱 버전 */
@@ -607,17 +609,11 @@
   margin-top:0.5rem;padding:0.75rem 0.625rem 0.25rem;border-top:1px solid var(--p-bd2)}
 .drawer-foot img{height:1.5rem;width:auto}
 .drawer-foot span{font-size:0.75rem;font-weight:600;color:var(--p-tx3);font-variant-numeric:tabular-nums}
-.app>header .sub{font-size:1.375rem;font-weight:800;color:var(--p-tx);margin-left:0.75rem}
+.app>header .sub{font-size:1.375rem;font-weight:800;color:var(--p-tx)}
 @media (max-width:1150px){.app>header .clock{display:none}.app>header .sub{font-size:1.1875rem}}
-/* 사선 칸 안 — 메뉴(≡)와 로고 사이에 옅은 세로선, 로고 앞에 집 아이콘(누르면 홈). */
-.hd-sep{width:1px;height:2.375rem;flex:none;background:#ffffff59}
-.wm-home{display:inline-flex;align-items:center;gap:0.625rem;padding-left:1.125rem}
-.wm-home svg{width:1.75rem;height:1.75rem;flex:none;stroke-width:2.2;color:#fff}
 /* 화면 이름 옆 영문(혜원님 10/14) — 한 단계 작고 옅게. 좁은 화면에서는 접는다. */
 .app>header .sub em{margin-left:0.5rem;font-style:normal;font-size:0.9375rem;font-weight:600;color:var(--p-tx2)}
 @media (max-width:1150px){.app>header .sub em{display:none}}
-/* 헤더 사선 칸은 원래 파랑(#0063b3), 주 버튼(--blue)은 살짝 하늘 쪽으로 밝힌 #1f78c1 — 혜원님 10/14. */
+/* 헤더 사선 칸은 원래 파랑(#0063b3, 위 .hd-brand), 주 버튼(--blue)은 살짝 하늘 쪽으로 밝힌 #1f78c1 — 혜원님 10/14. */
 :root{--blue:#1f78c1;--blue7:#1f78c1}
-.hd-brand{background:#0063b3}
-.hd-brand .hd-menu{background:transparent}
-.wm-home i{color:#bcd9f5}
+
