@@ -1,6 +1,5 @@
 import type {AppState} from '../api/types.ts';
 import type {TabKey} from '../config/defines.ts';
-import {AlertBell} from './AlertBell.tsx';
 import {tempAbnormal} from '../utils/plate.ts';
 
 interface Props {
@@ -15,12 +14,6 @@ interface Props {
   onMenu: () => void;
   /** 계정 칩을 눌렀을 때 — 말풍선을 연다. */
   onAccount: () => void;
-  /** 관리자가 알림에서 곧장 장비 화면으로 넘어간다. */
-  onDevice: () => void;
-  /** 알림에서 플레이트를 손보러 상세로 넘어간다. */
-  onPlate: (deviceId: number, slot: number) => void;
-  /** 분석자가 장비 오류를 눌렀을 때. */
-  onNeedAdmin: (where: string, what: string) => void;
 }
 
 /**
@@ -47,8 +40,10 @@ const SUBTITLE: Record<TabKey, string> = {
  *
  * 여기에는 **장비 전체에 하나뿐인 값**만 둔다. 배양 진행이나 다음 촬영처럼
  * 플레이트마다 다른 값은 하나만 골라 적는 순간 나머지를 가리는 거짓말이 된다.
+ *
+ * 알림 종은 없다 — 알람은 홈의 알람 칸이 맡는다.
  */
-export function Header({state, tab, clock, day, operator, onMenu, onAccount, onDevice, onPlate, onNeedAdmin}: Props) {
+export function Header({state, tab, clock, day, operator, onMenu, onAccount}: Props) {
   const devices = state.devices;
   const linked = devices.filter(d => d.connected).length;
   const abnormal = devices.some(tempAbnormal);
@@ -87,9 +82,6 @@ export function Header({state, tab, clock, day, operator, onMenu, onAccount, onD
         <span className="clock">
           {day} {clock}
         </span>
-
-        {/* 알림은 장비 문제 건수다. 목록은 종 밑에 붙는 말풍선이다. */}
-        <AlertBell state={state} onDevice={onDevice} onPlate={onPlate} onNeedAdmin={onNeedAdmin} />
 
         <button className={`role-chip ${state.session.role}`} onClick={onAccount}>
           <i>{operator.slice(0, 1)}</i>

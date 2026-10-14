@@ -58,7 +58,7 @@ button.hsum:disabled{opacity:1;cursor:default}
 .hsum-todo button:disabled{opacity:1;cursor:default}
 .hsum-todo button:disabled b{color:#8f8f8f}
 
-/* 알람 목록 팝업 — 헤더 종 목록과 같은 줄 꼴. */
+/* 알람 목록 팝업. */
 .home-alert-list{max-height:min(28rem,60vh);overflow-y:auto;padding:0}
 .home-alert-list button{min-height:3.75rem}
 

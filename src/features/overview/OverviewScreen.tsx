@@ -143,7 +143,7 @@ export function OverviewScreen({state, send, openDetail, openRegister, onDevice,
           </div>
         </section>
 
-        {/* 알람 — 건수와 맨 위 한 줄만. 누르면 헤더 종과 같은 목록을 편다. */}
+        {/* 알람 — 건수와 맨 위 한 줄만. 누르면 전체 목록을 편다. */}
         <button className="card hsum" onClick={() => setAlertsOpen(true)} disabled={!alerts.length}>
           <span className="hsum-head">
             <small>알람</small>

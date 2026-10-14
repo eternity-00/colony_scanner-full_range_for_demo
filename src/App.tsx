@@ -248,9 +248,6 @@ export default function App() {
         operator={operator}
         onMenu={() => setMenu(true)}
         onAccount={() => setUserCard(true)}
-        onDevice={() => setTab('device')}
-        onPlate={openDetail}
-        onNeedAdmin={(where, what) => setAdminAsk({where, what})}
       />
       <main>{screens[visible]}</main>
       <MenuDrawer
