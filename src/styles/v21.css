@@ -533,3 +533,7 @@
   .hm-big>span{padding:0.625rem 0.75rem}
   .hm-big b{font-size:2rem}
 }
+/* 정보 칸을 조금 더 높게(혜원님 10/14) — 버튼 2 : 정보 1 쯤. */
+.hm-page{grid-template-rows:minmax(0,2.4fr) auto minmax(7.5rem,1fr)}
+.hm-big b{font-size:2.75rem}
+@media (max-height:700px){.hm-page{grid-template-rows:minmax(0,2.4fr) auto minmax(5.5rem,1fr)}.hm-big b{font-size:2.125rem}}
