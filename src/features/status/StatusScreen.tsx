@@ -76,6 +76,10 @@ export function StatusScreen({
         <div className="st-head">
           <h3>{d.name}</h3>
           <Badge type={next.badgeType}>{next.badge}</Badge>
+          {/* 다음 촬영은 작게 한 마디로만(혜원님 10/14). */}
+          <span className="st-next">
+            다음 촬영 <b className={next.scheduled ? '' : 'idle'}>{next.label}</b>
+          </span>
           <WellLegend />
         </div>
         <div className="p-tray st-tray">

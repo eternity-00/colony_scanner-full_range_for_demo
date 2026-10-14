@@ -542,3 +542,26 @@
 .st-list time{flex:none;font-size:0.75rem;font-weight:600;color:var(--p-tx3);font-variant-numeric:tabular-nums}
 @media (hover:hover) and (pointer:fine){.st-list button:hover{background:#f7f8fa}}
 .st-alerts .st-list li button{background:transparent;border-radius:0;padding:0.25rem 0.125rem;min-height:2.875rem}
+
+/* 현황 — 왼쪽 위 「다음 촬영」 한 마디, 오른쪽 열은 조금씩 키운다(혜원님 10/14). */
+.st-next{font-size:0.8125rem;font-weight:600;color:var(--p-tx2);white-space:nowrap}
+.st-next b{margin-left:0.125rem;font-weight:800;color:var(--p-tx);font-variant-numeric:tabular-nums}
+.st-next b.idle{color:var(--p-tx3);font-weight:600}
+.st-page{grid-template-columns:minmax(0,1fr) minmax(20rem,28rem)}
+.st-facts>span{padding:1rem 0.5rem;gap:0.5rem}
+.st-facts small{font-size:0.875rem;font-weight:700}
+.st-facts b{font-size:2rem}
+.st-facts b em{font-size:0.9375rem}
+.st-alerts .p-card-head h3{font-size:1.125rem}
+.st-list button,.st-alerts .st-list li button{min-height:3.25rem}
+.st-list .p-tag{width:3rem;font-size:0.75rem}
+.st-list b{font-size:1rem}
+.st-list small{font-size:0.875rem}
+.st-list time{font-size:0.8125rem}
+.st-reg{min-height:4.25rem;font-size:1.1875rem}
+@media (max-height:700px){
+  .st-facts>span{padding:0.625rem 0.375rem}
+  .st-facts b{font-size:1.5rem}
+  .st-list button,.st-alerts .st-list li button{min-height:2.75rem}
+  .st-reg{min-height:3.25rem}
+}
