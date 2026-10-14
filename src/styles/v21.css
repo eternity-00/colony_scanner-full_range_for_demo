@@ -591,23 +591,21 @@
 .dv-reset{min-height:5.5rem;font-size:1.25rem;font-weight:800}
 @media (max-height:700px){.dv-reset{min-height:4rem;font-size:1.0625rem}}
 
-/* 헤더(혜원님 10/14, 캔버스 2-C 일자판) — 왼쪽 파란 칸 = 홈(흰 로고 | 집), 칸 밖에 화면 이름,
-   오른쪽 끝 파란 칸 = 메뉴. */
-.hd-home{height:5rem;min-height:0;flex:none;margin:0;display:flex;align-items:center;gap:1.125rem;padding:0 1.5rem;
-  border:0;border-radius:0;background:var(--blue);color:#fff}
-.hd-home img{height:3.375rem;width:auto;display:block}
-.hd-home>i{width:1px;height:2.375rem;background:#ffffff59}
-.hd-home svg{width:1.875rem;height:1.875rem;stroke-width:2.2}
-@media (hover:hover) and (pointer:fine){.hd-home:hover{filter:brightness(.94)}}
+/* 헤더(혜원님 10/14) — 왼쪽 파란 띠: 메뉴(≡) · 흰 로고 · 홈(⌂). 나머지는 흰 바탕. 서랍은 왼쪽에서 연다. */
+.hd-brand{flex:none;height:5rem;display:flex;align-items:center;gap:0.75rem;padding-right:1.5rem;background:var(--blue)}
+.hd-brand img{height:3.375rem;width:auto;display:block}
 .hd-name{flex:none;display:flex;align-items:baseline;gap:0.5rem;padding:0 1.5rem;white-space:nowrap}
 .hd-name b{font-size:1.375rem;font-weight:800;color:var(--p-tx)}
 .hd-name em{font-style:normal;font-size:0.875rem;font-weight:600;color:var(--p-tx2)}
 .app>header .head-status{padding-right:0.75rem}
-.app[data-w="sm"] .hd-home img,.app[data-w="md"] .hd-home img{height:2.75rem}
-.app[data-w="sm"] .hd-name em{display:none}
-/* 메뉴가 오른쪽 끝이라 서랍도 오른쪽에서 연다. */
-.app>nav.drawer{left:auto;right:0;transform:translateX(100%);border-right:0;border-left:1px solid var(--g3)}
-.app>nav.drawer.open{transform:translateX(0);box-shadow:-8px 0 32px #0a112e26}
+.hd-brand{gap:0.5rem;padding-right:0}
+.hd-brand>i{width:1px;height:2.375rem;margin-left:0.75rem;background:#ffffff59}
+.hd-home{width:5rem;height:5rem;min-height:0;flex:none;margin:0;padding:0;display:grid;place-items:center;
+  border:0;border-radius:0;background:transparent;color:#fff}
+.hd-home svg{width:2rem;height:2rem;stroke-width:2.2}
+.hd-home.on{background:#ffffff1f}
+@media (hover:hover) and (pointer:fine){.hd-home:hover{background:#ffffff1f;filter:none}}
+.app[data-w="sm"] .hd-brand img,.app[data-w="md"] .hd-brand img{height:2.75rem}
 
 /* 메뉴 서랍 바닥 — 제조사 로고 · 앱 버전 */
 .drawer-foot{flex:none;display:flex;align-items:center;justify-content:space-between;gap:0.75rem;

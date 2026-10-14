@@ -45,20 +45,26 @@ export function Header({state, tab, clock, day, operator, onMenu, onAccount, onH
   return (
     <header>
       {/*
-        * 왼쪽 파란 칸 = 홈 버튼. 흰 로고 | 집 아이콘을 담고, 어느 화면에서든 같은 파란 칸이다.
-        * 지금 보는 화면 이름은 칸 밖(흰 바탕)에 적는다. 메뉴는 오른쪽 끝으로 옮겼다
-        * (디자인 캔버스 「홈 화면 배치안」, 혜원님 10/14).
+        * 왼쪽 파란 띠 = 메뉴(≡) · 로고 · 홈(⌂). 메뉴는 왼쪽에 있어야 찾고, 홈도 같은
+        * 띠에 묶었다(혜원님 10/14). 그 오른쪽은 흰 바탕 — 화면 이름 · 상태 칩 · 계정.
         */}
-      <button
-        className="hd-home"
-        onClick={onHome}
-        aria-label="홈으로"
-        aria-current={tab === 'overview' ? 'page' : undefined}
-      >
+      <div className="hd-brand">
+        <button className="hd-menu" onClick={onMenu} aria-label="메뉴 열기">
+          <span />
+          <span />
+          <span />
+        </button>
         <img src={logoUrl} alt="ColonyScanner" />
         <i aria-hidden="true" />
-        <TabIcon tab="overview" />
-      </button>
+        <button
+          className={`hd-home ${tab === 'overview' ? 'on' : ''}`}
+          onClick={onHome}
+          aria-label="홈으로"
+          aria-current={tab === 'overview' ? 'page' : undefined}
+        >
+          <TabIcon tab="overview" />
+        </button>
+      </div>
       <span className="hd-name">
         <b>{name?.[1]}</b>
         <em>{name?.[2]}</em>
@@ -89,12 +95,6 @@ export function Header({state, tab, clock, day, operator, onMenu, onAccount, onH
           </span>
         </button>
       </div>
-      {/* 메뉴 — 오른쪽 끝 파란 칸. 서랍도 오른쪽에서 열린다. */}
-      <button className="hd-menu" onClick={onMenu} aria-label="메뉴 열기">
-        <span />
-        <span />
-        <span />
-      </button>
     </header>
   );
 }
