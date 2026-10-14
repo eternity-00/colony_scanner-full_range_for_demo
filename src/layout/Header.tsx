@@ -1,6 +1,5 @@
 import type {AppState} from '../api/types.ts';
 import type {TabKey} from '../config/defines.ts';
-import logoUrl from '../assets/logo.svg';
 import {TabIcon} from '../shared/TabIcon.tsx';
 import {tempAbnormal} from '../utils/plate.ts';
 
@@ -73,8 +72,9 @@ export function Header({state, tab, clock, day, operator, onMenu, onAccount, onH
       >
         <TabIcon tab="overview" />
       </button>
-      {/* 로고는 SVG 원본(2단 락업 · 라이트) 그대로 — 흰 헤더라 짙은 글자판을 쓴다. */}
-      <img className="wm-logo" src={logoUrl} alt="ColonyScanner" />
+      <span className="wm">
+        Colony<i>Scanner</i>
+      </span>
       <span className="sub">{SUBTITLE[tab]}</span>
 
       <div className="head-status">
