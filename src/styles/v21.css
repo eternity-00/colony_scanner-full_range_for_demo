@@ -559,3 +559,6 @@
 .cp-next b{margin-left:0.125rem;font-weight:800;color:var(--p-tx)}
 .cp-next b.idle{color:var(--p-tx3);font-weight:600}
 .cp-queue .p-card-head .cp-next+em{margin-left:0.75rem}
+/* 현황 「＋ 플레이트 등록」 — 조금 더 두툼하게(혜원님 10/14). */
+.st-reg{min-height:5.5rem;font-size:1.3125rem;font-weight:800}
+@media (max-height:700px){.st-reg{min-height:4rem;font-size:1.125rem}}
