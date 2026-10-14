@@ -486,3 +486,13 @@
   .sg-block .p-card-head p{display:none}
 }
 .settings-shell>section{max-height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch;touch-action:pan-y}
+
+/* 현황의 「다음 촬영 / 지금 촬영」 칸 — 옅은 면으로는 묻혀서 강조색 면으로 올렸다(혜원님 10/14).
+   초안의 남색 대신 앱의 파랑을 쓰고, 민트 같은 형광 글자는 두지 않는다. */
+.st-run.p-panel{background:var(--blue);border-color:var(--blue)}
+.st-run .st-run-top small,.st-run .st-run-foot small{color:#d5e4f3}
+.st-run .st-run-main b{color:#fff}
+.st-run .st-run-main b.idle{color:#9fc0e0}
+.st-run .st-run-main em,.st-run .st-run-main em.bad,.st-run .st-run-main em.warn{color:#fff}
+.st-run .p-bar{background:#2f7cc0}
+.st-run .p-bar>i{background:#fff}
