@@ -591,9 +591,8 @@
 .dv-reset{min-height:5.5rem;font-size:1.25rem;font-weight:800}
 @media (max-height:700px){.dv-reset{min-height:4rem;font-size:1.0625rem}}
 
-/* 헤더(혜원님 10/15) — 왼쪽 끝 사선 파란 칸 = 메뉴만. 글자 로고(= 홈 버튼)부터는 흰 바탕. */
-.hd-brand{flex:none;height:5rem;display:flex;align-items:center;padding-right:1.75rem;background:#0063b3;
-  clip-path:polygon(0 0,100% 0,calc(100% - 1.75rem) 100%,0 100%)}
+/* 헤더(혜원님 10/15) — 왼쪽 끝 네모 파란 칸 = 메뉴만(사선 없이 일자). 글자 로고(= 홈 버튼)부터는 흰 바탕. */
+.hd-brand{flex:none;height:5rem;display:flex;align-items:center;background:#0063b3}
 .hd-brand .hd-menu{background:transparent}
 .wm-home{display:inline-flex;align-items:center;gap:0.625rem;min-height:0;height:5rem;margin:0;padding:0 0.25rem 0 0.75rem;
   border:0;border-radius:0;background:transparent;font-size:1.5rem;font-weight:800;letter-spacing:-.02em;color:var(--p-tx);white-space:nowrap}
@@ -614,6 +613,6 @@
 /* 화면 이름 옆 영문(혜원님 10/14) — 한 단계 작고 옅게. 좁은 화면에서는 접는다. */
 .app>header .sub em{margin-left:0.5rem;font-style:normal;font-size:0.9375rem;font-weight:600;color:var(--p-tx2)}
 @media (max-width:1150px){.app>header .sub em{display:none}}
-/* 헤더 사선 칸은 원래 파랑(#0063b3, 위 .hd-brand), 주 버튼(--blue)은 살짝 하늘 쪽으로 밝힌 #1f78c1 — 혜원님 10/14. */
+/* 헤더 메뉴 칸은 원래 파랑(#0063b3, 위 .hd-brand), 주 버튼(--blue)은 살짝 하늘 쪽으로 밝힌 #1f78c1 — 혜원님 10/14. */
 :root{--blue:#1f78c1;--blue7:#1f78c1}
 

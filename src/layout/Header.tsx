@@ -44,7 +44,7 @@ export function Header({state, tab, clock, day, operator, onMenu, onAccount, onH
   return (
     <header>
       {/*
-        * 왼쪽 파란 사선 칸 = 메뉴. 오른쪽 변을 비스듬히 세운 1.5 · 1.6 의 사선 칸이다.
+        * 왼쪽 파란 네모 칸 = 메뉴. 사선 없이 일자로 끊는다(혜원님 10/15).
         * 로고는 칸 밖 흰 바탕에 두고, 누르면 홈 — 따로 홈 버튼을 두지 않는다(혜원님 10/15).
         */}
       <div className="hd-brand">
