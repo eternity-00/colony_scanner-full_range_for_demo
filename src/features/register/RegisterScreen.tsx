@@ -185,19 +185,31 @@ export function RegisterScreen({state, send, setTab, device = 1, slot: picked}: 
             <div className="rg-facts">
               <span>
                 <small>촬영 주기</small>
-                <b>{state.routine.cycleHours} 시간</b>
+                <b>
+                  {state.routine.cycleHours}
+                  <em>시간</em>
+                </b>
               </span>
               <span>
                 <small>총 배양 기간</small>
-                <b>{state.routine.days} 일</b>
+                <b>
+                  {state.routine.days}
+                  <em>일</em>
+                </b>
               </span>
               <span>
                 <small>총 촬영 회차</small>
-                <b>{totalRuns(state)} 회</b>
+                <b>
+                  {totalRuns(state)}
+                  <em>회</em>
+                </b>
               </span>
               <span>
-                <small>Well 당</small>
-                <b>{state.routine.wellShots} 장</b>
+                <small>Well 당 촬영</small>
+                <b>
+                  {state.routine.wellShots}
+                  <em>장</em>
+                </b>
               </span>
             </div>
             {batch > 0 && <p className="rg-batch">이번에 {batch}매 등록했습니다 · 완료를 누르면 촬영이 시작됩니다</p>}
