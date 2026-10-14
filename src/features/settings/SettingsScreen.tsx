@@ -168,83 +168,92 @@ export function SettingsScreen({state, send, operator, setOperator, onRole,
     ),
 
     routine: (
-      <section className="card stack">
-        <h2>검사 루틴</h2>
-        <p className="muted">장비 전체에 공통으로 적용됩니다.</p>
-        <div className="fields">
-          {ROUTINE_FIELDS.map(f => (
-            <div className="field step" key={f.key}>
-              <span className="fl">
-                {f.label}
+      <section className="sg-routine">
+        <div className="p-card sg-block">
+          <div className="p-card-head">
+            <h2>검사 루틴</h2>
+            <p>등록된 모든 플레이트에 함께 적용됩니다</p>
+            <span className="p-tag warn">변경 시 진행 중 배양 일정 재산정</span>
+          </div>
+          <div className="sg-fields">
+            {ROUTINE_FIELDS.map(f => (
+              <div className="sg-field" key={f.key}>
+                <small>{f.label}</small>
+                <span className="sg-step">
+                  <button
+                    onClick={() => bump(f, -f.step)}
+                    disabled={routine[f.key] <= f.min}
+                    aria-label={`${f.label} 줄이기`}
+                  >
+                    −
+                  </button>
+                  {/* 값을 누르면 키패드가 열린다. */}
+                  <button className="sg-val" onClick={() => setPad(f)}>
+                    <b>{routine[f.key]}</b>
+                    <i>{f.unit}</i>
+                  </button>
+                  <button
+                    onClick={() => bump(f, f.step)}
+                    disabled={routine[f.key] >= f.max}
+                    aria-label={`${f.label} 늘리기`}
+                  >
+                    ＋
+                  </button>
+                </span>
                 <em>{f.desc}</em>
-              </span>
-              <span className="stepper">
-                <button
-                  onClick={() => bump(f, -f.step)}
-                  disabled={routine[f.key] <= f.min}
-                  aria-label={`${f.label} 줄이기`}
-                >
-                  −
-                </button>
-                <button className="st-val" onClick={() => setPad(f)}>
-                  <b>{routine[f.key]}</b>
-                  <i>{f.unit}</i>
-                </button>
-                <button
-                  onClick={() => bump(f, f.step)}
-                  disabled={routine[f.key] >= f.max}
-                  aria-label={`${f.label} 늘리기`}
-                >
-                  +
-                </button>
-              </span>
-            </div>
-          ))}
+              </div>
+            ))}
+          </div>
+          <div className="sg-sum">
+            <small>현재 설정 기준</small>
+            <b>
+              총 {Math.floor((routine.days * 24) / routine.cycleHours)} 회 촬영 · 플레이트 1 매당 사진{' '}
+              {(
+                Math.floor((routine.days * 24) / routine.cycleHours) *
+                WELLS *
+                routine.wellShots
+              ).toLocaleString()}{' '}
+              장
+            </b>
+            <button className="primary" onClick={() => setAskSave(true)}>
+              루틴 저장
+            </button>
+          </div>
+        </div>
+
+        <div className="p-card sg-block">
+          <div className="p-card-head">
+            <h2>촬영 옵션</h2>
+          </div>
           {/*
             * Well 한 칸을 가운데 한 장만 찍을지, 상하좌우까지 다섯 장을 찍을지.
-            * 장수라 스테퍼로 둘 수도 있지만 쓰는 값이 1 과 5 둘뿐이라 스위치로 둔다.
+            * 쓰는 값이 1 과 5 둘뿐이라 스위치로 둔다. 루틴 저장 때 함께 저장된다.
             */}
-          <div className="field">
-            <span className="fl">
-              Well 십자 촬영
-              <em>Well 한 칸을 가운데 · 상하좌우 다섯 장으로 나눠 찍습니다</em>
-            </span>
-            <span className="fv">
+          <div className="sg-opts">
+            <div>
+              <span>
+                <b>Well 십자 촬영</b>
+                <em>Well 한 칸을 가운데 · 상하좌우 다섯 장으로 나눠 찍습니다 · 루틴 저장 시 적용</em>
+              </span>
               <Toggle
                 label={`Well당 ${routine.wellShots}장`}
                 checked={routine.wellShots === 5}
                 onChange={on => setRoutine(r => ({...r, wellShots: on ? 5 : 1}))}
               />
-            </span>
+            </div>
+            <div>
+              <span>
+                <b>자동 촬영 스케줄러</b>
+                <em>끄면 주기가 와도 촬영하지 않습니다 · 바로 적용</em>
+              </span>
+              <Toggle
+                label={state.autoRun ? '켜짐' : '꺼짐'}
+                checked={state.autoRun}
+                onChange={enabled => send('autoRun', 0, {enabled})}
+              />
+            </div>
           </div>
         </div>
-        <div className="calc">
-          <span>
-            현재 설정 기준
-            {/* 장수는 회차보다 저장·전송량에 직결되는 값이라 같이 적는다. */}
-            <em>
-              플레이트 1매당 사진{' '}
-              {(
-                Math.floor((routine.days * 24) / routine.cycleHours) *
-                WELLS *
-                routine.wellShots
-              ).toLocaleString()}
-              장
-            </em>
-          </span>
-          <b>
-            총 {Math.floor((routine.days * 24) / routine.cycleHours)}
-            <em>회 촬영</em>
-          </b>
-        </div>
-        <button className="primary" onClick={() => setAskSave(true)}>
-          루틴 저장
-        </button>
-        <Toggle
-          label="자동 촬영 스케줄러"
-          checked={state.autoRun}
-          onChange={enabled => send('autoRun', 0, {enabled})}
-        />
       </section>
     ),
 
@@ -370,7 +379,7 @@ export function SettingsScreen({state, send, operator, setOperator, onRole,
 
   return (
     <div className="settings-shell">
-      <aside className="card settings-nav">
+      <aside className="settings-nav">
         {nav.map(([key, label]) => (
           <button
             className={active === key ? 'selected' : ''}

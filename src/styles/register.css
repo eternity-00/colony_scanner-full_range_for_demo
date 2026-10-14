@@ -1,28 +1,14 @@
-/* 등록 화면 — 스캐너 선택 · 수납 위치 · 투입 시각 */
+/* 등록 화면 — 스캐너 탭 · 등록 완료 팝업. 화면 배치는 v21.css(.rg-*) */
 
 .device-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:0.5rem}
 .device-tabs button{display:flex;flex-direction:column}
 .device-tabs .selected{background:var(--blue);border-color:var(--blue);color:#fff}
 /* small 은 전역에서 회색이라, 파란 면 위에서 그대로 두면 읽히지 않는다. */
 .device-tabs .selected small{color:#fff}
-/* 투입 시각은 고르는 값이 아니라 기록되는 값이라, 무엇이 찍힐지만 보여준다. */
-.register-layout aside dd em{display:block;font-style:normal;font-size:0.71875rem;
-  font-weight:500;color:var(--gt);margin-top:1px}
-/* 이름이 넉 자를 넘지 않는 줄들이라 전역 7.5rem 짜리 이름 칸은 절반이 빈다.
-   비는 만큼 이름과 값이 멀어져 한 쌍으로 안 읽힌다. 칸을 줄여 붙이고,
-   남은 폭은 값이 가져간다 — 「등록을 마쳐야…」가 두 줄로 접히던 자리다. */
-.register-layout aside dl{grid-template-columns:5rem 1fr;column-gap:0.625rem}
-
-/* 선택된 수납 위치 — 중립 슬레이트. 초록은 이 화면에서 '이미 찬 칸'을 뜻하고
-   파랑은 아래 실행 버튼이 쓰므로, 의미가 겹치지 않는 색을 쓴다.
-   흰 글씨를 얹는 면이라 더 밝히지는 않는다 — #6b7380 에서 대비가 4.8:1 이다. */
-.card.dark{background:#6b7380;border-color:#6b7380}
-.card.dark small{color:#e4e7ea;font-size:0.8125rem;font-weight:600;letter-spacing:.3px}
-.card.dark h2{color:#fff;font-size:1.375rem;font-weight:800;margin-top:0.25rem;letter-spacing:-.3px}
 /* 스캐너를 고르는 버튼이라 손가락으로 조준 없이 눌려야 한다. */
-.register-layout .device-tabs button{min-height:4rem;gap:1px}
-.register-layout .device-tabs button>*:first-child{font-size:1.0625rem;font-weight:800}
-.register-layout .device-tabs small{font-size:0.78125rem}
+.rg-left .device-tabs button{min-height:4rem;gap:1px}
+.rg-left .device-tabs button>*:first-child{font-size:1.0625rem;font-weight:800}
+.rg-left .device-tabs small{font-size:0.78125rem}
 /* 등록 트레이도 현황과 같은 상태색 */
 .tray.registration .cell{opacity:1}
 .tray.registration .cell:disabled{opacity:1;cursor:not-allowed}
@@ -35,29 +21,3 @@
 .done-box span{display:block;font-size:0.8125rem;color:var(--gt);margin-top:2px}
 .done-ask{margin:1rem 0 0;font-size:0.84375rem;color:var(--gt)}
 
-
-/* 본문 높이 안에서 내부 스크롤 */
-.reg-page{display:flex;flex-direction:column;gap:0.25rem;height:100%;min-height:0}
-/* 등록 화면의 범례는 「있음 / 없음」 둘뿐이라 한 줄을 다 쓸 이유가 없다.
-   줄여서 넘긴 높이는 아래 버튼과 트레이 칸이 가져간다 — 눌러야 하는 건 그쪽이다. */
-/* 본문 위 여백(1rem) 안으로 끌어올린다. 범례는 읽기만 하는 줄이라
-   헤더에 붙여 두고, 벌어 둔 자리는 아래 카드가 쓴다.
-   아래 register-layout 과 같은 칸으로 나눠, 범례가 트레이(흰 상자)의
-   오른쪽 끝에 맞도록 둔다 — 설명하는 대상이 그 상자이지 오른쪽 패널이 아니다. */
-.reg-page .overview-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(15rem,19.75rem);
-  gap:0.75rem;height:1.25rem;margin-top:-0.5rem}
-.reg-page .legend{grid-column:1;justify-self:end;font-size:0.8125rem;gap:0.75rem}
-.reg-page .legend i{width:0.75rem;height:0.75rem;border-width:2px}
-.app[data-w="sm"] .reg-page .overview-head{grid-template-columns:minmax(0,1fr)}
-.register-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(15rem,19.75rem);gap:0.75rem;flex:1;min-height:0;align-items:stretch}
-.app[data-w="sm"] .register-layout{grid-template-columns:minmax(0,1fr);overflow:auto}
-.register-layout>section{min-height:0;display:flex;flex-direction:column}
-.register-layout>aside{min-height:0;overflow:auto}
-
-/* 등록 트레이 — 현황처럼 네모에 가깝게 채움 */
-.register-layout>section .tray{flex:1;min-height:0;width:100%;max-width:none;
-  grid-auto-rows:minmax(0,1fr);gap:0.4375rem;background:#fff;border:1px solid var(--g3);border-radius:var(--rr);padding:0.625rem}
-.register-layout>section .tray .tray-row{align-items:stretch;gap:0.4375rem;grid-template-columns:2.25rem repeat(3,minmax(0,1fr))}
-/* 상세와 같은 꼴 — 12 → 14px, 가운데 정렬(detail.css 주석 참조). */
-.register-layout .tier{text-align:center;padding-right:0;font-size:0.875rem}
-.register-layout .registration .cell{height:auto;min-height:0;font-size:1rem;font-weight:800}

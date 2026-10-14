@@ -125,7 +125,7 @@ export function StatusScreen({
             <>
               <span className="st-run-main">
                 <b className={next.scheduled ? '' : 'idle'}>{next.label}</b>
-                <em>{next.badge}</em>
+                <em className={next.badgeType}>{next.badge}</em>
               </span>
               <span className="st-run-foot">
                 <small>배양 중 {plates.length} 매</small>

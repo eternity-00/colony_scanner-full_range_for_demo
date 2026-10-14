@@ -1,7 +1,6 @@
 import {useLayoutEffect, useRef, useState} from 'react';
 import type {AppState, Plate} from '../../api/types.ts';
 import {ROW_HEIGHT_REM} from '../../config/defines.ts';
-import {Badge} from '../../shared/Badge.tsx';
 import {fmt} from '../../utils/datetime.ts';
 import {download} from '../../utils/download.ts';
 import {coord, nextAt, pending, pos, totalRuns} from '../../utils/plate.ts';
@@ -48,7 +47,7 @@ export function HistoryScreen({state, openDetail, openPlateViewer}: Props) {
     const el = wrap.current;
     if (!el) return;
     const calc = () => {
-      const head = el.querySelector('thead')?.offsetHeight || 38;
+      const head = el.querySelector('.hs-head')?.clientHeight || 40;
       const rowPx = ROW_HEIGHT_REM * rootFontPx();
       setPer(Math.max(3, Math.min(40, Math.floor((el.clientHeight - head) / rowPx))));
     };
@@ -58,14 +57,6 @@ export function HistoryScreen({state, openDetail, openPlateViewer}: Props) {
     return () => ro.disconnect();
   }, []);
 
-  // 계산 결과가 1행 넘칠 때가 있어 렌더 후 한 번 더 줄인다.
-  useLayoutEffect(() => {
-    const el = wrap.current;
-    const table = el?.querySelector('table');
-    if (el && table && table.getBoundingClientRect().height > el.clientHeight + 1) {
-      setPer(p => Math.max(3, p - 1));
-    }
-  });
 
   const rows = state.plates
     .filter(p => {
@@ -99,9 +90,11 @@ export function HistoryScreen({state, openDetail, openPlateViewer}: Props) {
     ),
   ].join('\n');
 
+  const lastShot = (p: Plate) => p.runs.at(-1);
+
   return (
-    <div className="hist-page">
-      <section className="card filters">
+    <div className="hs-page">
+      <section className="p-card hs-filters">
         <select value={draft.days} onChange={e => pick('days', Number(e.target.value))}>
           <option value="0">전체 기간</option>
           <option value="7">최근 7일</option>
@@ -148,81 +141,79 @@ export function HistoryScreen({state, openDetail, openPlateViewer}: Props) {
           <option value="pending">미전송</option>
         </select>
         <button className="primary" onClick={apply}>
-          적용
-        </button>
-        <button
-          className="ghost-btn"
-          onClick={() => download('colony-history.csv', '\ufeff' + csv, 'text/csv')}
-        >
-          CSV 내보내기
+          조회
         </button>
       </section>
 
-      <section className="card hist-table">
-        <div className="table-wrap" ref={wrap}>
-          <table className={shown.length >= per ? 'fillrows' : ''}>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>수납 위치</th>
-                <th>회차</th>
-                <th>투입 시각</th>
-                <th>다음 촬영</th>
-                <th>영상</th>
-                <th>전송</th>
-                <th />
-              </tr>
-            </thead>
-            <tbody>
-              {shown.map(p => (
-                <tr key={p.id}>
-                  <td>{p.id}</td>
-                  <td>
-                    {state.devices.length > 1 && `S${p.deviceId} · `}
-                    {pos(p.slot)}
-                  </td>
-                  <td>
-                    {p.runs.length}/{totalRuns(state)}
-                  </td>
-                  <td>{fmt(p.registeredAt)}</td>
-                  <td>{p.removedAt ? '–' : fmt(nextAt(state, p))}</td>
-                  <td>{p.runs.filter(r => r.imageState === 'held').length}</td>
-                  <td>
-                    {/*
-                      * 아직 한 번도 안 찍은 플레이트는 보낼 것이 없어서 미전송 0 이 된다.
-                      * 그걸 「완료」라고 적으면 전송이 끝난 것처럼 읽힌다.
-                      */}
-                    {p.runs.length === 0 ? (
-                      <Badge>촬영 전</Badge>
-                    ) : (
-                      <Badge type={pending(p) ? 'warn' : 'good'}>
-                        {pending(p) ? `미전송 ${pending(p)}` : '완료'}
-                      </Badge>
-                    )}
-                  </td>
-                  <td>
-                    <button
-                      onClick={() =>
-                        p.removedAt ? openPlateViewer(p) : openDetail(p.deviceId, p.slot)
-                      }
-                    >
-                      상세
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      <section className="p-card hs-table">
+        <div className="hs-wrap" ref={wrap}>
+          <div className="hs-head">
+            <span>수납 위치</span>
+            <span>회차</span>
+            <span>투입 시각</span>
+            <span>다음 촬영</span>
+            <span>영상</span>
+            <span>최근 촬영</span>
+            <span>전송</span>
+          </div>
+          {shown.map(p => {
+            const lr = lastShot(p);
+            return (
+              <button
+                key={p.id}
+                className="hs-row"
+                onClick={() => (p.removedAt ? openPlateViewer(p) : openDetail(p.deviceId, p.slot))}
+              >
+                <b>
+                  {state.devices.length > 1 && `S${p.deviceId} · `}
+                  {coord(p.slot).tier}-{coord(p.slot).col}
+                  {p.removedAt && <em>반출</em>}
+                </b>
+                <span className="num">
+                  {p.runs.length} / {totalRuns(state)}
+                </span>
+                <span>{fmt(p.registeredAt)}</span>
+                <strong>{p.removedAt ? '–' : fmt(nextAt(state, p))}</strong>
+                <span className="hs-shot">영상 {p.runs.filter(r => r.imageState === 'held').length}</span>
+                <span className="hs-last">
+                  {lr
+                    ? `${fmt(lr.at)} · ${
+                        lr.imageState === 'failed' ? '촬영 실패' : lr.transferred ? '촬영 후 전송' : '전송 대기'
+                      }`
+                    : '–'}
+                </span>
+                {/*
+                  * 아직 한 번도 안 찍은 플레이트는 보낼 것이 없어서 미전송 0 이 된다.
+                  * 그걸 「완료」라고 적으면 전송이 끝난 것처럼 읽힌다.
+                  */}
+                <span className="hs-st">
+                  {p.runs.length === 0 ? (
+                    <span className="p-tag mute">촬영 전</span>
+                  ) : pending(p) ? (
+                    <span className="p-tag warn">미전송 {pending(p)}</span>
+                  ) : (
+                    <span className="p-tag good">전송 완료</span>
+                  )}
+                </span>
+              </button>
+            );
+          })}
         </div>
-        <div className="pager">
+        <div className="hs-foot">
           <span>
-            총 {rows.length}매 · {pg + 1}/{last + 1} 페이지
+            총 {rows.length} 매 · {pg + 1} / {last + 1} 페이지
           </span>
           <button disabled={!pg} onClick={() => setPage(pg - 1)}>
             이전
           </button>
           <button disabled={pg >= last} onClick={() => setPage(pg + 1)}>
             다음
+          </button>
+          <button
+            className="primary"
+            onClick={() => download('colony-history.csv', '\ufeff' + csv, 'text/csv')}
+          >
+            CSV 내보내기
           </button>
         </div>
       </section>

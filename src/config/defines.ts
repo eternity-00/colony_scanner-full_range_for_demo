@@ -93,15 +93,6 @@ export const tabsFor = (isAdmin: boolean) =>
 
 /** 촬영 작업의 6단계. 그 외 명령(home/calibrate/reset)은 3단계. */
 export const STAGES = ['이송', '물기 제거', '촬영', '수납 복귀', '전송', 'PC 저장'];
-/**
- * 촬영 화면의 진행 띠에 그리는 단계 수.
- *
- * 장비는 여섯 단계를 돈다. 그중 앞의 넷이 스캐너가 실제로 움직이는 일이고,
- * 뒤의 둘(전송 · PC 저장)은 여기서 지켜볼 일이 아니다 — 전송 여부는 현황의
- * 「미전송」, 이력의 전송 칸, 상세의 회차별 배지가 각자 말한다.
- * 띠는 앞의 넷만 그리고, 남은 두 단계 동안은 배지의 퍼센트가 진행을 말한다.
- */
-export const STAGES_SHOWN = 4;
 
 export const SHORT_STAGES = ['준비', '구동', '완료 확인'];
 
@@ -115,7 +106,7 @@ export const SLOTS_PER_DEVICE = 24;
  * 이력 표 한 행 높이(rem). 화면 높이에 맞춰 페이지당 행 수를 계산하는 데 쓴다.
  * CSS 가 rem 이므로 실제 픽셀은 rootFontPx() 를 곱해서 구한다.
  */
-export const ROW_HEIGHT_REM = 2.75;
+export const ROW_HEIGHT_REM = 3;
 
 /** 촬영 이력 표 한 행 높이(rem). */
 export const RUN_ROW_HEIGHT_REM = 3.25;
