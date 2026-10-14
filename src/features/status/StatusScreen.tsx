@@ -17,7 +17,7 @@ interface Props {
 /**
  * 현황 (1.6 까지의 홈).
  *
- * v1.7 에서 홈을 「큰 버튼 + 요약」으로 바꾸면서, 칸 하나하나를 보던 이 화면은
+ * v2.0 에서 홈을 「큰 버튼 + 요약」으로 바꾸면서, 칸 하나하나를 보던 이 화면은
  * 메뉴의 「현황」으로 옮겼다. 내용은 1.6 그대로다 — 요약 한 줄과 스캐너 카드.
  */
 export function StatusScreen({state, openDetail, openRegister}: Props) {

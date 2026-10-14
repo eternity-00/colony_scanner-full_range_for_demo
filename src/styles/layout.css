@@ -1,4 +1,4 @@
-/* 앱 껍데기 · 헤더 · 메뉴 서랍 (v1.7 · 도안 3-1) */
+/* 앱 껍데기 · 헤더 · 메뉴 서랍 (v2.0 · 도안 3-1) */
 
 /* 픽셀 수를 요구하지 않는다. 좁으면 좁은 대로 담고, 분기는 rem 기준으로 App 이 data-w 로 준다. */
 .app{height:100vh;min-height:0;min-width:0;display:flex;flex-direction:column}

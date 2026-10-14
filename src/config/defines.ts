@@ -69,11 +69,12 @@ export const ADMIN_ACTION: Record<string, string> = {
 /**
  * 화면에 표시할 UI 버전.
  *
- * 브랜치를 소수점으로 센다 — 데모였던 v2 가 1.2, v3 이 1.3, … v7 이 1.7.
+ * 1.x 는 브랜치 feat/lcd-uiux-vN 을 1.N 으로 센다 — 데모였던 v2 가 1.2, … v6 이 1.6.
+ * 2차 피드백(2026-10-13) 반영부터 2.x 이고, 브랜치는 feat/lcd-uiux-v2.N 이다.
  * 마지막 자리는 파이에 올린 횟수다. 파이에 올릴 때마다 하나씩 올린다.
  * 파이에 무엇이 도는지 화면만 보고 알 수 있어야 해서 붙인 값이다.
  */
-export const APP_VERSION = 'v1.7.0';
+export const APP_VERSION = 'v2.0.0';
 
 /** 장비 오류 코드의 한글 이름. 사용자에게 "무엇이 고장났는지"를 말해주기 위한 것이다. */
 export const FAULT_LABEL: Record<string, string> = {
