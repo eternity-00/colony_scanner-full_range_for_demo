@@ -560,3 +560,7 @@
 /* 현황 「＋ 플레이트 등록」 — 조금 더 두툼하게(혜원님 10/14). */
 .st-reg{min-height:5.5rem;font-size:1.3125rem;font-weight:800}
 @media (max-height:700px){.st-reg{min-height:4rem;font-size:1.125rem}}
+/* 촬영 — 일시정지 · 재개(· 비상 정지) 버튼을 두툼하게(혜원님 10/14). */
+.cp-acts .p-btn{min-height:5.5rem;font-size:1.25rem;font-weight:800}
+.cp-acts .acti{width:1.5rem;height:1.5rem}
+@media (max-height:700px){.cp-acts .p-btn{min-height:4rem;font-size:1.0625rem}}
