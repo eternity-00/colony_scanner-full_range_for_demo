@@ -28,8 +28,6 @@ export function RegisterScreen({state, send, setTab, device = 1, slot: picked}: 
   const [slot, setSlot] = useState(() => (picked && free.includes(picked) ? picked : free[0] || 0));
   /** 「등록」을 눌러 확인을 기다리는 중. */
   const [ask, setAsk] = useState(false);
-  /** 방금 등록한 위치. 화면에 남겨 이어서 넣는 동안 무엇을 넣었는지 보이게 한다. */
-  const [last, setLast] = useState('');
   /** 「완료」를 누를 때까지 이어서 넣은 매수. */
   const [batch, setBatch] = useState(0);
   const [submitting, setSubmitting] = useState(false);
@@ -67,12 +65,10 @@ export function RegisterScreen({state, send, setTab, device = 1, slot: picked}: 
   const register = async () => {
     setAsk(false);
     setSubmitting(true);
-    const place = pos(slot);
     // 투입 시각은 서버가 찍는다. 화면은 무엇이 기록될지 미리 보여줄 뿐이다.
     const result = await send('register', deviceId, {slot});
     if (result) {
       setBatch(n => n + 1);
-      setLast(place);
     }
     setSubmitting(false);
   };
@@ -83,7 +79,6 @@ export function RegisterScreen({state, send, setTab, device = 1, slot: picked}: 
    */
   const finish = () => {
     setBatch(0);
-    setLast('');
     void send('registerDone', 0);
     setTab('overview');
   };
@@ -209,11 +204,6 @@ export function RegisterScreen({state, send, setTab, device = 1, slot: picked}: 
                 </b>
               </span>
             </div>
-            {batch > 0 && (
-              <p className="rg-batch">
-                {last} 등록 완료 · 이번에 {batch}매 · 다 넣었으면 「완료」를 누르세요
-              </p>
-            )}
           </section>
 
           <div className="rg-acts">
