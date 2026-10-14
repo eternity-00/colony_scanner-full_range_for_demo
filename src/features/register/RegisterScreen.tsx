@@ -147,11 +147,7 @@ export function RegisterScreen({state, send, setTab, device = 1, slot: picked}: 
           <div className="p-panel rg-where">
             <small>선택된 수납 위치</small>
             <b>{slot ? pos(slot) : '선택 불가'}</b>
-            <small>
-              {slot
-                ? `6-well 플레이트 1 매 · 남은 빈 슬롯 ${free.length}`
-                : '등록 가능한 빈 슬롯이 없습니다'}
-            </small>
+            {!slot && <small>등록 가능한 빈 슬롯이 없습니다</small>}
           </div>
 
           {/*
