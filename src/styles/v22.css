@@ -15,22 +15,22 @@
   --p-panel:#f4f6fb;--p-panel-bd:#dce1ec}
 :root,.app>main{background:var(--p-bg)}
 
-/* 헤더 — 남색 한 줄. 메뉴 칸만 한 단계 밝은 남색으로 남긴다(혜원님 10/15 「메뉴만 파란색」). */
+/* 헤더 — 메뉴 칸 · 칩까지 모두 한 가지 남색(혜원님 10/15 「헤더는 다 같은색으로」). 칩은 테두리로만 구분한다. */
 .app>header{background:var(--navy);border-bottom:0;color:#fff}
-.hd-brand{background:var(--blue)}
+.hd-brand{background:var(--navy)}
 .wm-home{color:#fff}
 .wm-home i{color:#f7cd4c}
 .wm-home svg{color:#f7cd4c}
 .app>header .sub{color:#fff;border-left-color:#4a5680}
 .app>header .sub em{color:#aabac7}
 .app>header .clock{color:#e8edf9}
-.hstat{background:#24315d;border-color:#46599a;color:#e8edf9}
+.hstat{background:var(--navy);border-color:#46599a;color:#e8edf9}
 .hstat b{color:#fff}
 .hstat .dot{background:#4ade80}
 .hstat.bad{background:#4a2020;border-color:#8a4a4a;color:#f8b4b4}
 .hstat.bad b{color:#f8b4b4}
 .hstat.bad .dot{background:#f8b4b4}
-.role-chip{background:#24315d;border-color:#46599a;color:#fff}
+.role-chip{background:var(--navy);border-color:#46599a;color:#fff}
 .role-chip i{background:#3a4f8f}
 .role-chip.admin i{background:#f79009}
 @media (hover:hover) and (pointer:fine){.role-chip:hover:not(:disabled){background:#2e3d6f}}
