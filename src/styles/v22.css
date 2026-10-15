@@ -2,20 +2,20 @@
  * v2.2 — 2.1 배치를 그대로 두고 색만 1.2(feat/lcd-uiux-v2) 무드로 되돌린다(혜원님 10/15).
  *
  *   헤더     흰 바탕 → 남색(#162350), 글자 흰색, 로고 노랑(#f7cd4c)
- *   주 버튼  #1f78c1 → 1.2 의 쨍한 파랑 #2a4bc7
+ *   주 버튼  #1f78c1 → 남색 계열 #1d3a8a (1.2 의 #2a4bc7 은 너무 튀어서 — 혜원님 10/15)
  *   바탕·선  1.2 의 푸른 회색(#eef1f7 · #dce1ec)
  *
  * 상태 색(배양 중 노랑 · 반출 대기 초록 · 문제 빨강)은 2.1 그대로 둔다.
  * 이 파일은 index.css 맨 끝 — v21.css 보다 뒤에 와야 이긴다.
  */
-:root{--blue:#2a4bc7;--blue7:#2a4bc7;--navy:#162350;--line:#dce1ec;
+:root{--blue:#1d3a8a;--blue7:#1d3a8a;--navy:#162350;--line:#dce1ec;
   --p-bg:#eef1f7;--p-bd:#dce1ec;--p-bd2:#e7ebf3;
   --p-tx:#101828;--p-tx2:#667085;--p-tx3:#98a2b3;
-  --p-pri-soft:#eef2fe;--p-pri-bd:#c3cee8;
+  --p-pri-soft:#eef1f8;--p-pri-bd:#c4cce0;
   --p-panel:#f4f6fb;--p-panel-bd:#dce1ec}
 :root,.app>main{background:var(--p-bg)}
 
-/* 헤더 — 남색 한 줄. 메뉴 칸만 한 단계 밝은 파랑으로 남긴다(혜원님 10/15 「메뉴만 파란색」). */
+/* 헤더 — 남색 한 줄. 메뉴 칸만 한 단계 밝은 남색으로 남긴다(혜원님 10/15 「메뉴만 파란색」). */
 .app>header{background:var(--navy);border-bottom:0;color:#fff}
 .hd-brand{background:var(--blue)}
 .wm-home{color:#fff}
@@ -31,14 +31,14 @@
 .hstat.bad b{color:#f8b4b4}
 .hstat.bad .dot{background:#f8b4b4}
 .role-chip{background:#24315d;border-color:#46599a;color:#fff}
-.role-chip i{background:#3b6fe0}
+.role-chip i{background:#3a4f8f}
 .role-chip.admin i{background:#f79009}
 @media (hover:hover) and (pointer:fine){.role-chip:hover:not(:disabled){background:#2e3d6f}}
 
 /* 주 버튼 그림자·진행 막대를 새 파랑에 맞춘다. */
-.p-bar{background:#dfe5f5}
+.p-bar{background:#e0e4ee}
 .rg-box.now{background:#f6f8fd}
-.hm-acts>.home-act{box-shadow:0 4px 0 #c3cee8,0 10px 22px #10182814}
-.hm-acts>.home-act.primary{box-shadow:0 4px 0 #1d3a8a,0 10px 22px #2a4bc733}
-.hm-acts>.home-act:active:not(:disabled){box-shadow:0 1px 0 #c3cee8}
-.hm-acts>.home-act.primary:active:not(:disabled){box-shadow:0 1px 0 #1d3a8a}
+.hm-acts>.home-act{box-shadow:0 4px 0 #c4cce0,0 10px 22px #10182814}
+.hm-acts>.home-act.primary{box-shadow:0 4px 0 #12235e,0 10px 22px #1d3a8a33}
+.hm-acts>.home-act:active:not(:disabled){box-shadow:0 1px 0 #c4cce0}
+.hm-acts>.home-act.primary:active:not(:disabled){box-shadow:0 1px 0 #12235e}
