@@ -2,13 +2,13 @@
  * v2.2 — 2.1 배치를 그대로 두고 색만 1.2(feat/lcd-uiux-v2) 무드로 되돌린다(혜원님 10/15).
  *
  *   헤더     흰 바탕 → 남색(#162350), 글자 흰색, 로고 노랑(#f7cd4c)
- *   주 버튼  #1f78c1 → 채도를 낮춘 남색 #384a75 (1.2 의 #2a4bc7 · #1d3a8a 는 튀어서 — 혜원님 10/15)
+ *   주 버튼  #1f78c1 → 파랑 쪽 남색 #2e4a8c (1.2 의 #2a4bc7 · #1d3a8a 는 튀고 #384a75 는 너무 죽어서 — 혜원님 10/15)
  *   바탕·선  1.2 의 푸른 회색(#eef1f7 · #dce1ec)
  *
  * 상태 색(배양 중 노랑 · 반출 대기 초록 · 문제 빨강)은 2.1 그대로 둔다.
  * 이 파일은 index.css 맨 끝 — v21.css 보다 뒤에 와야 이긴다.
  */
-:root{--blue:#384a75;--blue7:#384a75;--navy:#162350;--line:#dce1ec;
+:root{--blue:#2e4a8c;--blue7:#2e4a8c;--navy:#162350;--line:#dce1ec;
   --p-bg:#eef1f7;--p-bd:#dce1ec;--p-bd2:#e7ebf3;
   --p-tx:#101828;--p-tx2:#667085;--p-tx3:#98a2b3;
   --p-pri-soft:#eef1f8;--p-pri-bd:#c4cce0;
@@ -39,6 +39,6 @@
 .p-bar{background:#e0e4ee}
 .rg-box.now{background:#f6f8fd}
 .hm-acts>.home-act{box-shadow:0 4px 0 #c4cce0,0 10px 22px #10182814}
-.hm-acts>.home-act.primary{box-shadow:0 4px 0 #26324f,0 10px 22px #384a7526}
+.hm-acts>.home-act.primary{box-shadow:0 4px 0 #1f3361,0 10px 22px #2e4a8c2b}
 .hm-acts>.home-act:active:not(:disabled){box-shadow:0 1px 0 #c4cce0}
-.hm-acts>.home-act.primary:active:not(:disabled){box-shadow:0 1px 0 #26324f}
+.hm-acts>.home-act.primary:active:not(:disabled){box-shadow:0 1px 0 #1f3361}
