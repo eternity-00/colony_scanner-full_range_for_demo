@@ -1,5 +1,4 @@
 import {useEffect} from 'react';
-import websLogo from '../assets/webs_logo.png';
 import {APP_VERSION, tabsFor, type TabKey} from '../config/defines.ts';
 import {TabIcon} from '../shared/TabIcon.tsx';
 
@@ -65,9 +64,8 @@ export function MenuDrawer({open, tab, isAdmin, onSelect, onClose}: Props) {
             </button>
           ))}
         </div>
-        {/* 바닥 — 제조사 로고와 앱 버전. 파이에 무엇이 도는지 메뉴만 열어도 알 수 있다. */}
+        {/* 바닥 — 앱 버전. 파이에 무엇이 도는지 메뉴만 열어도 알 수 있다. 제조사 로고는 뺐다(10/22). */}
         <div className="drawer-foot">
-          <img src={websLogo} alt="WEBS" />
           <span>Colony Scanner {APP_VERSION}</span>
         </div>
       </nav>

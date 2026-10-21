@@ -43,15 +43,15 @@
 .hm-acts>.home-act:active:not(:disabled){box-shadow:0 1px 0 #c4cce0}
 .hm-acts>.home-act.primary:active:not(:disabled){box-shadow:0 1px 0 #1f3361}
 /* 홈 등록 · 반출 — E안(캔버스 「플레이트 등록 버튼안」): 진한 남색 판 대신 등록은 연한 남색 면,
-   반출은 흰 면. 둘 다 남색 2px 테두리, 그림자 없이 눌림은 바탕색으로. 아래 줄은 이름 기준 가운데.
+   반출은 흰 면(10/22 부터 등록도 흰 면). 둘 다 남색 2px 테두리, 그림자 없이 눌림은 바탕색으로. 아래 줄은 이름 기준 가운데.
    base.css 의 button:disabled 반투명은 글자를 너무 흐리게 해 여기서 끈다. */
-.hm-page .hm-acts>.home-act{background:#fff;border:2px solid #2e4a8c;box-shadow:none}
+/* 테두리는 진한 남색보다 한 톤 옅게(10/21) — 버튼 윤곽만 잡고 글자보다 앞에 나오지 않게. */
+.hm-page .hm-acts>.home-act{background:#fff;border:2px solid #8195c2;box-shadow:none}
 .hm-page .hm-acts>.home-act:active:not(:disabled){transform:none;box-shadow:none;background:#f3f5fa}
 .hm-page .hm-acts>.home-act>svg{color:#2e4a8c}
 /* 아래 줄(빈 슬롯 · 반출 대기)을 위 이름 기준으로 가운데에 맞춘다. */
 .hm-page .hm-acts>.home-act>span{align-items:center}
-.hm-page .hm-acts>.home-act.reg{background:#e8edf8}
-.hm-page .hm-acts>.home-act.reg:active:not(:disabled){background:#d7dff1}
+/* 등록도 흰 면으로(10/22) — 두 버튼은 아이콘 · 글자로만 갈린다. */
 .hm-page .hm-acts>.home-act.reg b{color:#1d2f5c}
 .hm-page .hm-acts>.home-act.reg small{color:#2e4a8c}
 .hm-page .hm-acts>.home-act.out b{color:var(--p-tx)}
