@@ -57,6 +57,12 @@
 .hm-page .hm-acts>.home-act.out b{color:var(--p-tx)}
 .hm-page .hm-acts>.home-act.out small{color:var(--p-tx2)}
 .hm-page .hm-acts>.home-act:disabled{opacity:1;background:#f2f4f7;border:1px solid #e1e5ea;box-shadow:none}
+/* 버튼답게(10/21): 그림자 대신 아래 테두리만 두껍게 — 누르면 얇아지며 그만큼 내려앉는다.
+   오른쪽 끝 「›」는 스캐너 줄의 「현황 보기 ›」처럼 누르면 넘어간다는 표시. */
+.hm-page .hm-acts>.home-act{position:relative;border-bottom-width:5px}
+.hm-page .hm-acts>.home-act:active:not(:disabled){transform:translateY(3px);border-bottom-width:2px}
+.hm-page .hm-acts>.home-act .ha-go{position:absolute;right:1.5rem;top:50%;width:2rem;height:2rem;margin-top:-1rem;color:#2e4a8c;stroke-width:2.4}
+.hm-page .hm-acts>.home-act:disabled .ha-go{display:none}
 .hm-page .hm-acts>.home-act:disabled>svg,.hm-page .hm-acts>.home-act:disabled b,.hm-page .hm-acts>.home-act:disabled small{color:#a2a9b2}
 /* 홈 스캐너 줄은 줄 전체가 「현황 보기」 버튼이다. 오른쪽 단추 모양은 갈 곳을 알려 주는 표시로 남긴다. */
 button.hm-bar{width:100%;color:inherit;font-weight:inherit;text-align:left;transition:background .06s}

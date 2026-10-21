@@ -61,6 +61,9 @@ export function OverviewScreen({state, openDetail, openRegister, onStatus}: Prop
             <b>플레이트 등록</b>
             <small>{free ? `빈 슬롯 ${free}칸` : '빈 슬롯 없음 · 반출 먼저'}</small>
           </span>
+          <svg className="ha-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M9 6l6 6-6 6" />
+          </svg>
         </button>
         <button className="home-act out" onClick={openRemove} disabled={!plates.length}>
           <ActIcon name="eject" />
@@ -68,6 +71,9 @@ export function OverviewScreen({state, openDetail, openRegister, onStatus}: Prop
             <b>플레이트 반출</b>
             <small>{ready ? `반출 대기 ${ready}매` : `배양 중 ${plates.length}매`}</small>
           </span>
+          <svg className="ha-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M9 6l6 6-6 6" />
+          </svg>
         </button>
       </div>
 
