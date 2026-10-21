@@ -10,7 +10,6 @@ import {ALERT_TAG, alertItems} from '../../utils/alerts.ts';
 import {elapsedLabel, hm, kdt} from '../../utils/datetime.ts';
 import {
   nextAt,
-  plateBad,
   platesFor,
   pos,
   totalRuns,
@@ -59,10 +58,12 @@ export function StatusScreen({
   const device = picked ? state.devices.find(x => x.id === picked.deviceId) : undefined;
 
   const plates = platesFor(state, d.id);
-  const need = totalRuns(state);
   const free = SLOTS_PER_DEVICE - plates.length;
-  const waiting = plates.filter(p => p.runs.length >= need).length;
-  const bad = plates.filter(plateBad).length;
+  // 홈과 같이 트레이 원 색으로 센다 — 한 판은 한 칸에만 들어가 넷의 합이 슬롯 수가 된다.
+  const states = plates.map(p => wellState(state, p, d));
+  const growing = states.filter(w => w === 'ok' || w === 'busy').length;
+  const waiting = states.filter(w => w === 'done').length;
+  const bad = states.filter(w => w === 'bad').length;
   const next = scannerNext(state, d);
   const alerts = alertItems(state, {
     onDevice,
@@ -99,11 +100,11 @@ export function StatusScreen({
             이미 말한다(혜원님 10/14). 진행은 촬영 화면에서 본다. */}
         {/* 홈 아랫줄과 같은 넷, 같은 색(혜원님 10/14). 미전송은 따로 세지 않고 문제 발생에 든다. */}
         <div className="p-card st-facts">
-          <span className={plates.length ? 'grow' : ''}>
+          <span className={growing ? 'grow' : ''}>
             <small>배양 중</small>
-            <b className={plates.length ? '' : 'zero'}>
-              {plates.length}
-              <em>/ {SLOTS_PER_DEVICE}</em>
+            <b className={growing ? '' : 'zero'}>
+              {growing}
+              <em>매</em>
             </b>
           </span>
           <span className={waiting ? 'ready' : ''}>

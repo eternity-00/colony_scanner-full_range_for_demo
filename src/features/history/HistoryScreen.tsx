@@ -60,6 +60,9 @@ export function HistoryScreen({state, openDetail, openPlateViewer}: Props) {
 
   const rows = state.plates
     .filter(p => {
+      // 스캐너 수를 줄이기 전(4대 시절) 데이터가 남아 있으면 없는 스캐너의 플레이트가
+      // 섞인다. 눌러도 상세가 빈 화면이라 목록에서 뺀다.
+      if (!state.devices.some(d => d.id === p.deviceId)) return false;
       if (applied.device && p.deviceId !== applied.device) return false;
       if (applied.days && p.registeredAt < Date.now() - applied.days * 86400000) return false;
       if (applied.transfer !== 'all' && (applied.transfer === 'pending') !== !!pending(p))

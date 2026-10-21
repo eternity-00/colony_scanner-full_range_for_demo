@@ -3,7 +3,7 @@ import {SLOTS_PER_DEVICE} from '../../config/defines.ts';
 import {ActIcon} from '../../shared/ActIcon.tsx';
 import {Badge} from '../../shared/Badge.tsx';
 import {scannerNext} from '../../shared/ScannerHead.tsx';
-import {active, plateBad, totalRuns} from '../../utils/plate.ts';
+import {active, totalRuns, wellState} from '../../utils/plate.ts';
 
 interface Props {
   state: AppState;
@@ -23,8 +23,9 @@ interface Props {
  *
  * 누르는 것(버튼 둘 · 현황 보기)과 읽는 것(정보 넷)을 꼴로 가른다 — 버튼은 꽉 찬 면 ·
  * 굵은 테두리와 깔린 그림자, 정보 칸은 그림자 없는 납작한 면.
- * 정보 칸 색은 트레이 원과 같은 뜻이다: 배양 중 = 노랑(Well 있음), 반출 대기 = 초록
- * (작업 완료), 문제 발생 = 빨강.
+ * 정보 칸 색은 트레이 원과 같은 뜻이다: 배양 중 = 노랑, 반출 대기 = 초록, 문제 발생 = 빨강.
+ * 세는 법도 트레이 원과 같다 — 한 칸은 한 곳에만 들어가서
+ * 넷을 더하면 슬롯 수(24)가 된다. 문제가 난 판은 다 찍었어도 반출 대기가 아니라 문제로 센다.
  *
  * 2차 피드백(상무님 요구): 홈을 단순하게, 등록 · 반출로 바로 들어가게.
  */
@@ -42,7 +43,10 @@ export function OverviewScreen({state, openDetail, openRegister, onStatus}: Prop
   const removeTarget = done[0] ?? [...plates].sort((a, b) => a.slot - b.slot)[0];
   const openRemove = () => removeTarget && openDetail(device.id, removeTarget.slot);
   const free = SLOTS_PER_DEVICE - plates.length;
-  const bad = plates.filter(plateBad).length;
+  const states = plates.map(p => wellState(state, p, device));
+  const growing = states.filter(w => w === 'ok' || w === 'busy').length;
+  const ready = states.filter(w => w === 'done').length;
+  const bad = states.filter(w => w === 'bad').length;
   const next = scannerNext(state, device);
   const capturing = device.job?.status === 'running' && device.job.type === 'capture';
 
@@ -61,7 +65,7 @@ export function OverviewScreen({state, openDetail, openRegister, onStatus}: Prop
           <ActIcon name="eject" />
           <span>
             <b>플레이트 반출</b>
-            <small>{done.length ? `반출 대기 ${done.length}매` : `배양 중 ${plates.length}매`}</small>
+            <small>{ready ? `반출 대기 ${ready}매` : `배양 중 ${plates.length}매`}</small>
           </span>
         </button>
       </div>
@@ -87,17 +91,17 @@ export function OverviewScreen({state, openDetail, openRegister, onStatus}: Prop
 
       {/* 정보 넷 — 읽는 칸. 0 이면 색을 빼고 숫자를 회색으로. */}
       <div className="hm-big">
-        <span className={plates.length ? 'grow' : 'calm'}>
+        <span className={growing ? 'grow' : 'calm'}>
           <small>배양 중</small>
           <b>
-            {plates.length}
-            <em>/ {SLOTS_PER_DEVICE} 매</em>
+            {growing}
+            <em>매</em>
           </b>
         </span>
-        <span className={done.length ? 'ready' : 'calm'}>
+        <span className={ready ? 'ready' : 'calm'}>
           <small>반출 대기</small>
           <b>
-            {done.length}
+            {ready}
             <em>매</em>
           </b>
         </span>

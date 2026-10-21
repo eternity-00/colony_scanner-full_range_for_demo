@@ -138,12 +138,12 @@ export const ADMIN_IDLE_LIMIT_SEC = 300;
 /** 자동 해제 경고를 띄우기 시작하는 무조작 시간(ms). */
 export const ADMIN_IDLE_WARN_MS = 270000;
 
-/** 트레이 셀 상태 범례. */
+/** 트레이 셀 상태 범례. 이름은 홈 · 현황의 정보 칸과 같게 쓴다. */
 export const WELL_LEGEND: readonly (readonly [WellState, string])[] = [
-  ['ok', 'Well 있음'],
-  ['empty', 'Well 없음'],
+  ['ok', '배양 중'],
+  ['empty', '빈 슬롯'],
   ['busy', '촬영 중'],
-  ['done', '작업 완료'],
+  ['done', '반출 대기'],
   ['bad', '문제 발생'],
 ];
 

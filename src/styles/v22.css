@@ -42,3 +42,5 @@
 .hm-acts>.home-act.primary{box-shadow:0 4px 0 #1f3361,0 10px 22px #2e4a8c2b}
 .hm-acts>.home-act:active:not(:disabled){box-shadow:0 1px 0 #c4cce0}
 .hm-acts>.home-act.primary:active:not(:disabled){box-shadow:0 1px 0 #1f3361}
+/* 위 그림자가 v21 의 비활성 규칙을 덮어 회색 판 밑에 남색 띠가 남았다. 못 누르는 버튼은 납작하게. */
+.hm-acts>.home-act:disabled,.hm-acts>.home-act.primary:disabled{background:#f2f4f7;border-color:#e1e5ea;box-shadow:none}
