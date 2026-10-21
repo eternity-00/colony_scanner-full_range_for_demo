@@ -42,30 +42,25 @@
 .hm-acts>.home-act.primary{box-shadow:0 4px 0 #1f3361,0 10px 22px #2e4a8c2b}
 .hm-acts>.home-act:active:not(:disabled){box-shadow:0 1px 0 #c4cce0}
 .hm-acts>.home-act.primary:active:not(:disabled){box-shadow:0 1px 0 #1f3361}
-/* 홈 등록 · 반출 — 흰 카드 + 색 아이콘 타일(캔버스 「플레이트 등록 버튼안」 S-2). 옅은 하늘회색(D-3)은
-   화면 바탕과 차이가 없어 묻혀서 흰색으로 돌렸다(10/21).
-   못 누를 때 판 전체가 회색이면 화면 절반이 죽어 보인다. 바탕은 거의 흰색, 타일만 회색.
+/* 홈 등록 · 반출 — E안(캔버스 「플레이트 등록 버튼안」): 진한 남색 판 대신 등록은 연한 남색 면,
+   반출은 흰 면. 둘 다 남색 2px 테두리, 그림자 없이 눌림은 바탕색으로. 아래 줄은 이름 기준 가운데.
    base.css 의 button:disabled 반투명은 글자를 너무 흐리게 해 여기서 끈다. */
-.hm-page .hm-acts>.home-act{flex-direction:column;gap:1.25rem;background:#fff;border:1px solid #b9c3d6;border-radius:1.125rem;box-shadow:none}
-/* 깔린 그림자를 뺐으니 눌림은 내려앉기 대신 바탕색으로 보인다. */
+.hm-page .hm-acts>.home-act{background:#fff;border:2px solid #2e4a8c;box-shadow:none}
 .hm-page .hm-acts>.home-act:active:not(:disabled){transform:none;box-shadow:none;background:#f3f5fa}
-.hm-page .hm-acts>.home-act .ha-tile{width:7rem;height:7rem;flex:none;border-radius:1.75rem;display:flex;flex-direction:row;align-items:center;justify-content:center;background:#2e4a8c;color:#fff}
-.hm-page .hm-acts>.home-act.out .ha-tile{background:#467d41}
-.hm-page .hm-acts>.home-act .ha-tile>svg{width:3.25rem;height:3.25rem;stroke-width:2.2}
-.hm-page .hm-acts>.home-act b{color:var(--p-tx)}
-.hm-page .hm-acts>.home-act small{padding:.375rem .875rem;border-radius:999px;background:#d9e1f2;color:#2e4a8c}
-.hm-page .hm-acts>.home-act.out small{background:#d3e9da;color:#2f6e3a}
-.hm-page .hm-acts>.home-act:disabled{opacity:1;background:#f6f7f9;border-color:#e1e5ea;box-shadow:none}
-.hm-page .hm-acts>.home-act:disabled .ha-tile{background:#dde1e7;color:#9aa2ad}
-.hm-page .hm-acts>.home-act:disabled b{color:#8a929c}
-.hm-page .hm-acts>.home-act:disabled small{background:#e7eaef;color:#6b7480}
-.app[data-w="sm"] .hm-page .hm-acts>.home-act .ha-tile{width:4.5rem;height:4.5rem;border-radius:1.25rem}
+.hm-page .hm-acts>.home-act>svg{color:#2e4a8c}
+/* 아래 줄(빈 슬롯 · 반출 대기)을 위 이름 기준으로 가운데에 맞춘다. */
+.hm-page .hm-acts>.home-act>span{align-items:center}
+.hm-page .hm-acts>.home-act.reg{background:#e8edf8}
+.hm-page .hm-acts>.home-act.reg:active:not(:disabled){background:#d7dff1}
+.hm-page .hm-acts>.home-act.reg b{color:#1d2f5c}
+.hm-page .hm-acts>.home-act.reg small{color:#2e4a8c}
+.hm-page .hm-acts>.home-act.out b{color:var(--p-tx)}
+.hm-page .hm-acts>.home-act.out small{color:var(--p-tx2)}
+.hm-page .hm-acts>.home-act:disabled{opacity:1;background:#f2f4f7;border:1px solid #e1e5ea;box-shadow:none}
+.hm-page .hm-acts>.home-act:disabled>svg,.hm-page .hm-acts>.home-act:disabled b,.hm-page .hm-acts>.home-act:disabled small{color:#a2a9b2}
 /* 홈 스캐너 줄은 줄 전체가 「현황 보기」 버튼이다. 오른쪽 단추 모양은 갈 곳을 알려 주는 표시로 남긴다. */
-button.hm-bar{width:100%;color:inherit;font-weight:inherit;text-align:left;transition:background .06s;
-  background:#d6dded;border-color:#bcc6dc}
-button.hm-bar:active{background:#c9d2e6}
-button.hm-bar .hm-next{color:#4a5568}
-button.hm-bar .hm-go{border-color:#bcc6dc;color:#2e4a8c}
+button.hm-bar{width:100%;color:inherit;font-weight:inherit;text-align:left;transition:background .06s}
+button.hm-bar:active{background:#f3f5fa}
 /* 홈 정보 넷: 0 인 칸은 판까지 회색으로 가라앉히되 테두리는 보이게, 빈 슬롯은 진한 회색 판. */
 .hm-big>span.calm{background:#e8ebf0;border-color:#c3cad5}
 .hm-big>span.calm small,.hm-big>span.calm b,.hm-big>span.calm b em{color:#a2a9b2}
