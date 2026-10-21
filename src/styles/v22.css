@@ -1,7 +1,7 @@
 /*
  * v2.2 — 2.1 배치를 그대로 두고 색만 1.2(feat/lcd-uiux-v2) 무드로 되돌린다(혜원님 10/15).
  *
- *   헤더     흰 바탕 → 남색(#162350), 글자 흰색, 로고 노랑(#f7cd4c)
+ *   헤더     흰 바탕 → 남색(#162350), 글자 흰색, 로고 흰색(노랑은 10/21 뺌)
  *   주 버튼  #1f78c1 → 파랑 쪽 남색 #2e4a8c (1.2 의 #2a4bc7 · #1d3a8a 는 튀고 #384a75 는 너무 죽어서 — 혜원님 10/15)
  *   바탕·선  1.2 의 푸른 회색(#eef1f7 · #dce1ec)
  *
@@ -19,8 +19,8 @@
 .app>header{background:var(--navy);border-bottom:0;color:#fff}
 .hd-brand{background:var(--navy)}
 .wm-home{color:#fff}
-.wm-home i{color:#f7cd4c}
-.wm-home svg{color:#f7cd4c}
+/* 로고 노랑은 뺐다 — 집 아이콘 · Scanner 도 흰색(10/21). */
+.wm-home i,.wm-home svg{color:#fff}
 .app>header .sub{color:#fff;border-left-color:#4a5680}
 .app>header .sub em{color:#aabac7}
 .app>header .clock{color:#e8edf9}
@@ -42,5 +42,48 @@
 .hm-acts>.home-act.primary{box-shadow:0 4px 0 #1f3361,0 10px 22px #2e4a8c2b}
 .hm-acts>.home-act:active:not(:disabled){box-shadow:0 1px 0 #c4cce0}
 .hm-acts>.home-act.primary:active:not(:disabled){box-shadow:0 1px 0 #1f3361}
-/* 위 그림자가 v21 의 비활성 규칙을 덮어 회색 판 밑에 남색 띠가 남았다. 못 누르는 버튼은 납작하게. */
-.hm-acts>.home-act:disabled,.hm-acts>.home-act.primary:disabled{background:#f2f4f7;border-color:#e1e5ea;box-shadow:none}
+/* 홈 등록 · 반출 — 흰 카드 + 색 아이콘 타일(캔버스 「플레이트 등록 버튼안」 S-2). 옅은 하늘회색(D-3)은
+   화면 바탕과 차이가 없어 묻혀서 흰색으로 돌렸다(10/21).
+   못 누를 때 판 전체가 회색이면 화면 절반이 죽어 보인다. 바탕은 거의 흰색, 타일만 회색.
+   base.css 의 button:disabled 반투명은 글자를 너무 흐리게 해 여기서 끈다. */
+.hm-page .hm-acts>.home-act{flex-direction:column;gap:1.25rem;background:#fff;border:1px solid #b9c3d6;border-radius:1.125rem;box-shadow:none}
+/* 깔린 그림자를 뺐으니 눌림은 내려앉기 대신 바탕색으로 보인다. */
+.hm-page .hm-acts>.home-act:active:not(:disabled){transform:none;box-shadow:none;background:#f3f5fa}
+.hm-page .hm-acts>.home-act .ha-tile{width:7rem;height:7rem;flex:none;border-radius:1.75rem;display:flex;flex-direction:row;align-items:center;justify-content:center;background:#2e4a8c;color:#fff}
+.hm-page .hm-acts>.home-act.out .ha-tile{background:#467d41}
+.hm-page .hm-acts>.home-act .ha-tile>svg{width:3.25rem;height:3.25rem;stroke-width:2.2}
+.hm-page .hm-acts>.home-act b{color:var(--p-tx)}
+.hm-page .hm-acts>.home-act small{padding:.375rem .875rem;border-radius:999px;background:#d9e1f2;color:#2e4a8c}
+.hm-page .hm-acts>.home-act.out small{background:#d3e9da;color:#2f6e3a}
+.hm-page .hm-acts>.home-act:disabled{opacity:1;background:#f6f7f9;border-color:#e1e5ea;box-shadow:none}
+.hm-page .hm-acts>.home-act:disabled .ha-tile{background:#dde1e7;color:#9aa2ad}
+.hm-page .hm-acts>.home-act:disabled b{color:#8a929c}
+.hm-page .hm-acts>.home-act:disabled small{background:#e7eaef;color:#6b7480}
+.app[data-w="sm"] .hm-page .hm-acts>.home-act .ha-tile{width:4.5rem;height:4.5rem;border-radius:1.25rem}
+/* 홈 스캐너 줄은 줄 전체가 「현황 보기」 버튼이다. 오른쪽 단추 모양은 갈 곳을 알려 주는 표시로 남긴다. */
+button.hm-bar{width:100%;color:inherit;font-weight:inherit;text-align:left;transition:background .06s;
+  background:#d6dded;border-color:#bcc6dc}
+button.hm-bar:active{background:#c9d2e6}
+button.hm-bar .hm-next{color:#4a5568}
+button.hm-bar .hm-go{border-color:#bcc6dc;color:#2e4a8c}
+/* 홈 정보 넷: 0 인 칸은 판까지 회색으로 가라앉히되 테두리는 보이게, 빈 슬롯은 진한 회색 판. */
+.hm-big>span.calm{background:#e8ebf0;border-color:#c3cad5}
+.hm-big>span.calm small,.hm-big>span.calm b,.hm-big>span.calm b em{color:#a2a9b2}
+/* 빈 슬롯은 남색 대신 회색(10/21). 0 인 칸보다 한 톤 진한 판에 진한 글자라 「값이 있는 회색」으로 읽힌다. */
+.hm-big>span.free{background:#dde0e5;border-color:#aab1bc}
+.hm-big>span.free small,.hm-big>span.free b em{color:#4b525e}
+.hm-big>span.free b{color:#2f3540}
+/* 연한 파스텔이 흐려 보여 홈 정보 칸 바탕을 반 톤씩 올린다(10/21). 다른 화면의 같은 색은 그대로. */
+.hm-big>span.grow{background:#fae8c2;border-color:#e2b45e}
+.hm-big>span.ready{background:#d3e9da;border-color:#92c4a2}
+.hm-big>span.bad{background:#f7dad7;border-color:#e8aaa3}
+/* 현황 정보 넷도 홈과 같은 색(10/21): 반 톤 올린 바탕, 0 이면 회색, 빈 슬롯은 진한 회색. */
+.st-facts>span.grow{background:#fae8c2}
+.st-facts>span.ready{background:#d3e9da}
+.st-facts>span.bad{background:#f7dad7}
+.st-facts>span.calm{background:#e8ebf0}
+.st-facts>span.calm small,.st-facts>span.calm b,.st-facts>span.calm b em{color:#a2a9b2}
+.st-facts>span.free{background:#dde0e5}
+.st-facts>span.free small,.st-facts>span.free b em{color:#4b525e}
+.st-facts>span.free b{color:#2f3540}
+.st-facts>span+span{border-left-color:#c3cad5}

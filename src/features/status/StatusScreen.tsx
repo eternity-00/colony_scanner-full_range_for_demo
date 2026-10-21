@@ -98,30 +98,31 @@ export function StatusScreen({
       <div className="st-side">
         {/* 「지금 촬영」 칸은 뺐다 — 촬영 중인지는 트레이의 파란 원과 왼쪽 위 배지가
             이미 말한다(혜원님 10/14). 진행은 촬영 화면에서 본다. */}
-        {/* 홈 아랫줄과 같은 넷, 같은 색(혜원님 10/14). 미전송은 따로 세지 않고 문제 발생에 든다. */}
+        {/* 홈 아랫줄과 같은 넷, 같은 색(혜원님 10/14 · 10/21). 0 이면 칸 전체를 회색으로 가라앉히고,
+            빈 슬롯은 회색 판. 미전송은 따로 세지 않고 문제 발생에 든다. */}
         <div className="p-card st-facts">
-          <span className={growing ? 'grow' : ''}>
+          <span className={growing ? 'grow' : 'calm'}>
             <small>배양 중</small>
             <b className={growing ? '' : 'zero'}>
               {growing}
               <em>매</em>
             </b>
           </span>
-          <span className={waiting ? 'ready' : ''}>
+          <span className={waiting ? 'ready' : 'calm'}>
             <small>반출 대기</small>
             <b className={waiting ? '' : 'zero'}>
               {waiting}
               <em>매</em>
             </b>
           </span>
-          <span>
+          <span className={free ? 'free' : 'calm'}>
             <small>빈 슬롯</small>
             <b className={free ? '' : 'zero'}>
               {free}
               <em>칸</em>
             </b>
           </span>
-          <span className={bad ? 'bad' : ''}>
+          <span className={bad ? 'bad' : 'calm'}>
             <small>문제 발생</small>
             <b className={bad ? '' : 'zero'}>
               {bad}

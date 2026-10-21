@@ -21,8 +21,10 @@ interface Props {
  * 디자인 캔버스 「홈 화면 배치안」에서 혜원님이 고른 꼴(10/14). 알람 목록은 홈에서 빼고
  * 메뉴의 현황에서 본다. 대신 「문제 발생」 칸이 손봐야 할 플레이트 수를 말한다.
  *
- * 누르는 것(버튼 둘 · 현황 보기)과 읽는 것(정보 넷)을 꼴로 가른다 — 버튼은 꽉 찬 면 ·
- * 굵은 테두리와 깔린 그림자, 정보 칸은 그림자 없는 납작한 면.
+ * 누르는 것(버튼 둘 · 스캐너 줄)과 읽는 것(정보 넷)을 꼴로 가른다 — 버튼은 테두리 있는
+ * 흰 카드에 색 아이콘 타일, 정보 칸은 그림자 없는 납작한 면. 진한 남색 판은 너무
+ * 무거워 뺐고, 흰 카드 사이 스캐너 줄에 회청색을 깐다(캔버스 「플레이트 등록 버튼안」 S-2, 10/21).
+ * 못 누르는 버튼은 회색 판이 아니라 거의 흰 바탕에 타일만 회색으로 둔다.
  * 정보 칸 색은 트레이 원과 같은 뜻이다: 배양 중 = 노랑, 반출 대기 = 초록, 문제 발생 = 빨강.
  * 세는 법도 트레이 원과 같다 — 한 칸은 한 곳에만 들어가서
  * 넷을 더하면 슬롯 수(24)가 된다. 문제가 난 판은 다 찍었어도 반출 대기가 아니라 문제로 센다.
@@ -54,24 +56,25 @@ export function OverviewScreen({state, openDetail, openRegister, onStatus}: Prop
     <div className="hm-page">
       {/* 등록 · 반출 — 홈에서 가장 큰 두 칸. */}
       <div className="hm-acts">
-        <button className="home-act primary" onClick={() => openRegister(device.id)} disabled={!free}>
-          <ActIcon name="plus" />
-          <span>
-            <b>플레이트 등록</b>
-            <small>{free ? `빈 슬롯 ${free}칸` : '빈 슬롯 없음'}</small>
+        <button className="home-act reg" onClick={() => openRegister(device.id)} disabled={!free}>
+          <span className="ha-tile">
+            <ActIcon name="plus" />
           </span>
+          <b>플레이트 등록</b>
+          <small>{free ? `빈 슬롯 ${free}칸` : '빈 슬롯 없음 · 반출 먼저'}</small>
         </button>
-        <button className="home-act" onClick={openRemove} disabled={!plates.length}>
-          <ActIcon name="eject" />
-          <span>
-            <b>플레이트 반출</b>
-            <small>{ready ? `반출 대기 ${ready}매` : `배양 중 ${plates.length}매`}</small>
+        <button className="home-act out" onClick={openRemove} disabled={!plates.length}>
+          <span className="ha-tile">
+            <ActIcon name="eject" />
           </span>
+          <b>플레이트 반출</b>
+          <small>{ready ? `반출 대기 ${ready}매` : `배양 중 ${plates.length}매`}</small>
         </button>
       </div>
 
-      {/* 스캐너 한 줄 — 이름 · 상태 · 다음 촬영, 오른쪽 끝에 현황으로 가는 버튼. */}
-      <div className="hm-bar">
+      {/* 스캐너 한 줄 — 이름 · 상태 · 다음 촬영, 오른쪽 끝에 「현황 보기」. 줄 전체가 현황으로
+          가는 버튼이다 — 오른쪽 작은 단추만 노리고 누르지 않아도 된다. */}
+      <button className="hm-bar" onClick={onStatus}>
         <b>{device.name}</b>
         <Badge type={next.badgeType}>{next.badge}</Badge>
         <span className="hm-next">
@@ -81,15 +84,15 @@ export function OverviewScreen({state, openDetail, openRegister, onStatus}: Prop
             {capturing ? '지금 촬영 중' : next.label}
           </b>
         </span>
-        <button className="hm-go" onClick={onStatus}>
+        <span className="hm-go">
           현황 보기
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M9 6l6 6-6 6" />
           </svg>
-        </button>
-      </div>
+        </span>
+      </button>
 
-      {/* 정보 넷 — 읽는 칸. 0 이면 색을 빼고 숫자를 회색으로. */}
+      {/* 정보 넷 — 읽는 칸. 0 이면 판까지 회색으로 가라앉힌다. 빈 슬롯은 회색 판. */}
       <div className="hm-big">
         <span className={growing ? 'grow' : 'calm'}>
           <small>배양 중</small>
@@ -105,7 +108,7 @@ export function OverviewScreen({state, openDetail, openRegister, onStatus}: Prop
             <em>매</em>
           </b>
         </span>
-        <span className={free ? '' : 'calm'}>
+        <span className={free ? 'free' : 'calm'}>
           <small>빈 슬롯</small>
           <b>
             {free}
