@@ -62,6 +62,13 @@
 .hm-page .hm-acts>.home-act{position:relative}
 .hm-page .hm-acts>.home-act .ha-go{position:absolute;right:1.5rem;top:50%;width:2rem;height:2rem;margin-top:-1rem;color:#2e4a8c;stroke-width:2.4}
 .hm-page .hm-acts>.home-act:disabled .ha-go{display:none}
+/* 버튼 글자를 한 단계 키운다(10/22): 이름 30 → 36px, 아래 줄 16 → 20px. 낮은 화면에서도 비율대로. */
+.hm-page .hm-acts>.home-act b{font-size:2.25rem}
+.hm-page .hm-acts>.home-act small{font-size:1.25rem}
+@media (max-height:700px){
+  .hm-page .hm-acts>.home-act b{font-size:1.75rem}
+  .hm-page .hm-acts>.home-act small{font-size:1.0625rem}
+}
 .hm-page .hm-acts>.home-act:disabled>svg,.hm-page .hm-acts>.home-act:disabled b,.hm-page .hm-acts>.home-act:disabled small{color:#a2a9b2}
 /* 홈 스캐너 줄은 줄 전체가 「현황 보기」 버튼이다. 오른쪽 단추 모양은 갈 곳을 알려 주는 표시로 남긴다. */
 button.hm-bar{width:100%;color:inherit;font-weight:inherit;text-align:left;transition:background .06s}
@@ -87,3 +94,8 @@ button.hm-bar:active{background:#f3f5fa}
 .st-facts>span.free small,.st-facts>span.free b em{color:#4b525e}
 .st-facts>span.free b{color:#2f3540}
 .st-facts>span+span{border-left-color:#c3cad5}
+/* 홈 정보 넷 글자를 한 단계 키운다(10/22): 이름 15 → 19px, 숫자 44 → 52px, 단위 18 → 20px. */
+.hm-big small{font-size:1.1875rem}
+.hm-big b{font-size:3.25rem}
+.hm-big b em{font-size:1.25rem}
+@media (max-height:700px){.hm-big small{font-size:1rem}.hm-big b{font-size:2.5rem}.hm-big b em{font-size:1.0625rem}}
