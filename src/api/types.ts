@@ -108,6 +108,8 @@ export interface Run {
   images?: (string | null)[] | null;
   transferred: boolean;
   error?: string | null;
+  /** 이 회차를 만든 촬영 명령의 requestId(촬영 화면이 끝난 작업과 짝을 맞출 때). */
+  requestId?: string;
   /** 실장비 촬영의 원본 정보(6-well 프레임, 모자이크, 정렬 결과). 가상 장비 회차에는 없다. */
   capture?: CaptureRecord | null;
 }

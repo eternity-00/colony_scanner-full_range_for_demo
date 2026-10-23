@@ -1,4 +1,4 @@
-import type {AppState} from '../../api/types.ts';
+import type {AppState, Plate, Run} from '../../api/types.ts';
 import {SHORT_STAGES, STAGES, type SendCommand} from '../../config/defines.ts';
 import {ActIcon} from '../../shared/ActIcon.tsx';
 import {scannerNext} from '../../shared/ScannerHead.tsx';
@@ -8,6 +8,8 @@ import {active, dueNow, nextAt, platesFor, pos, totalRuns} from '../../utils/pla
 interface Props {
   state: AppState;
   send: SendCommand;
+  /** 끝난 촬영의 결과를 Well 6장 뷰어로 연다. */
+  openViewer?: (plate: Plate, run: Run, wellIndex: number) => void;
 }
 
 /**
@@ -24,13 +26,19 @@ const JOB_NAME = {capture: '촬영', home: '원점 복귀', calibrate: '캘리�
  * 왼쪽: 카메라 영상과 촬영 단계(넷). 오른쪽: 이번 작업 진행 · 촬영 큐 · 버튼.
  * 스캐너가 한 대라 고르는 탭은 없다.
  */
-export function CaptureScreen({state, send}: Props) {
+export function CaptureScreen({state, send, openViewer}: Props) {
   const d = state.devices[0];
   if (!d) return null;
 
   const isAdmin = state.session.role === 'admin';
   const job = d.job && ['running', 'paused'].includes(d.job.status) ? d.job : null;
   const running = d.job?.status === 'running';
+  // 끝난 작업은 다음 작업이 시작될 때까지 남아 있다. 촬영이면 결과 영상을 그대로 보여준다 —
+  // 사용자는 「찍혔나」를 이 화면에서 확인한다(촬영 완료 직후 화면이 비는 문제, 2026-10-23).
+  const finished = !job && d.job && d.job.type === 'capture' && ['completed', 'failed'].includes(d.job.status) ? d.job : null;
+  const finishedPlate = finished?.plateId ? state.plates.find(p => p.id === finished.plateId) : undefined;
+  const finishedRun = finished && finishedPlate ? finishedPlate.runs.find(r => r.requestId === finished.requestId) ?? finishedPlate.runs.at(-1) : undefined;
+  const finishedImage = finished?.image || (finishedRun?.imageState === 'held' ? finishedRun.image : null);
   const capture = !job || job.type === 'capture';
   const stages = capture ? STAGES.slice(0, SHOWN) : SHORT_STAGES;
   const plates = platesFor(state, d.id);
@@ -47,6 +55,13 @@ export function CaptureScreen({state, send}: Props) {
           {/* 실장비(스캐너 1)는 6-well 모자이크가 만들어지는 대로 보여준다. 가상 장비는 영상이 없다. */}
           {job && capture && job.image ? (
             <img src={`/api/images/${job.image}`} alt="촬영 중인 플레이트" />
+          ) : finished && finishedImage ? (
+            <img src={`/api/images/${finishedImage}`} alt="방금 촬영한 플레이트" />
+          ) : finished ? (
+            <span className="cp-cam-idle">
+              <b>{finished.status === 'failed' ? '촬영 실패' : '촬영 완료'}</b>
+              <small>{finished.status === 'failed' ? finished.error || '장비 오류' : '표시할 영상이 없습니다 (가상 장비)'}</small>
+            </span>
           ) : (
             <span className="cp-cam-idle">
               <b>{job ? `${JOB_NAME[job.type]} ${job.status === 'paused' ? '일시정지' : '진행 중'}` : '촬영 대기'}</b>
@@ -67,7 +82,22 @@ export function CaptureScreen({state, send}: Props) {
             {running && <span className="p-tag bad">REC</span>}
             {job?.realCamera && <span className="p-tag mute">실장비</span>}
             {job?.plateGrid && <span className="p-tag mute">{job.plateGrid.label}</span>}
+            {finished && (
+              <span className={`p-tag ${finished.status === 'failed' ? 'bad' : 'good'}`}>
+                {finished.status === 'failed' ? '실패' : '완료'} · {hm(finished.finishedAt ?? finished.startedAt)}
+                {finishedPlate ? ` · ${pos(finishedPlate.slot)}` : ''}
+              </span>
+            )}
           </span>
+          {/* 끝난 촬영의 결과: Well 6장 뷰어로. 실장비는 원본 확대까지 이어진다. */}
+          {finished && finishedPlate && finishedRun && finishedRun.imageState === 'held' && openViewer && (
+            <button className="cp-result" onClick={() => openViewer(finishedPlate, finishedRun, 0)}>
+              촬영 결과 보기 · {finishedRun.n}회차
+              {finishedRun.capture?.alignment?.enabled
+                ? ` · 정렬 ${finishedRun.capture.alignment.alignedWells?.length ?? 0}/6`
+                : ''}
+            </button>
+          )}
           {/* 위치 칩 · 조명/히팅/카메라 줄은 뺐다 — 영상 위에 글자가 덮이지 않게(혜원님 10/14). */}
         </div>
 
@@ -77,13 +107,18 @@ export function CaptureScreen({state, send}: Props) {
           </div>
           <ol className="cp-steps">
             {stages.map((label, i) => {
-              const st = !job
+              const ref = job ?? finished;
+              const st = !ref
                 ? ''
-                : i < job.step
+                : ref.status === 'completed'
                   ? 'done'
-                  : i === job.step
-                    ? 'now'
-                    : '';
+                  : i < ref.step
+                    ? 'done'
+                    : i === ref.step
+                      ? ref.status === 'failed'
+                        ? 'fail'
+                        : 'now'
+                      : '';
               return (
                 <li key={label} className={st}>
                   <i />
