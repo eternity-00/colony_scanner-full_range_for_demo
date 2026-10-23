@@ -37,7 +37,7 @@ export const imagesOf=capture=>{
 };
 export class Controller extends EventEmitter {
  constructor({dataDir,stageMs=1600,tickMs=250,autoTick=true,adapter,profile=null,layout=null,autoRun=null,features=null}={}){
-  super();this.dataDir=dataDir;mkdirSync(join(dataDir,'images'),{recursive:true});this.stateFile=join(dataDir,'state.json');this.revision=0;this.adminPin=process.env.ADMIN_PIN||'0000';this.session={role:'analyst',failed:0,lockUntil:0,idleAt:null};this.holdUntil=0;this.maintenance=null;this.extras=null;this.envSince={};this.lastEnvSample=0;this.lastAlarmEval=0;
+  super();this.dataDir=dataDir;mkdirSync(join(dataDir,'images'),{recursive:true});this.stateFile=join(dataDir,'state.json');this.revision=0;this.adminPin=process.env.ADMIN_PIN||'0000';this.session={role:'analyst',failed:0,lockUntil:0,idleAt:null};this.holdUntil=0;this.maintenance=null;this.extras=null;this.envSince={};this.lastEnvSample=0;this.lastAlarmEval=0;this.startedAt=Date.now();
   this.profile=profile;this.layout={...DEFAULT_LAYOUT,...(profile?.layout||layout||{})};this.layout.slots=this.layout.tiers*this.layout.columns;
   this.features={triggers:process.env.COLONY_TRIGGERS==='1',simAlarm:process.env.COLONY_TRIGGERS==='1',demoPlates:false,...(profile?.features||{}),...(features||{})};
   if(existsSync(this.stateFile)){this.db=JSON.parse(readFileSync(this.stateFile,'utf8'));assert(this.db.version===1,'BAD_STATE','지원하지 않는 데이터 파일입니다.',500);}
@@ -106,7 +106,8 @@ export class Controller extends EventEmitter {
   const at=(id,slot)=>one?pos(slot):`${name(id)} · ${pos(slot)}`;
   for(const d of devices){
    const fault=!d.connected?FAULT_LABEL.DISCONNECTED:d.fault?(FAULT_LABEL[d.fault]||d.fault):d.doorOpen?FAULT_LABEL.DOOR_OPEN:null;
-   if(fault)put({key:`device:${d.id}`,kind:'device',level:'high',where:d.name,what:fault,deviceId:d.id});
+   // 기동 직후 카메라·MCB 확인이 끝나기 전의 「연결 끊김」은 알람으로 남기지 않는다(30초 유예).
+   if(fault&&!(fault===FAULT_LABEL.DISCONNECTED&&now-this.startedAt<30000))put({key:`device:${d.id}`,kind:'device',level:'high',where:d.name,what:fault,deviceId:d.id});
    for(const e of this.envProblem(d,now))put(e);
   }
   const total=this.totalRuns();
