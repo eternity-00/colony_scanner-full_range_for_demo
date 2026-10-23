@@ -14,7 +14,7 @@
 ```sh
 npm install && npm run build
 COLONY_PROFILE=virtual npm run system          # PC: 가상 엔진 + 콘솔 + LCD 서버 (http://127.0.0.1:8787)
-COLONY_PROFILE=testbed npm run system          # 파이(테스트베드): 스캐너 1 실장비
+COLONY_PROFILE=testbed npm run system          # 파이(테스트베드): 스캐너 1 실장비 (가상 엔진 없이 LCD 서버만)
 npm run admin                                  # 관리 툴 http://<파이>:8799
 ```
 

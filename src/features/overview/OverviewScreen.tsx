@@ -2,7 +2,10 @@ import type {AppState} from '../../api/types.ts';
 import {ActIcon} from '../../shared/ActIcon.tsx';
 import {Badge} from '../../shared/Badge.tsx';
 import {scannerNext} from '../../shared/ScannerHead.tsx';
-import {active, slotsPerDevice, totalRuns, wellState} from '../../utils/plate.ts';
+import {EnvCard} from '../../shared/EnvCard.tsx';
+import {ALERT_TAG, alertItems} from '../../utils/alerts.ts';
+import {hm} from '../../utils/datetime.ts';
+import {active, plateDone, slotsPerDevice, wellState} from '../../utils/plate.ts';
 
 interface Props {
   state: AppState;
@@ -29,13 +32,12 @@ interface Props {
  *
  * 2차 피드백(상무님 요구): 홈을 단순하게, 등록 · 반출로 바로 들어가게.
  */
-export function OverviewScreen({state, openDetail, openRegister, onStatus}: Props) {
+export function OverviewScreen({state, openDetail, openRegister, onStatus, onDevice, onNeedAdmin}: Props) {
   const device = state.devices[0];
   if (!device) return null;
 
   const plates = active(state).filter(p => p.deviceId === device.id);
-  const need = totalRuns(state);
-  const done = plates.filter(p => p.runs.length >= need).sort((a, b) => a.slot - b.slot);
+  const done = plates.filter(p => plateDone(state, p)).sort((a, b) => a.slot - b.slot);
   /*
    * 반출은 따로 탭이 없다. 상세에서 꺼낼 칸을 골라 둔 채로 연다 — 촬영을 다 마친
    * 판 중 첫 칸, 그런 판이 없으면 맨 앞 칸. 상세의 「플레이트 반출」이 확인을 받는다.
@@ -49,6 +51,10 @@ export function OverviewScreen({state, openDetail, openRegister, onStatus}: Prop
   const bad = states.filter(w => w === 'bad').length;
   const next = scannerNext(state, device);
   const capturing = device.job?.status === 'running' && device.job.type === 'capture';
+  // 홈 알람 줄 — 2차 피드백 5(홈에 현황 요약 + 알람) · M3 홈(알람 · 로그 표시) · 1차(반출 알림 최우선).
+  // 요약만 둔다: 처리할 건수와 최신 두 줄. 누르면 현황의 알람 목록으로.
+  const alerts = alertItems(state, {onDevice, onPlate: openDetail, onNeedAdmin}).filter(a => a.kind !== 'shot');
+  const logs = state.logs.slice(0, 2);
 
   return (
     <div className="hm-page">
@@ -74,6 +80,45 @@ export function OverviewScreen({state, openDetail, openRegister, onStatus}: Prop
             <path d="M9 6l6 6-6 6" />
           </svg>
         </button>
+      </div>
+
+      {/* 환경 · 알람 · 로그 요약 줄. 이슈 없을 때는 조용하고(10-12 원칙), 있을 때만 색이 든다. */}
+      <div className="hm-strip">
+        <EnvCard state={state} compact />
+        <button className={`hm-alerts ${alerts.length ? 'has' : ''}`} onClick={onStatus} aria-label="알람 목록 보기">
+          <small>
+            알람 <b>{alerts.length}</b>건
+          </small>
+          {alerts.length ? (
+            <ul>
+              {alerts.slice(0, 2).map(a => (
+                <li key={a.id}>
+                  <span className={`p-tag ${a.kind}`}>{ALERT_TAG[a.kind]}</span>
+                  <b>{a.where}</b>
+                  <span>{a.what}</span>
+                  <time>{hm(a.at)}</time>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <span className="hm-quiet">처리할 알람이 없습니다</span>
+          )}
+        </button>
+        <div className="hm-logs">
+          <small>최근 로그</small>
+          {logs.length ? (
+            <ul>
+              {logs.map(l => (
+                <li key={l.id} className={l.level.toLowerCase()}>
+                  <time>{hm(l.at)}</time>
+                  <span>{l.message}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <span className="hm-quiet">기록 없음</span>
+          )}
+        </div>
       </div>
 
       {/* 스캐너 한 줄 — 이름 · 상태 · 다음 촬영, 오른쪽 끝에 「현황 보기」. 줄 전체가 현황으로

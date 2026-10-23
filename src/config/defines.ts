@@ -63,7 +63,9 @@ export const ADMIN_ACTION: Record<string, string> = {
   autoRun: '자동 촬영 설정',
   calibrate: '캘리브레이션',
   routine: '검사 루틴 변경',
-  environment: '온도 · CO₂ 변경',
+  environment: '목표 온도 변경',
+  alarmSettings: '알림 규칙 변경',
+  plateResult: '판독 결과 입력',
   focusStop: '초점 조정 종료',
   settings: '촬영 방식 변경',
 };
@@ -126,11 +128,7 @@ export const MAX_INCUBATION_DAYS = 42;
  */
 export const ELAPSED_MIXED_AFTER_HOURS = 48;
 
-/**
- * 인큐베이터 온도가 목표에서 이만큼(℃) 벗어나면 "이상"으로 본다.
- * 피드백 2.2 의 "이상 시에만 노출" 판정에 쓴다.
- * 확인 필요 5번(정상 범위·알림 기준값·지속 시간)이 열려 있어 잠정값이다.
- */
+/** 온도 허용 편차의 기본값(℃). 실제 값은 서버 설정 state.settings.alarms.tempTolerance 를 쓴다. */
 export const TEMP_TOLERANCE_C = 1;
 
 /** 관리자 권한 자동 해제까지의 시간(초). server/controller.mjs 의 5분과 맞춰야 한다. */

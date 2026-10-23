@@ -7,7 +7,7 @@ export class DeviceError extends Error { constructor(code,message,status=409){su
 export class VirtualDeviceAdapter extends EventEmitter {
  constructor({stageMs=1600,config=[]}={}){
   super();this.stageMs=stageMs;
-  this.devices=Array.from({length:SCANNER_COUNT},(_,i)=>({id:i+1,name:`SCANNER ${i+1}`,connected:true,pcConnected:true,doorOpen:false,fault:null,failCamera:false,temperature:37,co2:5,targetTemperature:37,targetCo2:5,z:0,light:false,heater:false,job:null,...config[i],id:i+1,job:null,light:false,heater:false,z:0}));
+  this.devices=Array.from({length:SCANNER_COUNT},(_,i)=>({id:i+1,name:`SCANNER ${i+1}`,connected:true,pcConnected:true,doorOpen:false,fault:null,failCamera:false,temperature:37,humidity:85,targetTemperature:37,z:0,light:false,heater:false,job:null,...config[i],id:i+1,job:null,light:false,heater:false,z:0}));
  }
  snapshot(){return structuredClone(this.devices);}
  get(id){const d=this.devices.find(d=>d.id===id);if(!d)throw new DeviceError('INVALID_DEVICE','스캐너 번호는 1~4여야 합니다.',400);return d;}
@@ -35,10 +35,13 @@ export class VirtualDeviceAdapter extends EventEmitter {
   this.event('job.failed',d,{code,message,job:structuredClone(d.job)});
  }
  inject(id,patch,requestId){
-  const d=this.get(id),allowed=['connected','pcConnected','doorOpen','failCamera'];
+  const d=this.get(id),allowed=['connected','pcConnected','doorOpen','failCamera'],numeric=['temperature','humidity'];
   for(const key of allowed)if(key in patch){if(typeof patch[key]!=='boolean')throw new DeviceError('INVALID_VALUE',`${key} 값은 boolean이어야 합니다.`,400);}
+  // environment injection (tests / alarm trials): the value sticks until the next injection or holdEnvironment:false
+  for(const key of numeric)if(key in patch){if(!Number.isFinite(patch[key])&&patch[key]!==null)throw new DeviceError('INVALID_VALUE',`${key} 값은 숫자여야 합니다.`,400);d.holdEnvironment=patch[key]!==null;}
+  if('holdEnvironment' in patch){d.holdEnvironment=!!patch.holdEnvironment;delete patch.holdEnvironment;}
   if('fault' in patch&&!['Z_LIMIT','HEATER',null].includes(patch.fault))throw new DeviceError('INVALID_FAULT','지원하지 않는 오류입니다.',400);
-  if(!Object.keys(patch).length||Object.keys(patch).some(key=>![...allowed,'fault'].includes(key)))throw new DeviceError('INVALID_INPUT','지원하지 않는 가상 입력입니다.',400);
+  if(!Object.keys(patch).length||Object.keys(patch).some(key=>![...allowed,...numeric,'fault'].includes(key)))throw new DeviceError('INVALID_INPUT','지원하지 않는 가상 입력입니다.',400);
   Object.assign(d,patch);
   if(!d.connected)this.fail(d,'DISCONNECTED','장비 연결 끊김');
   else if(d.doorOpen)this.fail(d,'DOOR_OPEN','도어 인터록 작동');
@@ -48,8 +51,8 @@ export class VirtualDeviceAdapter extends EventEmitter {
  tick(ms){
   for(const d of this.devices){
    if(!d.connected)continue;
-   d.temperature=Math.round((d.temperature+(d.targetTemperature-d.temperature)*.07+Math.sin(Date.now()/8000+d.id)*.006)*100)/100;
-   d.co2=Math.round((d.co2+(d.targetCo2-d.co2)*.05)*100)/100;
+   if(!d.holdEnvironment)d.temperature=Math.round((d.temperature+(d.targetTemperature-d.temperature)*.07+Math.sin(Date.now()/8000+d.id)*.006)*100)/100;
+   if(!d.holdEnvironment)d.humidity=Math.round((d.humidity+(85-d.humidity)*.05+Math.sin(Date.now()/11000+d.id)*.05)*100)/100;
    const j=d.job;if(!j||j.status!=='running')continue;
    j.elapsed+=ms;const stages=j.type==='capture'?6:3;
    const step=Math.min(stages-1,Math.floor(j.elapsed/this.stageMs));

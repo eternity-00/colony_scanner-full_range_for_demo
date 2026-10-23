@@ -1,11 +1,12 @@
-import type {AppState} from '../api/types.ts';
-import {active, failedWells, faultLabel, pending, plateBad, pos, totalRuns} from './plate.ts';
+import type {Alarm, AlarmKind, AppState} from '../api/types.ts';
+import {active, faultLabel, pos} from './plate.ts';
 
-export type AlertKind = 'device' | 'plate' | 'done' | 'shot';
+export type AlertKind = AlarmKind | 'shot';
 
 /** 알람 줄 앞의 꼬리표. 'shot'(촬영 완료)만 손댈 일이 아닌 알림이다. */
 export const ALERT_TAG: Record<AlertKind, string> = {
   device: '오류',
+  env: '환경',
   plate: '주의',
   done: '반출',
   shot: '촬영',
@@ -20,13 +21,19 @@ const SHOT_NOTES = 5;
 export interface AlertItem {
   id: string;
   kind: AlertKind;
-  /** 어디서 난 일인지 — SCANNER 3 · 8단 1열 */
+  /** 어디서 난 일인지 — 3단 · SCANNER 1 */
   where: string;
   /** 무슨 일인지 */
   what: string;
-  /** 언제 난 일인지(ms). 목록은 이 값의 최신순이다. 장비 오류는 지금 걸려 있는 일이라 현재 시각. */
+  /** 언제 난 일인지(ms). 목록은 이 값의 최신순이다. */
   at: number;
+  /** 사용자가 「확인」을 눌렀는지(서버 알람만). */
+  acked?: boolean;
+  /** 반출 사유(반출 알람만) — 기간 만료 / 조기 양성. */
+  reason?: 'expired' | 'positive';
   go?: () => void;
+  /** 서버 알람이면 확인 처리할 수 있다. */
+  ack?: () => void;
 }
 
 interface Go {
@@ -36,79 +43,72 @@ interface Go {
   onPlate: (deviceId: number, slot: number) => void;
   /** 분석자가 장비 오류 줄을 눌렀을 때 — 할 수 없는 일이라고 알린다. */
   onNeedAdmin: (where: string, what: string) => void;
+  /** 환경 알람을 눌렀을 때 — 온도·습도 추이를 연다. */
+  onEnv?: () => void;
+  /** 알람 확인(alarm.ack). */
+  onAck?: (id: string) => void;
 }
 
+/** 지금 걸려 있는 서버 알람. */
+export const activeAlarms = (state: AppState): Alarm[] => (state.alarms ?? []).filter(a => !a.clearedAt);
+
+/** 해제된 알람 이력(최신순). */
+export const alarmHistory = (state: AppState): Alarm[] => (state.alarms ?? []).filter(a => !!a.clearedAt);
+
 /**
- * 지금 손대야 하는 일 목록. 홈 화면의 알람 칸이 쓴다.
- *
- * 세 가지를 센다 — 장비 오류 · 손봐야 하는 플레이트 · 반출을 기다리는 플레이트.
- * 그 아래에 최근 촬영 완료를 알림으로 붙인다(한 주기 안, 최근 것부터 다섯 줄 — 혜원님 10/14).
- * 줄마다 갈 곳이 다르다. 플레이트는 상세로, 장비 오류는 관리자면 장비 화면으로,
- * 분석자면 왜 못 고치는지를 알리는 팝업으로 간다.
+ * 홈·현황의 알람 목록. 서버가 만든 알람 객체(장비 오류 · 환경 · 플레이트 · 반출)를 그대로 쓰고,
+ * 그 아래에 최근 촬영 완료 알림을 붙인다(한 주기 안, 최근 것부터 다섯 줄).
+ * 서버 알람은 발생·확인·해제가 기록되므로 화면에서 다시 계산하지 않는다(1차 피드백 3.4).
  */
-export function alertItems(state: AppState, {onDevice, onPlate, onNeedAdmin}: Go): AlertItem[] {
+export function alertItems(state: AppState, {onDevice, onPlate, onNeedAdmin, onEnv, onAck}: Go): AlertItem[] {
   const isAdmin = state.session.role === 'admin';
-  // 스캐너가 한 대면 이름은 늘 같다 — 위치만 적는다.
   const one = state.devices.length === 1;
   const name = (id: number) => state.devices.find(d => d.id === id)?.name ?? `SCANNER ${id}`;
   const at = (id: number, slot: number) => (one ? pos(slot) : `${name(id)} · ${pos(slot)}`);
-  const need = totalRuns(state);
-  const plates = active(state);
+  const plateOf = (id?: string) => state.plates.find(p => p.id === id);
 
-  // 시간순(최신이 위) — 혜원님 10/14. 꼬리표가 무슨 일인지를 가른다.
-  return [
-    ...state.devices
-      .filter(d => faultLabel(d))
-      .map<AlertItem>(d => ({
-        id: `d${d.id}`,
-        kind: 'device',
-        where: d.name,
-        what: faultLabel(d) as string,
-        at: state.serverTime,
-        // 관리자는 고치러 가고, 분석자는 왜 못 고치는지를 듣는다.
-        go: isAdmin ? onDevice : () => onNeedAdmin(d.name, faultLabel(d) as string),
-      })),
-    ...plates.filter(plateBad).map<AlertItem>(p => ({
-      id: `b${p.id}`,
-      kind: 'plate',
+  const server = activeAlarms(state).map<AlertItem>(a => {
+    const p = plateOf(a.plateId);
+    const d = state.devices.find(x => x.id === a.deviceId);
+    const go =
+      a.kind === 'device'
+        ? isAdmin
+          ? onDevice
+          : () => onNeedAdmin(a.where, a.what || (d ? (faultLabel(d) ?? '') : ''))
+        : a.kind === 'env'
+          ? onEnv
+          : p
+            ? () => onPlate(p.deviceId, p.slot)
+            : undefined;
+    return {
+      id: a.id,
+      kind: a.kind,
+      where: a.where,
+      what: a.what,
+      at: a.at,
+      acked: !!a.ackAt,
+      reason: a.reason,
+      go,
+      ack: onAck ? () => onAck(a.id) : undefined,
+    };
+  });
+
+  const shots = active(state)
+    .flatMap(p =>
+      p.runs
+        .filter(r => r.imageState !== 'failed' && state.serverTime - r.at < state.routine.cycleHours * 3600000)
+        .map(r => ({p, r})),
+    )
+    .sort((a, b) => b.r.at - a.r.at)
+    .slice(0, SHOT_NOTES)
+    .map<AlertItem>(({p, r}) => ({
+      id: `s${p.id}-${r.n}`,
+      kind: 'shot',
       where: at(p.deviceId, p.slot),
-      what: p.runs.at(-1)?.imageState === 'failed'
-        ? '촬영 실패'
-        : failedWells(p.runs.at(-1)!).length
-          ? `Well ${failedWells(p.runs.at(-1)!).join('·')} 촬영 실패`
-          : `미전송 ${pending(p)}건`,
-      at: p.runs.at(-1)?.at ?? p.registeredAt,
+      what: `${r.n}회차 촬영 완료`,
+      at: r.at,
       go: () => onPlate(p.deviceId, p.slot),
-    })),
-    ...plates
-      .filter(p => p.runs.length >= need)
-      .map<AlertItem>(p => ({
-        id: `w${p.id}`,
-        kind: 'done',
-        where: at(p.deviceId, p.slot),
-        what: `촬영 완료 ${p.runs.length}/${need} · 반출 대기`,
-        at: p.runs.at(-1)?.at ?? p.registeredAt,
-        go: () => onPlate(p.deviceId, p.slot),
-      })),
-    ...plates
-      .flatMap(p =>
-        p.runs
-          .filter(
-            r =>
-              r.imageState !== 'failed' &&
-              state.serverTime - r.at < state.routine.cycleHours * 3600000,
-          )
-          .map(r => ({p, r})),
-      )
-      .sort((a, b) => b.r.at - a.r.at)
-      .slice(0, SHOT_NOTES)
-      .map<AlertItem>(({p, r}) => ({
-        id: `s${p.id}-${r.n}`,
-        kind: 'shot',
-        where: at(p.deviceId, p.slot),
-        what: `${r.n}회차 촬영 완료`,
-        at: r.at,
-        go: () => onPlate(p.deviceId, p.slot),
-      })),
-  ].sort((a, b) => b.at - a.at);
+    }));
+
+  return [...server, ...shots].sort((a, b) => b.at - a.at);
 }

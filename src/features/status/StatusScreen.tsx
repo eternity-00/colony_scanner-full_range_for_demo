@@ -6,7 +6,9 @@ import {WellLegend} from '../../shared/Legend.tsx';
 import {Modal} from '../../shared/Modal.tsx';
 import {scannerNext} from '../../shared/ScannerHead.tsx';
 import {Tray} from '../../shared/Tray.tsx';
-import {ALERT_TAG, alertItems} from '../../utils/alerts.ts';
+import {ALERT_TAG, alarmHistory, alertItems} from '../../utils/alerts.ts';
+import type {SendCommand} from '../../config/defines.ts';
+import {EnvCard} from '../../shared/EnvCard.tsx';
 import {elapsedLabel, hm, kdt} from '../../utils/datetime.ts';
 import {
   nextAt,
@@ -23,6 +25,7 @@ interface Props {
   openRegister: (deviceId: number, slot?: number) => void;
   onDevice: () => void;
   onNeedAdmin: (where: string, what: string) => void;
+  send: SendCommand;
 }
 
 
@@ -39,7 +42,9 @@ export function StatusScreen({
   openRegister,
   onDevice,
   onNeedAdmin,
+  send,
 }: Props) {
+  const [history, setHistory] = useState(false);
   const [picked, setPicked] = useState<{deviceId: number; slot: number} | null>(null);
   const [emptyPick, setEmptyPick] = useState<{deviceId: number; slot: number} | null>(null);
 
@@ -70,7 +75,10 @@ export function StatusScreen({
     onDevice,
     onPlate: (deviceId, slot) => openDetail(deviceId, slot),
     onNeedAdmin,
+    onAck: id => void send('alarm.ack', 0, {id}),
   });
+  const past = alarmHistory(state).slice(0, 30);
+  const unacked = alerts.filter(a => a.ack && !a.acked).length;
 
   return (
     <div className="st-page">
@@ -132,21 +140,56 @@ export function StatusScreen({
           </span>
         </div>
 
+        <EnvCard state={state} compact />
+
         <section className="p-card st-alerts">
           <div className="p-card-head">
-            <h3>알람</h3>
+            <h3>{history ? '지난 알람' : '알람'}</h3>
+            {!history && unacked > 0 && (
+              <button className="st-ackall" onClick={() => void send('alarm.ack', 0, {})}>
+                모두 확인 ({unacked})
+              </button>
+            )}
+            <button className="st-hist" onClick={() => setHistory(h => !h)}>
+              {history ? '현재 알람' : `지난 알람 ${past.length}`}
+            </button>
           </div>
-          {/* 시간순 한 줄 목록(최신이 위) — 꼬리표가 무슨 일인지, 오른쪽 끝이 언제인지. */}
-          {alerts.length ? (
+          {/* 시간순 한 줄 목록(최신이 위) — 꼬리표가 무슨 일인지, 오른쪽 끝이 언제인지.
+              서버 알람은 「확인」을 남길 수 있고(ackAt), 해결돼야 목록에서 빠진다. */}
+          {history ? (
+            past.length ? (
+              <ul className="st-list hist">
+                {past.map(a => (
+                  <li key={a.id}>
+                    <div className={a.kind}>
+                      <span className={`p-tag ${a.kind}`}>{ALERT_TAG[a.kind]}</span>
+                      <b>{a.where}</b>
+                      <small>{a.what}</small>
+                      <time>
+                        {hm(a.at)} ~ {a.clearedAt ? hm(a.clearedAt) : ''}
+                      </time>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="st-clear">지난 알람이 없습니다</p>
+            )
+          ) : alerts.length ? (
             <ul className="st-list">
               {alerts.map(a => (
-                <li key={a.id}>
+                <li key={a.id} className={a.acked ? 'acked' : ''}>
                   <button className={a.kind} onClick={a.go}>
                     <span className={`p-tag ${a.kind}`}>{ALERT_TAG[a.kind]}</span>
                     <b>{a.where}</b>
                     <small>{a.what}</small>
                     <time>{a.kind === 'device' ? '지금' : hm(a.at)}</time>
                   </button>
+                  {a.ack && !a.acked && (
+                    <button className="st-ack" onClick={a.ack} aria-label="알람 확인">
+                      확인
+                    </button>
+                  )}
                 </li>
               ))}
             </ul>

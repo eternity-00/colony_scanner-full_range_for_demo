@@ -79,7 +79,7 @@ export class RealCameraAdapter extends EventEmitter {
   return state;
  });}
  get(id){const d=this.snapshot().find(d=>d.id===id);if(!d)throw new DeviceError('INVALID_DEVICE','스캐너 번호를 확인하세요.',400);return d;}
- sync(){const source=this.base.get(1),d=this.sim.get(1);for(const key of ['connected','pcConnected','doorOpen','temperature','co2','targetTemperature','targetCo2'])d[key]=source[key];return d;}
+ sync(){const source=this.base.get(1),d=this.sim.get(1);for(const key of ['connected','pcConnected','doorOpen','temperature','humidity','targetTemperature'])d[key]=source[key];return d;}
  async command(id,type,args={},requestId){
   if(id!==1)return this.base.command(id,type,args,requestId);
   const current=this.get(1),busy=current.job&&['running','paused'].includes(current.job.status);

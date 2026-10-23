@@ -36,7 +36,7 @@ const NAV: readonly (readonly [SectionKey, string, boolean])[] = [
   ['login', '로그인 정보', false],
   ['routine', '검사 루틴', false],
   ['alignment', '카메라 정렬 · 초점', false],
-  ['environment', '온도 · CO₂', true],
+  ['environment', '온도 · 습도', true],
   ['network', '유선 통신', false],
   ['backup', '로그 · 백업', false],
   ['info', '장비 정보', false],
@@ -96,10 +96,8 @@ export function SettingsScreen({state, send, operator, setOperator, onRole,
   /** 키패드를 열어 둔 항목. null 이면 닫혀 있다. */
   const [pad, setPad] = useState<RoutineField | null>(null);
   const [askSave, setAskSave] = useState(false);
-  const [env, setEnv] = useState({
-    temperature: state.devices[0]?.targetTemperature || 37,
-    co2: state.devices[0]?.targetCo2 || 5,
-  });
+  const [env, setEnv] = useState({temperature: state.devices[0]?.targetTemperature || 37});
+  const [alarmDraft, setAlarmDraft] = useState({...state.settings.alarms});
 
   /** 범위를 벗어나지 않게 step 만큼 옮긴다. */
   const bump = (f: RoutineField, by: number) =>
@@ -184,25 +182,25 @@ export function SettingsScreen({state, send, operator, setOperator, onRole,
                 <span className="sg-step">
                   <button
                     onClick={() => bump(f, -f.step)}
-                    disabled={routine[f.key] <= f.min}
+                    disabled={routine[f.key] <= f.min || (f.key === 'days' && !isAdmin)}
                     aria-label={`${f.label} 줄이기`}
                   >
                     −
                   </button>
                   {/* 값을 누르면 키패드가 열린다. */}
-                  <button className="sg-val" onClick={() => setPad(f)}>
+                  <button className="sg-val" disabled={f.key === 'days' && !isAdmin} onClick={() => setPad(f)}>
                     <b>{routine[f.key]}</b>
                     <i>{f.unit}</i>
                   </button>
                   <button
                     onClick={() => bump(f, f.step)}
-                    disabled={routine[f.key] >= f.max}
+                    disabled={routine[f.key] >= f.max || (f.key === 'days' && !isAdmin)}
                     aria-label={`${f.label} 늘리기`}
                   >
                     ＋
                   </button>
                 </span>
-                <em>{f.desc}</em>
+                <em>{f.key === 'days' && !isAdmin ? `${f.desc} · 변경은 관리자만` : f.desc}</em>
               </div>
             ))}
           </div>
@@ -260,45 +258,84 @@ export function SettingsScreen({state, send, operator, setOperator, onRole,
     ),
 
     environment: (
-      <section className="card stack">
-        <h2>온도 · CO₂</h2>
-        <div className="fields">
-          <label className="field">
-            <span className="fl">
-              목표 온도<em>허용 범위 4 ~ 55</em>
-            </span>
-            <span className="fi">
-              <input
-                type="number"
-                min="4"
-                max="55"
-                step="0.1"
-                value={env.temperature}
-                onChange={e => setEnv({...env, temperature: Number(e.target.value)})}
-              />
-              <i>℃</i>
-            </span>
-          </label>
-          <label className="field">
-            <span className="fl">
-              목표 CO₂<em>허용 범위 0 ~ 20</em>
-            </span>
-            <span className="fi">
-              <input
-                type="number"
-                min="0"
-                max="20"
-                step="0.1"
-                value={env.co2}
-                onChange={e => setEnv({...env, co2: Number(e.target.value)})}
-              />
-              <i>%</i>
-            </span>
-          </label>
+      <section className="env-settings">
+        <div className="p-card sg-block">
+          <div className="p-card-head">
+            <h2>온도 · 습도</h2>
+            <p>목표 온도와 이상 알람 규칙 · 관리자 전용</p>
+          </div>
+          <div className="fields">
+            <label className="field">
+              <span className="fl">
+                목표 온도<em>허용 범위 4 ~ 55 · 히터가 맞추는 값</em>
+              </span>
+              <span className="fi">
+                <input
+                  type="number"
+                  min="4"
+                  max="55"
+                  step="0.1"
+                  value={env.temperature}
+                  onChange={e => setEnv({...env, temperature: Number(e.target.value)})}
+                />
+                <i>℃</i>
+              </span>
+            </label>
+            <div className="field">
+              <span className="fl">
+                현재 값<em>습도는 자연 증발식이라 목표값 없이 범위만 감시합니다</em>
+              </span>
+              <span className="fv">
+                {state.devices[0]?.temperature === null || state.devices[0]?.temperature === undefined
+                  ? '온도 측정 없음'
+                  : `${state.devices[0].temperature.toFixed(1)}℃`}
+                {' · '}
+                {state.devices[0]?.humidity === null || state.devices[0]?.humidity === undefined
+                  ? '습도 측정 없음'
+                  : `${state.devices[0].humidity.toFixed(0)}%`}
+              </span>
+            </div>
+          </div>
+          <button className="primary" onClick={() => send('environment', 0, {temperature: env.temperature})}>
+            목표 온도 적용
+          </button>
         </div>
-        <button className="primary" onClick={() => send('environment', 0, {...env})}>
-          전체 장비 적용
-        </button>
+
+        <div className="p-card sg-block">
+          <div className="p-card-head">
+            <h2>이상 알람 규칙</h2>
+            <p>허용 범위를 벗어난 상태가 아래 시간 이상 이어지면 알람 · 장비 화면과 홈에 표시</p>
+          </div>
+          <div className="fields">
+            {(
+              [
+                ['tempTolerance', '온도 허용 편차', '℃', 0.1, 10, 0.1],
+                ['tempMinutes', '온도 이상 지속 시간', '분', 0, 120, 1],
+                ['humidityMin', '습도 하한', '%', 0, 100, 1],
+                ['humidityMax', '습도 상한', '%', 0, 100, 1],
+                ['humidityMinutes', '습도 이상 지속 시간', '분', 0, 120, 1],
+              ] as const
+            ).map(([key, label, unit, min, max, step]) => (
+              <label className="field" key={key}>
+                <span className="fl">{label}</span>
+                <span className="fi">
+                  <input
+                    type="number"
+                    min={min}
+                    max={max}
+                    step={step}
+                    value={alarmDraft[key]}
+                    onChange={e => setAlarmDraft({...alarmDraft, [key]: Number(e.target.value)})}
+                  />
+                  <i>{unit}</i>
+                </span>
+              </label>
+            ))}
+          </div>
+          <button className="primary" onClick={() => send('alarmSettings', 0, {...alarmDraft})}>
+            알림 규칙 저장
+          </button>
+        </div>
       </section>
     ),
 

@@ -16,7 +16,7 @@ const server=createServer(async(req,res)=>{
   if(req.method==='GET'&&url.pathname==='/api/state')return json(res,200,{time:Date.now(),devices:adapter.snapshot(),io:structuredClone(io)});
   if(req.method==='POST'&&url.pathname==='/api/device/command'){const x=await body(req);record('TX',x.type,x.id,x.requestId,x.args);adapter.command(x.id,x.type,x.args,x.requestId);record('RX','ACK',x.id,x.requestId,{accepted:true});return json(res,202,{accepted:true});}
   if(req.method==='POST'&&url.pathname==='/api/device/input'){const x=await body(req);record('TX','sim.input',x.id,x.requestId,x.patch);adapter.inject(x.id,x.patch,x.requestId);record('RX','ACK',x.id,x.requestId,{accepted:true});return json(res,202,{accepted:true});}
-  if(req.method==='POST'&&url.pathname==='/api/environment'){const x=await body(req);record('TX','environment',0,x.requestId,{temperature:x.temperature,co2:x.co2});for(const d of adapter.devices){d.targetTemperature=x.temperature;d.targetCo2=x.co2;}record('RX','ACK',0,x.requestId,{accepted:true});return json(res,202,{accepted:true});}
+  if(req.method==='POST'&&url.pathname==='/api/environment'){const x=await body(req);record('TX','environment',0,x.requestId,{temperature:x.temperature});for(const d of adapter.devices){d.targetTemperature=x.temperature;}record('RX','ACK',0,x.requestId,{accepted:true});return json(res,202,{accepted:true});}
   return json(res,404,{code:'NOT_FOUND',message:'지원하지 않는 엔진 경로입니다.'});
  }catch(error){json(res,error.status||500,{code:error.code||'ENGINE_ERROR',message:error.message||'엔진 오류'});}
 });

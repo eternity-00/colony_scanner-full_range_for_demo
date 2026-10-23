@@ -58,8 +58,8 @@ export function DeviceScreen({state, send}: Props) {
     ],
     [
       '히팅',
-      d.fault === 'HEATER' ? 'bad' : tempAbnormal(d) ? 'warn' : 'ok',
-      d.fault === 'HEATER' ? '오류' : `${d.temperature.toFixed(1)}℃`,
+      d.fault === 'HEATER' ? 'bad' : tempAbnormal(d, state.settings.alarms) ? 'warn' : 'ok',
+      d.fault === 'HEATER' ? '오류' : d.temperature === null ? '측정 없음' : `${d.temperature.toFixed(1)}℃`,
     ],
     ['조명', 'ok', d.light ? 'ON' : '정상'],
     ['도어 · 전원', d.doorOpen ? 'warn' : 'ok', d.doorOpen ? '도어 열림' : 'DC 24V'],

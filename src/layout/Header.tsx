@@ -1,7 +1,7 @@
 import type {AppState} from '../api/types.ts';
 import {TABS, type TabKey} from '../config/defines.ts';
 import {TabIcon} from '../shared/TabIcon.tsx';
-import {tempAbnormal} from '../utils/plate.ts';
+import {envAlarmActive} from '../utils/plate.ts';
 
 interface Props {
   state: AppState;
@@ -34,12 +34,9 @@ interface Props {
 export function Header({state, tab, clock, day, operator, onMenu, onAccount, onHome}: Props) {
   const devices = state.devices;
   const linked = devices.filter(d => d.connected).length;
-  const abnormal = devices.some(tempAbnormal);
+  const envAlarm = envAlarmActive(state);
   const role = state.session.role === 'admin' ? '관리자' : '분석자';
   const name = TABS.find(([key]) => key === tab);
-
-  const avg = (pick: (d: (typeof devices)[number]) => number) =>
-    (devices.reduce((a, d) => a + pick(d), 0) / (devices.length || 1)).toFixed(1);
 
   return (
     <header>
@@ -71,12 +68,12 @@ export function Header({state, tab, clock, day, operator, onMenu, onAccount, onH
       </span>
 
       <div className="head-status">
-        <span className={`hstat ${abnormal ? 'bad' : ''}`}>
-          온도 · CO₂{' '}
-          <b>
-            {avg(d => d.temperature)} ℃ · {avg(d => d.co2)} %
-          </b>
-        </span>
+        {/* 온도·습도 수치는 홈 카드가 맡는다(1차 피드백 2.2: 사용자는 이상 시에만). 헤더는 이상일 때만 알린다. */}
+        {envAlarm && (
+          <span className="hstat bad">
+            환경 이상 <b>온도 · 습도 확인</b>
+          </span>
+        )}
         <span className={`hstat ${linked === devices.length ? '' : 'bad'}`}>
           <i className="dot" />
           유선 연결{' '}

@@ -1,4 +1,4 @@
-import type {AppState, Device, Plate, Run} from '../api/types.ts';
+import type {AlarmSettings, AppState, Device, Plate, Run} from '../api/types.ts';
 import {FAULT_LABEL, TEMP_TOLERANCE_C, type WellState} from '../config/defines.ts';
 
 import type {Layout} from '../api/types.ts';
@@ -64,11 +64,14 @@ export const plateBad = (p: Plate) => {
   return last?.imageState === 'failed' || (!!last && failedWells(last).length > 0) || pending(p) >= 2;
 };
 
+/** 배양이 끝나 꺼낼 수 있는 판 — 기간 만료 또는 PC 조기 양성 판정(1차 피드백 1.1). */
+export const plateDone = (s: AppState, p: Plate) => p.result === 'positive' || p.runs.length >= totalRuns(s);
+
 export const wellState = (s: AppState, p: Plate | undefined, d: Device | undefined): WellState => {
   if (!p) return 'empty';
   if (d?.job?.status === 'running' && d.job.plateId === p.id) return 'busy';
   if (plateBad(p)) return 'bad';
-  if (p.runs.length >= totalRuns(s)) return 'done';
+  if (plateDone(s, p)) return 'done';
   return 'ok';
 };
 
@@ -114,6 +117,12 @@ export const failedWells = (r: Run): number[] =>
 export const imgSrc = (file: string) =>
   file.startsWith('http') || file.startsWith('/') ? file : `/api/images/${file}`;
 
-/** 인큐베이터 온도가 목표 범위를 벗어났는지. 피드백 2.2 의 "이상 시에만 노출" 판정. */
-export const tempAbnormal = (d: Device) =>
-  d.connected && Math.abs(d.temperature - d.targetTemperature) > TEMP_TOLERANCE_C;
+/** 인큐베이터 온도가 허용 편차를 벗어났는지(순간값). 알람은 서버가 지속 시간까지 보고 만든다. */
+export const tempAbnormal = (d: Device, a?: AlarmSettings) =>
+  d.connected && d.temperature !== null && Math.abs(d.temperature - d.targetTemperature) > (a?.tempTolerance ?? TEMP_TOLERANCE_C);
+
+export const humidityAbnormal = (d: Device, a?: AlarmSettings) =>
+  d.connected && d.humidity !== null && !!a && (d.humidity < a.humidityMin || d.humidity > a.humidityMax);
+
+/** 지금 걸려 있는 환경 알람(온도·습도)이 있는지 — 사용자 모드에서 수치를 보여줄지 정하는 기준(1차 피드백 2.2). */
+export const envAlarmActive = (s: AppState) => (s.alarms ?? []).some(a => a.kind === 'env' && !a.clearedAt);

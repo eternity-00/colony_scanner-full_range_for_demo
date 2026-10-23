@@ -5,6 +5,7 @@ import {networkInterfaces} from 'node:os';
 import {extname,join,normalize,resolve,sep,basename,dirname} from 'node:path';
 import {Controller} from './controller.mjs';
 import {RemoteDeviceAdapter} from './remote-device.mjs';
+import {LocalBaseAdapter} from './local-device.mjs';
 import {RealCameraAdapter} from './real-camera-adapter.mjs';
 import {CameraService} from './camera-service.mjs';
 import {McbMotion,loadMcbConfig} from './mcb-motion.mjs';
@@ -24,7 +25,8 @@ mkdirSync(dataDir,{recursive:true});
 
 const real=profile.adapter==='real';
 const camera=real?new CameraService():null;
-const base=new RemoteDeviceAdapter({url:process.env.VIRTUAL_ENGINE_URL||`http://127.0.0.1:${profile.network.enginePort}`});
+// 실장비 프로필은 가상 엔진을 쓰지 않는다(2차 피드백 #2). 가상 프로필·개발·CI 에서만 외부 엔진에 붙는다.
+const base=real?new LocalBaseAdapter():new RemoteDeviceAdapter({url:process.env.VIRTUAL_ENGINE_URL||`http://127.0.0.1:${profile.network.enginePort}`});
 // Scanner 1 motors (MCB via the local Pi 4 UART): recipe file of the profile, disable with COLONY_MCB_ENABLED=0
 const mcbConfig=(()=>{try{return loadMcbConfig(profile.recipeFile);}catch(error){console.log(JSON.stringify({recipe:'unreadable',file:profile.recipeFile,error:error.message}));return null;}})();
 const motion=real&&process.env.COLONY_MCB_ENABLED!=='0'&&mcbConfig?.enabled?new McbMotion({config:mcbConfig,layout:profile.layout}):null;

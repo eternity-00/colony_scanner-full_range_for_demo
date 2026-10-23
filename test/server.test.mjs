@@ -73,3 +73,37 @@ test('layout from the profile sizes the tray and demo seeding',()=>{
  try{assert.equal(c.snapshot().profile.layout.slots,8);assert.equal(c.snapshot().plates.length,8);assert.equal(c.snapshot().autoRun,true);}
  finally{c.close();rmSync(dir,{recursive:true,force:true});}
 });
+
+test('alarms: environment rule, ack, history, early positive, admin-only incubation limit',async()=>{
+ const dir=mkdtempSync(join(tmpdir(),'colony-test-'));const c=new Controller({dataDir:dir,adapter:new VirtualDeviceAdapter({stageMs:10}),autoTick:false,profile});
+ const at=n=>c.evaluateAlarms(n);
+ try{
+  assert.deepEqual(c.snapshot().settings.alarms,{tempTolerance:1,tempMinutes:5,humidityMin:60,humidityMax:95,humidityMinutes:10});
+  // analyst may change cycle/delay but not the incubation limit
+  await c.execute(request(200,'routine',0,{cycleHours:6,days:42,delay:0}));
+  await rejects(c.execute(request(201,'routine',0,{cycleHours:6,days:30,delay:0})),'FORBIDDEN');
+  await rejects(c.execute(request(202,'alarmSettings',0,{tempMinutes:0})),'FORBIDDEN');
+  await c.execute(request(203,'role.login',0,{pin:'0000'}));
+  await c.execute(request(204,'routine',0,{cycleHours:6,days:30,delay:0}));assert.equal(c.snapshot().routine.days,30);
+  await c.execute(request(205,'alarmSettings',0,{tempMinutes:0,humidityMinutes:0}));
+  await rejects(c.execute(request(206,'environment',0,{temperature:99})),'INVALID_ENV');await rejects(c.execute(request(218,'alarmSettings',0,{humidityMin:80,humidityMax:70})),'INVALID_VALUE');
+  await c.execute(request(207,'environment',0,{temperature:36}));assert.equal(c.snapshot().devices[0].targetTemperature,36);
+  // temperature out of range for 0 minutes -> env alarm; back in range -> cleared and kept in history
+  const now=Date.now();at(now);assert.equal(c.snapshot().alarms.filter(a=>!a.clearedAt).length,0);
+  await c.execute(request(208,'sim.input',1,{temperature:40}));at(now+1000);
+  let env=c.snapshot().alarms.find(a=>a.kind==='env'&&!a.clearedAt);assert.ok(env);assert.match(env.what,/온도 이상/);
+  assert.equal((await c.execute(request(209,'alarm.ack',0,{id:env.id}))).count,1);assert.ok(c.snapshot().alarms.find(a=>a.id===env.id).ackAt);
+  await c.execute(request(210,'sim.input',1,{temperature:36}));at(now+2000);
+  env=c.snapshot().alarms.find(a=>a.id===env.id);assert.ok(env.clearedAt,'cleared when back in range');
+  // early positive from the PC -> done alarm with reason positive; register a plate first
+  const reg=await c.execute(request(211,'register',1,{slot:3}));await c.execute(request(212,'registerDone',0));
+  await rejects(c.execute(request(213,'plateResult',1,{plateId:reg.plateId,result:'maybe'})),'INVALID_VALUE');
+  await c.execute(request(214,'plateResult',1,{plateId:reg.plateId,result:'positive'}));
+  const done=c.snapshot().alarms.find(a=>a.kind==='done'&&!a.clearedAt);assert.equal(done.reason,'positive');assert.equal(done.plateId,reg.plateId);
+  // device fault alarm appears and clears with the fault
+  await c.execute(request(215,'sim.input',1,{fault:'Z_LIMIT'}));at(now+3000);assert.ok(c.snapshot().alarms.find(a=>a.kind==='device'&&!a.clearedAt));
+  await c.execute(request(216,'sim.input',1,{fault:null}));await c.execute(request(217,'clearError',1));at(now+4000);assert.ok(!c.snapshot().alarms.find(a=>a.kind==='device'&&!a.clearedAt));
+  // environment history sampling
+  c.lastEnvSample=0;c.sampleEnvironment(now+5000);assert.equal(c.snapshot().envHistory.length,1);assert.equal(c.snapshot().envHistory[0].t,36);
+ }finally{c.close();rmSync(dir,{recursive:true,force:true});}
+});

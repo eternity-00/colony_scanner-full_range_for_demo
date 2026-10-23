@@ -148,9 +148,9 @@ test('the alignment setting is persisted by the controller and handed to the ada
  const settings=[],adapter=new VirtualDeviceAdapter({stageMs:10});adapter.configure=s=>settings.push({...s});
  let c=new Controller({features:{demoPlates:true},dataDir:dir,adapter,autoTick:false});
  try{
-  assert.deepEqual(c.snapshot().settings,{alignment:false});assert.deepEqual(settings.at(-1),{alignment:false});
+  assert.equal(c.snapshot().settings.alignment,false);assert.equal(settings.at(-1).alignment,false);
   await c.execute({requestId:'settings_request_1',command:'settings',deviceId:0,args:{alignment:true}});
-  assert.deepEqual(settings.at(-1),{alignment:true});
+  assert.equal(settings.at(-1).alignment,true);
   await assert.rejects(c.execute({requestId:'settings_request_2',command:'settings',deviceId:0,args:{alignment:'yes'}}),e=>e.code==='INVALID_VALUE');
   c.close();c=new Controller({features:{demoPlates:true},dataDir:dir,adapter:new VirtualDeviceAdapter({stageMs:10}),autoTick:false});
   assert.equal(c.snapshot().settings.alignment,true,'the setting survives a restart');

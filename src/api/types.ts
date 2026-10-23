@@ -83,10 +83,11 @@ export interface Device {
   doorOpen: boolean;
   fault: FaultCode;
   failCamera: boolean;
-  temperature: number;
-  co2: number;
+  /** 현재 온도(℃). 센서가 없으면 null. */
+  temperature: number | null;
+  /** 현재 습도(%). 자연 증발식이라 목표값은 없고 범위만 감시한다. 센서가 없으면 null. */
+  humidity: number | null;
   targetTemperature: number;
-  targetCo2: number;
   z: number;
   light: boolean;
   heater: boolean;
@@ -151,6 +152,9 @@ export interface Plate {
   removedAt: number | null;
   paused: boolean;
   runs: Run[];
+  /** PC 판독 결과. positive 면 조기 양성 → 반출 알람. */
+  result?: 'positive' | 'negative' | null;
+  resultAt?: number | null;
 }
 
 export interface Routine {
@@ -209,9 +213,45 @@ export interface ProfileInfo {
   recipe?: string;
 }
 
+/** 환경 알림 규칙(관리자). 허용 범위를 벗어난 상태가 minutes 이상 이어지면 알람. */
+export interface AlarmSettings {
+  tempTolerance: number;
+  tempMinutes: number;
+  humidityMin: number;
+  humidityMax: number;
+  humidityMinutes: number;
+}
+
 /** 사용자 설정(state.json). alignment = 웰 중심 자동 정렬 촬영. */
 export interface UserSettings {
   alignment: boolean;
+  alarms: AlarmSettings;
+}
+
+export type AlarmKind = 'device' | 'env' | 'plate' | 'done';
+
+/** 서버가 만들고 이력을 남기는 알람. clearedAt 이 없으면 지금 걸려 있는 일이다. */
+export interface Alarm {
+  id: string;
+  key: string;
+  kind: AlarmKind;
+  level: 'high' | 'normal';
+  /** 반출 대기의 사유 — 기간 만료 / 조기 양성(1차 피드백 1.1). */
+  reason?: 'expired' | 'positive';
+  where: string;
+  what: string;
+  plateId?: string;
+  deviceId?: number;
+  at: number;
+  ackAt: number | null;
+  clearedAt: number | null;
+}
+
+/** 온도·습도 추이의 한 점(5분 간격). */
+export interface EnvSample {
+  at: number;
+  t: number | null;
+  h: number | null;
 }
 
 export interface NetworkLink {
@@ -241,6 +281,8 @@ export interface AppState {
   routine: Routine;
   autoRun: boolean;
   settings: UserSettings;
+  alarms: Alarm[];
+  envHistory: EnvSample[];
   /** 등록하는 동안 촬영을 붙잡아 둔 상태. 「완료」를 누르면 풀린다. */
   captureHold: boolean;
   /** 관리 툴이 장비를 잡고 있는 동안. 장비를 움직이는 명령은 거부된다. */

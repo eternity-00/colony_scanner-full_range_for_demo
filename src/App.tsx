@@ -202,6 +202,7 @@ export default function App() {
         openRegister={openRegister}
         onDevice={() => setTab('device')}
         onNeedAdmin={(where, what) => setAdminAsk({where, what})}
+        send={execute}
       />
     ),
     detail: (

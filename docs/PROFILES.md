@@ -5,7 +5,7 @@
 
 | 키 | 뜻 | testbed | production(초안) | virtual |
 |---|---|---|---|---|
-| `adapter` | `real` = 스캐너 1 이 USB 카메라 + UART MCB, `virtual` = 가상 엔진만 | real | real | virtual |
+| `adapter` | `real` = 스캐너 1 이 USB 카메라 + UART MCB, 가상 엔진·콘솔은 **뜨지 않음**(2차 피드백 #2) · `virtual` = 가상 엔진만 | real | real | virtual |
 | `layout.tiers` × `layout.columns` | 트레이 배치. 슬롯 = (tiers − 단) × columns + 열, 1단이 맨 아래 | 8 × 1 (단당 플레이트 1매) | 8 × 3 | 8 × 3 |
 | `recipe` | 공정 레시피 파일(`config/mcb-config.*.json`). `tiers` 는 layout 과 같아야 한다 | mcb-config.testbed.json | mcb-config.production.json | testbed 파일 |
 | `dataDir` | state.json · 촬영 영상 · 정렬 보정값 · 파라미터 백업 | data/testbed | data/production | data/virtual |
@@ -38,3 +38,9 @@ systemctl --user restart colony.service
 | 펌웨어 파라미터 | 작동 범위 RANGE, 원점 HDIR/HPARK, 속도·가속도, USTEP, SMOOTH | MCB 플래시 (`GET ALL` / `SET` / `SAVE`) | 관리 툴 > 펌웨어 파라미터 |
 | 공정 레시피 | 단 수, 웰 배치, trayOut, captureZ, 웰 안지름, 정렬 중 축 속도 | `config/mcb-config.<profile>.json` | 관리 툴 > 레시피 |
 | 정렬 보정값 | px/step 행렬, 백래시, 기준 링, 기억된 웰 위치 | `<dataDir>/camera-alignment.json` | 운영 화면 설정 > 카메라 정렬 · 초점, 관리 툴 > 카메라 · 정렬 |
+
+## 환경값(온도 · 습도)
+
+- CO₂ 는 뺐다(2026-10-23 결정). 장비 모델은 `temperature`, `humidity`, `targetTemperature` 를 가진다. 습도는 자연 증발식이라 목표값이 없고 범위만 감시한다.
+- 실장비 프로필에는 아직 센서가 없어 두 값이 `null`(화면: 「측정 없음」)이다. 센서가 붙으면 `server/local-device.mjs` 의 `sensor` 콜백으로 읽는다.
+- 이상 알람 규칙(허용 편차 · 지속 시간 · 습도 범위)은 `state.settings.alarms`(관리자 `alarmSettings` 명령). 추이는 5분 간격으로 7일 보관(`envHistory`).
