@@ -4,7 +4,6 @@ import {
   ADMIN_IDLE_LIMIT_SEC,
   APP_VERSION,
   MAX_INCUBATION_DAYS,
-  SLOTS_PER_DEVICE,
   WELLS,
   type SendCommand,
 } from '../../config/defines.ts';
@@ -13,6 +12,8 @@ import {Modal} from '../../shared/Modal.tsx';
 import {NumberPad} from '../../shared/NumberPad.tsx';
 import {Toggle} from '../../shared/Toggle.tsx';
 import {download} from '../../utils/download.ts';
+import {slotsPerDevice} from '../../utils/plate.ts';
+import {AlignmentSection} from './AlignmentSection.tsx';
 
 interface Props {
   state: AppState;
@@ -24,7 +25,7 @@ interface Props {
   onExit: () => void;
 }
 
-type SectionKey = 'login' | 'routine' | 'environment' | 'network' | 'backup' | 'info';
+type SectionKey = 'login' | 'routine' | 'alignment' | 'environment' | 'network' | 'backup' | 'info';
 
 /**
  * [키, 라벨, 관리자 전용 여부]
@@ -34,6 +35,7 @@ type SectionKey = 'login' | 'routine' | 'environment' | 'network' | 'backup' | '
 const NAV: readonly (readonly [SectionKey, string, boolean])[] = [
   ['login', '로그인 정보', false],
   ['routine', '검사 루틴', false],
+  ['alignment', '카메라 정렬 · 초점', false],
   ['environment', '온도 · CO₂', true],
   ['network', '유선 통신', false],
   ['backup', '로그 · 백업', false],
@@ -300,6 +302,8 @@ export function SettingsScreen({state, send, operator, setOperator, onRole,
       </section>
     ),
 
+    alignment: <AlignmentSection state={state} send={send} />,
+
     network: (
       <section className="card stack">
         <h2>유선 통신</h2>
@@ -307,10 +311,33 @@ export function SettingsScreen({state, send, operator, setOperator, onRole,
           <div className="setting-row" key={d.id}>
             <b>{d.name}</b>
             <Badge type={d.connected && d.pcConnected ? 'good' : 'bad'}>
-              {d.connected && d.pcConnected ? '연결 · 238 Mbps' : '연결 끊김'}
+              {d.hardware
+                ? d.hardware.mcb?.connected
+                  ? 'MCB UART 연결'
+                  : 'MCB UART 확인 필요'
+                : d.connected && d.pcConnected
+                  ? '연결'
+                  : '연결 끊김'}
             </Badge>
           </div>
         ))}
+        {(state.network ?? []).map(n => (
+          <div className="setting-row" key={n.name}>
+            <b>
+              {n.kind === 'wifi' ? '무선' : n.kind === 'wired' ? '유선' : '기타'} · {n.name}
+            </b>
+            <Badge type="good">{n.address}</Badge>
+          </div>
+        ))}
+        {!(state.network ?? []).length && (
+          <div className="setting-row">
+            <b>네트워크</b>
+            <Badge type="bad">연결된 인터페이스 없음</Badge>
+          </div>
+        )}
+        <p className="muted">
+          프로필 {state.profile.title} ({state.profile.name}) · 장비 설정 변경은 관리 툴(포트 8799)에서 합니다.
+        </p>
       </section>
     ),
 
@@ -355,7 +382,7 @@ export function SettingsScreen({state, send, operator, setOperator, onRole,
           <dd>외부 프로세스 · 8790</dd>
           <dt>스캐너</dt>
           <dd>
-            {state.devices.length}대 · 각 {SLOTS_PER_DEVICE}슬롯
+            {state.devices.length}대 · 각 {slotsPerDevice(state)}슬롯 ({state.profile.layout.tiers}단 × {state.profile.layout.columns}열)
           </dd>
           <dt>시리얼</dt>
           <dd>미등록</dd>

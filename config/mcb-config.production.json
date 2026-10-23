@@ -1,0 +1,16 @@
+{
+ "_comment": "Process recipe for the PRODUCTION mechanics (placeholder copied from the testbed jig 2026-10-23). Replace tiers/wellColumns/wellRows/trayOut/captureZ/wellDiameterMm with the measured values of the production unit; ranges and park positions are read from the MCB firmware before every job.",
+ "enabled": true,
+ "axes": {
+  "cameraX": 1,
+  "trayX": 2,
+  "cameraY": 3,
+  "trayZ": 4
+ },
+ "tiers": 8,
+ "wellColumns": 3,
+ "wellRows": 2,
+ "trayOut": 450,
+ "captureZ": 875,
+ "wellDiameterMm": 34.8
+}

@@ -3,7 +3,7 @@ import type {AppState} from '../../api/types.ts';
 import type {SendCommand} from '../../config/defines.ts';
 import {Modal} from '../../shared/Modal.tsx';
 import {hm} from '../../utils/datetime.ts';
-import {faultLabel, tempAbnormal} from '../../utils/plate.ts';
+import {faultLabel, platesFor, tempAbnormal} from '../../utils/plate.ts';
 
 interface Props {
   state: AppState;
@@ -12,12 +12,15 @@ interface Props {
 
 type Mod = 'ok' | 'warn' | 'bad';
 
-/** 캘리브레이션 목록 — 초안(260911)처럼 항목마다 「실행」을 둔다. */
+/**
+ * 캘리브레이션 목록 — 실제 장비가 지원하는 항목만 둔다(테스트베드 2026-10-23).
+ * alignment · focus 는 플레이트가 든 칸이 필요하다(첫 번째 등록 칸을 쓴다).
+ * 히팅·조명 보정은 이 장비에 해당 하드웨어가 없어 뺐다. 기계 파라미터(작동 범위·속도)는 관리 툴에서 바꾼다.
+ */
 const CALIBRATIONS = [
-  {kind: 'camera', name: '카메라 초점 · 배율', note: '촬영 영상이 흐리거나 크기가 다를 때'},
-  {kind: 'axis', name: '구동 4축 원점', note: '이송 위치가 어긋날 때'},
-  {kind: 'heat', name: '히팅 스테이션 온도', note: '물기 제거 온도가 맞지 않을 때'},
-  {kind: 'light', name: '조명 광량', note: '영상 밝기가 고르지 않을 때'},
+  {kind: 'alignment', name: '카메라 웰 중심 정렬 보정', note: '정렬 촬영 전 1회 · 렌즈 초점, 촬영 높이, 마이크로스텝이 바뀐 뒤', needsSlot: true},
+  {kind: 'focus', name: '초점 조정 위치로 이동', note: '렌즈 초점을 손으로 맞출 때 · 설정 > 카메라 정렬 · 초점에서 진행', needsSlot: true},
+  {kind: 'axis', name: '구동 4축 원점 (HOME ALL)', note: '이송 위치가 어긋날 때', needsSlot: false},
 ] as const;
 
 /**
@@ -38,10 +41,21 @@ export function DeviceScreen({state, send}: Props) {
   if (!d) return null;
 
   const fault = faultLabel(d);
-  const linked = d.connected && d.pcConnected;
+  const hw = d.hardware;
+  const linked = hw ? !!hw.mcb?.connected : d.connected && d.pcConnected;
+  const link = state.network?.find(n => n.kind === 'wired') ?? state.network?.[0];
+  const calSlot = platesFor(state, d.id).sort((a, b) => a.slot - b.slot)[0]?.slot;
   const mods: [string, Mod, string][] = [
-    ['카메라', d.failCamera || d.fault === 'CAMERA_TIMEOUT' ? 'bad' : 'ok', d.failCamera ? '오류' : '정상'],
-    ['구동 4축', d.fault === 'Z_LIMIT' ? 'bad' : 'ok', d.fault === 'Z_LIMIT' ? 'Z축 오류' : '정상'],
+    [
+      '카메라',
+      hw ? (hw.camera.connected ? 'ok' : 'bad') : d.failCamera || d.fault === 'CAMERA_TIMEOUT' ? 'bad' : 'ok',
+      hw ? (hw.camera.connected ? 'USB 연결' : 'USB 끊김') : d.failCamera ? '오류' : '정상',
+    ],
+    [
+      '구동 4축',
+      hw?.mcb ? (hw.mcb.connected ? 'ok' : 'bad') : d.fault === 'Z_LIMIT' ? 'bad' : 'ok',
+      hw?.mcb ? (hw.mcb.connected ? 'UART 연결' : 'UART 확인 필요') : d.fault === 'Z_LIMIT' ? 'Z축 오류' : '정상',
+    ],
     [
       '히팅',
       d.fault === 'HEATER' ? 'bad' : tempAbnormal(d) ? 'warn' : 'ok',
@@ -58,8 +72,8 @@ export function DeviceScreen({state, send}: Props) {
         <section className="p-card dv-link">
           <i className={linked ? 'ok' : 'bad'} />
           <h3>유선 통신</h3>
-          <p className="p-note">{d.name} → 인큐베이터 메인 하드웨어</p>
-          <b>{linked ? '238 Mbps' : '–'}</b>
+          <p className="p-note">{hw ? `${d.name} → MCB(UART) · 제어 PC` : `${d.name} → 인큐베이터 메인 하드웨어`}</p>
+          <b>{link ? `${link.name} ${link.address}` : '–'}</b>
           <span className={`p-tag ${linked ? 'good' : 'bad'}`}>{linked ? '링크 정상' : '연결 끊김'}</span>
         </section>
 
@@ -156,9 +170,20 @@ export function DeviceScreen({state, send}: Props) {
               <li key={c.kind}>
                 <span>
                   <b>{c.name}</b>
-                  <small>{c.note}</small>
+                  <small>{c.needsSlot && !calSlot ? '등록된 플레이트가 있어야 합니다' : c.note}</small>
                 </span>
-                <button onClick={() => send('calibrate', d.id, {kind: c.kind})}>실행</button>
+                <button
+                  disabled={(c.needsSlot && !calSlot) || !!state.maintenance || state.cameraBusy}
+                  onClick={() =>
+                    setAsk({
+                      what: `${c.name}을(를) 실행합니다. 장비가 움직입니다.`,
+                      label: '실행',
+                      run: () => void send('calibrate', d.id, c.needsSlot ? {kind: c.kind, slot: calSlot} : {kind: c.kind}),
+                    })
+                  }
+                >
+                  실행
+                </button>
               </li>
             ))}
           </ul>

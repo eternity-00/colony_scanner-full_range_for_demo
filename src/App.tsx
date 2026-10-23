@@ -23,6 +23,7 @@ import {MenuDrawer} from './layout/MenuDrawer.tsx';
 import {Modal} from './shared/Modal.tsx';
 import {ShotViewer, type ShotTarget} from './shared/ShotViewer.tsx';
 import {hms, ymd} from './utils/datetime.ts';
+import {configureLayout} from './utils/plate.ts';
 import {useLayoutWidth} from './utils/viewport.ts';
 
 interface Notice {
@@ -65,10 +66,15 @@ export default function App() {
   // 최초 상태를 한 번 읽고, 이후에는 SSE 로 받는다.
   useEffect(() => {
     let live = true;
+    const apply = (s: AppState) => {
+      // 트레이 배치(단 × 열)는 프로필에서 온다. 슬롯 번호 → 단/열 변환이 이 값을 쓴다.
+      configureLayout(s.profile?.layout);
+      setState(s);
+    };
     getState()
-      .then(s => live && setState(s))
+      .then(s => live && apply(s))
       .catch((e: Error) => setNotice({bad: true, text: e.message}));
-    const stop = subscribe(s => live && setState(s));
+    const stop = subscribe(s => live && apply(s));
     return () => {
       live = false;
       stop();
@@ -278,6 +284,12 @@ export default function App() {
 
       {expiring && (
         <div className="session-warning">관리자 권한이 {idleLeft}초 후 자동 해제됩니다.</div>
+      )}
+
+      {state.maintenance && (
+        <div className="session-warning maintenance">
+          점검 모드 · 관리 툴({state.maintenance.by})이 장비를 잡고 있습니다. 촬영과 장비 조작은 잠시 막힙니다.
+        </div>
       )}
 
       {confirmModal && (

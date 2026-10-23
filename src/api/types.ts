@@ -20,6 +20,20 @@ export type FaultCode =
   | 'ENGINE_OFFLINE'
   | null;
 
+/** 초점 조정 모드(calibrate kind:'focus')의 진행 상태. 실장비 어댑터가 1초마다 갱신한다. */
+export interface FocusState {
+  stage: 'loading' | 'centring' | 'holding' | 'returning' | 'done' | string;
+  frames: number;
+  sharpness: number | null;
+  best: number | null;
+  ratio?: number | null;
+  hint?: string | null;
+  history?: number[];
+  images?: boolean;
+  at?: number;
+  stopRequested?: boolean;
+}
+
 export interface Job {
   id: string;
   type: JobType;
@@ -33,6 +47,32 @@ export interface Job {
   startedAt: number;
   finishedAt: number | null;
   error: string | null;
+  /** 실제 카메라·모터로 도는 작업(스캐너 1). */
+  realCamera?: boolean;
+  realMotion?: boolean;
+  /** 촬영 중 받은 영상(모자이크 PNG 파일명, /api/images/). */
+  image?: string | null;
+  /** 정렬 보정 작업의 단계. */
+  calibrationStage?: 'loading' | 'measuring' | 'returning' | 'done' | string;
+  focus?: FocusState;
+  plateGrid?: {tier: number; label: string};
+}
+
+/** 실장비 어댑터가 스캐너 1에 붙이는 하드웨어 상태. */
+export interface DeviceHardware {
+  camera: {connected: boolean; device?: string; error?: string | null};
+  mcb: {connected: boolean; checkedAt: number | null} | null;
+  mode: string;
+  alignment: {
+    enabled: boolean;
+    available: boolean;
+    calibrated: boolean;
+    calibratedAt: number | null;
+    ring: {radius: number; polarity: number} | null;
+    rememberedWells: number[];
+    umPerPx: number | null;
+    wellDiameterMm: number | null;
+  } | null;
 }
 
 export interface Device {
@@ -51,6 +91,7 @@ export interface Device {
   light: boolean;
   heater: boolean;
   job: Job | null;
+  hardware?: DeviceHardware;
 }
 
 export interface Run {
@@ -66,6 +107,40 @@ export interface Run {
   images?: (string | null)[] | null;
   transferred: boolean;
   error?: string | null;
+  /** 실장비 촬영의 원본 정보(6-well 프레임, 모자이크, 정렬 결과). 가상 장비 회차에는 없다. */
+  capture?: CaptureRecord | null;
+}
+
+export interface CaptureWell {
+  well: number;
+  /** 원본 PNG(카메라 폴더, /api/v1/hardware/files/). */
+  image?: string;
+  preview?: string;
+  raw?: string;
+  sha256?: string;
+  width?: number;
+  height?: number;
+  alignment?: {aligned: boolean; residual?: {x: number; y: number}; looks?: number} | null;
+}
+
+export interface CaptureRecord {
+  id: string;
+  width: number;
+  height: number;
+  mosaic?: boolean;
+  raw?: string;
+  sha256?: string;
+  plate?: {tier: number; label: string};
+  wells?: CaptureWell[];
+  alignment?: {
+    enabled: boolean;
+    alignedWells?: number[];
+    unalignedWells?: number[];
+    tolerancePx?: number;
+    plateModel?: {wells: number[]; shift: {x: number; y: number}; rotation: number; scale: number} | null;
+  };
+  totalSeconds?: number;
+  acquisitionSeconds?: number;
 }
 
 export interface Plate {
@@ -116,21 +191,70 @@ export interface IoEntry {
   payload: unknown;
 }
 
+/** 트레이 배치. 슬롯 번호 = (tiers − 단) × columns + 열. 1단이 맨 아래. */
+export interface Layout {
+  tiers: number;
+  columns: number;
+  slots: number;
+}
+
+/** 배포 프로필(server/profile.mjs). 어느 장비 위에서 도는지와 트레이 배치. */
+export interface ProfileInfo {
+  name: string;
+  title: string;
+  adapter: 'real' | 'virtual';
+  layout: Layout;
+  features: {triggers?: boolean; simAlarm?: boolean; demoPlates?: boolean};
+  kiosk?: {scale: number; width: number; height: number};
+  recipe?: string;
+}
+
+/** 사용자 설정(state.json). alignment = 웰 중심 자동 정렬 촬영. */
+export interface UserSettings {
+  alignment: boolean;
+}
+
+export interface NetworkLink {
+  name: string;
+  address: string;
+  kind: 'wired' | 'wifi' | 'other';
+}
+
+export interface FirmwareCheck {
+  checkedAt: number | null;
+  ok: boolean | null;
+  mismatches: {motor: number; key: string; expected: number; actual: number | null}[];
+}
+
+export interface HardwareInfo {
+  camera: {connected: boolean; device?: string; error?: string | null} | null;
+  mcb: {enabled: boolean; connected?: boolean; checkedAt?: number | null; error?: string | null; port?: string};
+}
+
 export interface AppState {
   revision: number;
   serverTime: number;
   mode: string;
+  profile: ProfileInfo;
   devices: Device[];
   plates: Plate[];
   routine: Routine;
   autoRun: boolean;
+  settings: UserSettings;
   /** 등록하는 동안 촬영을 붙잡아 둔 상태. 「완료」를 누르면 풀린다. */
   captureHold: boolean;
+  /** 관리 툴이 장비를 잡고 있는 동안. 장비를 움직이는 명령은 거부된다. */
+  maintenance: {since: number; by: string} | null;
+  /** 스캐너 1의 USB 카메라가 촬영 중(단일 점검 촬영 포함). */
+  cameraBusy: boolean;
   session: SessionState;
   logs: LogEntry[];
   io: IoEntry[];
   capabilities: string[];
   storage: string;
+  network?: NetworkLink[];
+  firmwareCheck?: FirmwareCheck;
+  hardware?: HardwareInfo;
 }
 
 /** 명령 인자. 명령마다 모양이 달라 서버에서 assert() 로 검증한다. */

@@ -1,10 +1,10 @@
 import {useEffect, useMemo, useState} from 'react';
 import type {AppState} from '../../api/types.ts';
-import {SLOTS_PER_DEVICE, type SendCommand, type TabKey} from '../../config/defines.ts';
+import {type SendCommand, type TabKey} from '../../config/defines.ts';
 import {Modal} from '../../shared/Modal.tsx';
 import {Tray} from '../../shared/Tray.tsx';
 import {kdt} from '../../utils/datetime.ts';
-import {isBusy, platesFor, pos, status, totalRuns} from '../../utils/plate.ts';
+import {isBusy, platesFor, pos, slotsPerDevice, status, totalRuns} from '../../utils/plate.ts';
 
 interface Props {
   state: AppState;
@@ -21,7 +21,7 @@ export function RegisterScreen({state, send, setTab, device = 1, slot: picked}: 
 
   const free = useMemo(() => {
     const used = new Set(platesFor(state, deviceId).map(p => p.slot));
-    return Array.from({length: SLOTS_PER_DEVICE}, (_, i) => i + 1).filter(n => !used.has(n));
+    return Array.from({length: slotsPerDevice(state)}, (_, i) => i + 1).filter(n => !used.has(n));
   }, [state, deviceId]);
 
   // 현황에서 누른 칸이 있으면 그 칸으로 시작한다. 그새 찼으면 첫 빈 칸으로 떨어진다.
@@ -99,7 +99,7 @@ export function RegisterScreen({state, send, setTab, device = 1, slot: picked}: 
                 >
                   {x.name}
                   <small>
-                    {status(x)} · 빈 슬롯 {SLOTS_PER_DEVICE - platesFor(state, x.id).length}
+                    {status(x)} · 빈 슬롯 {slotsPerDevice(state) - platesFor(state, x.id).length}
                   </small>
                 </button>
               ))}

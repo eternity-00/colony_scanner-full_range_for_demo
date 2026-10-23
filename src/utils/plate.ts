@@ -1,13 +1,31 @@
 import type {AppState, Device, Plate, Run} from '../api/types.ts';
 import {FAULT_LABEL, TEMP_TOLERANCE_C, type WellState} from '../config/defines.ts';
 
-/** 슬롯 번호(1~24) → 단/열. 8단이 맨 위. */
-export const coord = (n: number) => ({tier: 8 - Math.floor((n - 1) / 3), col: ((n - 1) % 3) + 1});
+import type {Layout} from '../api/types.ts';
+
+/**
+ * 현재 트레이 배치. 서버 프로필(state.profile.layout)에서 오고 App 이 상태를 받을 때마다
+ * 맞춰 둔다. 모듈 변수인 이유: pos()/coord() 가 알람·현황·이력 등 수십 곳에서 슬롯 번호만
+ * 받아 쓰므로, 모든 호출에 layout 을 끌고 다니는 것보다 한 곳에서 갈아 끼우는 편이 안전하다.
+ */
+let layout: Layout = {tiers: 8, columns: 3, slots: 24};
+export const configureLayout = (next: Layout | undefined) => {
+  if (next && next.tiers > 0 && next.columns > 0) layout = {...next, slots: next.tiers * next.columns};
+};
+export const currentLayout = () => layout;
+/** 스캐너 한 대의 슬롯 수(프로필 배치). */
+export const slotsPerDevice = (s?: AppState) => s?.profile?.layout?.slots ?? layout.slots;
+
+/** 슬롯 번호(1~slots) → 단/열. 맨 윗단이 슬롯 1. */
+export const coord = (n: number) => ({
+  tier: layout.tiers - Math.floor((n - 1) / layout.columns),
+  col: ((n - 1) % layout.columns) + 1,
+});
 
 /** 슬롯 번호 → "3단 2열" */
 export const pos = (n: number) => {
   const {tier, col} = coord(n);
-  return `${tier}단 ${col}열`;
+  return layout.columns > 1 ? `${tier}단 ${col}열` : `${tier}단`;
 };
 
 /** 아직 반출되지 않은 플레이트. */
@@ -92,8 +110,9 @@ export const failedWells = (r: Run): number[] =>
     ? []
     : r.images.flatMap((f, i) => (f ? [] : [i + 1]));
 
+/** 회차 영상 URL. 실장비 미리보기는 절대 경로(/api/v1/hardware/files/…)로 들어오고, 데모 이름은 /api/images/ 아래다. */
 export const imgSrc = (file: string) =>
-  file.startsWith('http') ? file : `/api/images/${file}`;
+  file.startsWith('http') || file.startsWith('/') ? file : `/api/images/${file}`;
 
 /** 인큐베이터 온도가 목표 범위를 벗어났는지. 피드백 2.2 의 "이상 시에만 노출" 판정. */
 export const tempAbnormal = (d: Device) =>

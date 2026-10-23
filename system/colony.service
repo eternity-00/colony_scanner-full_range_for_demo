@@ -1,0 +1,22 @@
+# systemd user unit: ~/.config/systemd/user/colony.service
+#   cp system/colony.service ~/.config/systemd/user/ && systemctl --user daemon-reload
+#   systemctl --user enable --now colony.service
+# One app, one profile. COLONY_PROFILE picks profiles/<name>.json (testbed | production | virtual);
+# the camera device and MCB port below override the profile when set.
+[Unit]
+Description=Colony Scanner UI (LCD + device server, profile %E{COLONY_PROFILE})
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/colony_scanner-UI
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+Environment=COLONY_PROFILE=testbed
+Environment=COLONY_KIOSK=1
+Environment=COLONY_PROFILE_DIR=/tmp/colony-kiosk
+ExecStart=%h/.local/bin/node scripts/system.mjs
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=default.target

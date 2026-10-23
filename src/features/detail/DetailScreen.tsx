@@ -111,7 +111,11 @@ export function DetailScreen({
               <div className="actbar">
                 <button
                   className="primary"
-                  disabled={['running', 'paused'].includes(device.job?.status ?? '')}
+                  disabled={
+                    ['running', 'paused'].includes(device.job?.status ?? '') ||
+                    state.cameraBusy ||
+                    !!state.maintenance
+                  }
                   onClick={() => send('capture', device.id, {plateId: plate.id}, 'running')}
                 >
                   <ActIcon name="play" />

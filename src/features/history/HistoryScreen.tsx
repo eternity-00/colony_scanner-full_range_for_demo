@@ -3,7 +3,7 @@ import type {AppState, Plate} from '../../api/types.ts';
 import {ROW_HEIGHT_REM} from '../../config/defines.ts';
 import {fmt} from '../../utils/datetime.ts';
 import {download} from '../../utils/download.ts';
-import {coord, failedWells, nextAt, pending, pos, totalRuns} from '../../utils/plate.ts';
+import {coord, currentLayout, failedWells, nextAt, pending, pos, totalRuns} from '../../utils/plate.ts';
 import {rootFontPx} from '../../utils/viewport.ts';
 
 interface Props {
@@ -116,20 +116,22 @@ export function HistoryScreen({state, openDetail, openPlateViewer}: Props) {
         )}
         <select value={draft.tier} onChange={e => pick('tier', Number(e.target.value))}>
           <option value="0">전체 단</option>
-          {[8, 7, 6, 5, 4, 3, 2, 1].map(t => (
+          {Array.from({length: currentLayout().tiers}, (_, i) => currentLayout().tiers - i).map(t => (
             <option key={t} value={t}>
               {t}단
             </option>
           ))}
         </select>
+        {currentLayout().columns > 1 && (
         <select value={draft.col} onChange={e => pick('col', Number(e.target.value))}>
           <option value="0">전체 열</option>
-          {[1, 2, 3].map(c => (
+          {Array.from({length: currentLayout().columns}, (_, i) => i + 1).map(c => (
             <option key={c} value={c}>
               {c}열
             </option>
           ))}
         </select>
+        )}
         <select value={draft.shot} onChange={e => pick('shot', e.target.value as Filters['shot'])}>
           <option value="all">촬영 전체</option>
           <option value="shot">촬영 시작</option>

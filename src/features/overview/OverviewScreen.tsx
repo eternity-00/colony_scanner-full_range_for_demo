@@ -1,9 +1,8 @@
 import type {AppState} from '../../api/types.ts';
-import {SLOTS_PER_DEVICE} from '../../config/defines.ts';
 import {ActIcon} from '../../shared/ActIcon.tsx';
 import {Badge} from '../../shared/Badge.tsx';
 import {scannerNext} from '../../shared/ScannerHead.tsx';
-import {active, totalRuns, wellState} from '../../utils/plate.ts';
+import {active, slotsPerDevice, totalRuns, wellState} from '../../utils/plate.ts';
 
 interface Props {
   state: AppState;
@@ -43,7 +42,7 @@ export function OverviewScreen({state, openDetail, openRegister, onStatus}: Prop
    */
   const removeTarget = done[0] ?? [...plates].sort((a, b) => a.slot - b.slot)[0];
   const openRemove = () => removeTarget && openDetail(device.id, removeTarget.slot);
-  const free = SLOTS_PER_DEVICE - plates.length;
+  const free = slotsPerDevice(state) - plates.length;
   const states = plates.map(p => wellState(state, p, device));
   const growing = states.filter(w => w === 'ok' || w === 'busy').length;
   const ready = states.filter(w => w === 'done').length;

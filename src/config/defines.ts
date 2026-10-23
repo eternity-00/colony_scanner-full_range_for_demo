@@ -64,6 +64,8 @@ export const ADMIN_ACTION: Record<string, string> = {
   calibrate: '캘리브레이션',
   routine: '검사 루틴 변경',
   environment: '온도 · CO₂ 변경',
+  focusStop: '초점 조정 종료',
+  settings: '촬영 방식 변경',
 };
 
 /**
@@ -74,7 +76,7 @@ export const ADMIN_ACTION: Record<string, string> = {
  * 마지막 자리는 파이에 올린 횟수다. 파이에 올릴 때마다 하나씩 올린다.
  * 파이에 무엇이 도는지 화면만 보고 알 수 있어야 해서 붙인 값이다.
  */
-export const APP_VERSION = 'v2.2.8';
+export const APP_VERSION = 'v2.3.0';
 
 /** 장비 오류 코드의 한글 이름. 사용자에게 "무엇이 고장났는지"를 말해주기 위한 것이다. */
 export const FAULT_LABEL: Record<string, string> = {
@@ -99,8 +101,7 @@ export const SHORT_STAGES = ['준비', '구동', '완료 확인'];
 /** 플레이트 1매당 Well 수. */
 export const WELLS = 6;
 
-/** 스캐너 1대당 슬롯 수 (8단 × 3열). */
-export const SLOTS_PER_DEVICE = 24;
+/** 스캐너 1대당 슬롯 수는 프로필 배치에서 온다 — utils/plate.ts 의 slotsPerDevice(state). */
 
 /**
  * 이력 표 한 행 높이(rem). 화면 높이에 맞춰 페이지당 행 수를 계산하는 데 쓴다.

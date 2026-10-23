@@ -1,3 +1,4 @@
+import type React from 'react';
 import type {AppState} from '../api/types.ts';
 import {WELL_LABEL} from '../config/defines.ts';
 import {platesFor, pos, wellState} from '../utils/plate.ts';
@@ -13,7 +14,7 @@ interface Props {
   registration?: boolean;
 }
 
-/** 8단 × 3열 = 24슬롯 수납도. */
+/** 수납도. 단 수·열 수는 프로필 배치(state.profile.layout)를 따른다 — 테스트베드 8×1, 정식 N×3. */
 export function Tray({
   state,
   deviceId,
@@ -25,16 +26,20 @@ export function Tray({
   const plates = platesFor(state, deviceId);
   const bySlot = new Map(plates.map(p => [p.slot, p]));
   const device = state.devices.find(d => d.id === deviceId);
+  const {tiers, columns} = state.profile?.layout ?? {tiers: 8, columns: 3};
 
   return (
-    <div className={`tray ${compact ? 'compact' : ''} ${registration ? 'registration' : ''}`}>
-      {Array.from({length: 8}, (_, row) => {
-        const tier = 8 - row;
+    <div
+      className={`tray ${compact ? 'compact' : ''} ${registration ? 'registration' : ''} cols-${columns}`}
+      style={{'--tray-cols': columns} as React.CSSProperties}
+    >
+      {Array.from({length: tiers}, (_, row) => {
+        const tier = tiers - row;
         return (
           <div className="tray-row" key={tier}>
             <span className="tier">{tier}단</span>
-            {[1, 2, 3].map(col => {
-              const slot = row * 3 + col;
+            {Array.from({length: columns}, (_, c) => c + 1).map(col => {
+              const slot = row * columns + col;
               const plate = bySlot.get(slot);
               const chosen = selected === slot;
               const cell = registration
@@ -51,7 +56,7 @@ export function Tray({
                   title={`${pos(slot)} · ${plate ? plate.id : '빈 슬롯'} · ${WELL_LABEL[cell]}`}
                 >
                   {/* 등록 화면은 상태 원 대신 빈 칸 번호 / 「사용 중」을 적는다. 번호는 다른 화면과 같은 「2-1」 꼴. */}
-                  <b>{registration && plate ? '사용 중' : `${tier}-${col}`}</b>
+                  <b>{registration && plate ? '사용 중' : columns > 1 ? `${tier}-${col}` : `${tier}단`}</b>
                 </button>
               );
             })}

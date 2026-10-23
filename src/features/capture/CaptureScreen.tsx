@@ -44,16 +44,29 @@ export function CaptureScreen({state, send}: Props) {
     <div className="cp-page">
       <div className="cp-main">
         <div className={`cp-cam ${running ? 'live' : ''}`}>
-          {running && capture ? (
-            <img src={`/api/images/well-${(((d.id - 1) * 2) % 9) + 1}.png`} alt="" />
+          {/* 실장비(스캐너 1)는 6-well 모자이크가 만들어지는 대로 보여준다. 가상 장비는 영상이 없다. */}
+          {job && capture && job.image ? (
+            <img src={`/api/images/${job.image}`} alt="촬영 중인 플레이트" />
           ) : (
             <span className="cp-cam-idle">
               <b>{job ? `${JOB_NAME[job.type]} ${job.status === 'paused' ? '일시정지' : '진행 중'}` : '촬영 대기'}</b>
-              <small>촬영이 시작되면 실제 촬영 영상이 표시됩니다</small>
+              <small>
+                {job?.realCamera
+                  ? job.step < 2
+                    ? '플레이트를 촬영 위치로 옮기는 중입니다.'
+                    : job.step === 2
+                      ? '카메라 영상을 가져오는 중입니다.'
+                      : '촬영 후 과정을 진행 중입니다.'
+                  : job
+                    ? '가상 장비 작업 · 표시할 영상이 없습니다.'
+                    : '촬영이 시작되면 실제 촬영 영상이 표시됩니다'}
+              </small>
             </span>
           )}
           <span className="cp-chips">
             {running && <span className="p-tag bad">REC</span>}
+            {job?.realCamera && <span className="p-tag mute">실장비</span>}
+            {job?.plateGrid && <span className="p-tag mute">{job.plateGrid.label}</span>}
           </span>
           {/* 위치 칩 · 조명/히팅/카메라 줄은 뺐다 — 영상 위에 글자가 덮이지 않게(혜원님 10/14). */}
         </div>

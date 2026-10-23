@@ -1,0 +1,20 @@
+{
+  "title": "테스트베드 (지그, 단당 플레이트 1매)",
+  "adapter": "real",
+  "scanners": 1,
+  "layout": {"tiers": 8, "columns": 1},
+  "recipe": "config/mcb-config.testbed.json",
+  "dataDir": "data/testbed",
+  "camera": {"device": "/dev/v4l/by-id/usb-HD_USB_Camera_HD_USB_Camera_01.00.00-video-index0", "format": "YUYV", "width": 3840, "height": 3040},
+  "mcb": {
+    "port": "/dev/serial0",
+    "firmwareMin": 18,
+    "expected": {"1": {"RANGE": -4000, "USTEP": 8}, "2": {"RANGE": 3680, "USTEP": 8}, "3": {"RANGE": 2400, "USTEP": 8}, "4": {"RANGE": 22400, "USTEP": 8}}
+  },
+  "alignment": {"enabled": true},
+  "autoRun": false,
+  "features": {"triggers": true, "simAlarm": true, "demoPlates": false},
+  "network": {"host": "0.0.0.0", "port": 8787, "enginePort": 8790, "consolePort": 8792, "adminPort": 8799},
+  "kiosk": {"scale": 1.0, "width": 1200, "height": 800},
+  "limits": {"captureZMax": 1000}
+}

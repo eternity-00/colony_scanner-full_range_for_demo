@@ -1,0 +1,18 @@
+# systemd user unit for the admin tool (start only while servicing the machine):
+#   systemctl --user start colony-admin.service      -> http://<pi>:8799
+# It talks to the running colony.service through /api/v1/maintenance and holds no hardware itself.
+[Unit]
+Description=Colony Scanner admin tool (firmware parameters, recipe, manual motion)
+After=colony.service
+
+[Service]
+Type=simple
+WorkingDirectory=%h/colony_scanner-UI
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+Environment=COLONY_PROFILE=testbed
+ExecStart=%h/.local/bin/node tools/admin/server.mjs
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=default.target

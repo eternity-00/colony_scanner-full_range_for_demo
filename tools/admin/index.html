@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Colony Scanner 관리 툴</title>
+<style>
+:root{--bg:#f2f4f7;--bd:#d9dee6;--tx:#1b1f24;--tx2:#5c6672;--blue:#2e4a8c;--red:#b42318;--amber:#9a5b06;--green:#2f7a4b;--navy:#16244b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font-family:Pretendard,'Noto Sans CJK KR',system-ui,sans-serif;font-size:14px}
+header{background:var(--navy);color:#fff;padding:10px 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+header h1{font-size:16px;margin:0}header .st{margin-left:auto;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.pill{padding:3px 8px;border-radius:12px;font-size:12px;font-weight:700;background:#fff2;color:#fff}.pill.on{background:#2f7a4b}.pill.off{background:#b42318}.pill.warn{background:#9a5b06}
+nav{display:flex;gap:4px;padding:8px 16px 0;flex-wrap:wrap}nav button{border:1px solid var(--bd);border-bottom:none;background:#e8ecf3;padding:8px 14px;border-radius:8px 8px 0 0;font:inherit;cursor:pointer}nav button.active{background:#fff;font-weight:700}
+main{padding:12px 16px;max-width:1300px}section.tab{display:none}section.tab.active{display:block}
+.card{background:#fff;border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:12px}.card h2{font-size:15px;margin:0 0 8px}.card p.muted{color:var(--tx2);margin:4px 0 10px;font-size:13px}
+button{font:inherit;border:1px solid #c5ccd6;border-radius:8px;background:#fff;padding:7px 12px;cursor:pointer;min-height:36px}button.primary{background:var(--blue);border-color:var(--blue);color:#fff}button.danger{background:var(--red);border-color:var(--red);color:#fff}button:disabled{opacity:.5;cursor:default}
+input,select{font:inherit;padding:6px 8px;border:1px solid #c5ccd6;border-radius:6px;min-height:36px}input.num{width:7em;text-align:right}
+table{border-collapse:collapse;width:100%;font-size:13px}th,td{border-bottom:1px solid var(--bd);padding:5px 6px;text-align:right;white-space:nowrap}th:first-child,td:first-child{text-align:left}thead th{background:#f6f7fa;position:sticky;top:0}
+td.diff{background:#fff0b3}td.changed{background:#d3f1a7}td.mismatch{background:#ffbdad}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+pre{background:#101827;color:#dbe5ff;padding:10px;border-radius:8px;overflow:auto;max-height:280px;font-size:12px;margin:8px 0}
+.log{font-family:ui-monospace,monospace;font-size:12px;color:var(--tx2);white-space:pre-wrap}
+#toast{position:fixed;right:16px;bottom:16px;background:#1b1f24;color:#fff;padding:10px 14px;border-radius:8px;display:none;max-width:520px;white-space:pre-wrap}
+.scroll{overflow:auto;max-height:60vh}
+dl{display:grid;grid-template-columns:10em 1fr;gap:6px 10px;margin:0}dt{color:var(--tx2)}dd{margin:0}
+img.prev{max-width:100%;border:1px solid var(--bd);border-radius:6px;background:#000}
+.warnbox{background:#fff0b3;border:1px solid #ebc27a;border-radius:8px;padding:8px 10px;margin:8px 0}
+</style>
+</head>
+<body>
+<header>
+ <h1>Colony Scanner 관리 툴</h1>
+ <span id="hdProfile" class="pill">프로필 —</span>
+ <span id="hdMcb" class="pill">MCB —</span>
+ <span id="hdCam" class="pill">카메라 —</span>
+ <span id="hdMaint" class="pill off">점검 모드 꺼짐</span>
+ <div class="st">
+  <label>관리자 PIN <input id="pin" type="password" inputmode="numeric" maxlength="4" style="width:5em" placeholder="0000"></label>
+  <button id="btnEnter" class="primary">점검 모드 시작</button>
+  <button id="btnExit">점검 모드 종료</button>
+ </div>
+</header>
+<nav id="tabs">
+ <button data-tab="params" class="active">펌웨어 파라미터</button>
+ <button data-tab="recipe">레시피</button>
+ <button data-tab="manual">수동 조작</button>
+ <button data-tab="camera">카메라 · 정렬</button>
+ <button data-tab="diag">진단</button>
+ <button data-tab="profile">프로필</button>
+</nav>
+<main>
+ <div id="noMaint" class="warnbox" style="display:none">점검 모드가 아닙니다. 읽기는 되지만 파라미터 변경 · 레시피 저장 · 모터 조작은 「점검 모드 시작」 뒤에만 됩니다. 점검 모드 동안 운영 화면의 촬영과 장비 조작은 막힙니다.</div>
+
+ <section class="tab active" id="tab-params">
+  <div class="card">
+   <h2>MCB 펌웨어 파라미터 (GET ALL)</h2>
+   <p class="muted">칸을 고쳐 「변경 적용(SET)」을 누르면 RAM 에 바로 적용되고, 「플래시 저장(SAVE)」을 눌러야 전원을 꺼도 남습니다. 프로필 기대값과 다른 칸은 주황, 고친 칸은 초록입니다. 변경 전에 백업이 자동으로 남습니다.</p>
+   <div class="row">
+    <button id="btnParamsReload">다시 읽기</button>
+    <button id="btnParamsApply" class="primary">변경 적용 (SET)</button>
+    <button id="btnParamsSave">플래시 저장 (SAVE)</button>
+    <button id="btnParamsDefaults" class="danger">기본값으로 (DEFAULTS)</button>
+    <span id="paramsNote" class="log"></span>
+   </div>
+   <div class="scroll"><table id="paramsTable"></table></div>
+   <p class="muted">검사: HMAX ≥ |RANGE|, SPEED·MAXSPEED 는 공진 구간(RESLO~RESHI) 밖, USTEP 변경 시 step 단위 값 전부 재확인(정렬 보정값도 무효가 됩니다).</p>
+  </div>
+  <div class="card">
+   <h2>백업 · 복원</h2>
+   <div class="row"><input id="backupNote" placeholder="메모 (예: 트레이 X 속도 조정 전)" style="width:24em"><button id="btnBackup">지금 백업</button></div>
+   <table id="backupTable"><thead><tr><th>파일</th><th>저장 시각</th><th>메모</th><th></th></tr></thead><tbody></tbody></table>
+  </div>
+ </section>
+
+ <section class="tab" id="tab-recipe">
+  <div class="card">
+   <h2>공정 레시피 <span id="recipeFile" class="log"></span></h2>
+   <p class="muted">단 수, 웰 배치, 트레이 꺼냄 위치, 촬영 높이(풀스텝 — 앱이 USTEP 을 곱함), 웰 안지름, 정렬 중 카메라 축 속도. 저장 전 검증하며 이전 파일은 config/history 에 남습니다. 저장은 즉시 적용됩니다.</p>
+   <div class="grid" id="recipeForm"></div>
+   <div class="row"><label>speedHz cameraX <input class="num" id="r_speed_cameraX"></label><label>cameraY <input class="num" id="r_speed_cameraY"></label><label>trayX <input class="num" id="r_speed_trayX"></label><label>trayZ <input class="num" id="r_speed_trayZ"></label><span class="log">비우면 펌웨어 SPEED</span></div>
+   <div class="row"><button id="btnRecipeValidate">검증</button><button id="btnRecipeSave" class="primary">저장</button><button id="btnRecipeReload">다시 읽기</button></div>
+   <pre id="recipeProblems" style="display:none"></pre>
+   <details><summary>이전 버전</summary><ul id="recipeHistory"></ul></details>
+  </div>
+ </section>
+
+ <section class="tab" id="tab-manual">
+  <div class="card">
+   <h2>수동 조작</h2>
+   <p class="muted">모든 이동은 펌웨어 RANGE 안에서만 보냅니다. 위치는 step(마이크로스텝) 단위입니다. 「정지」는 점검 모드와 무관하게 언제나 됩니다.</p>
+   <div class="row"><button id="btnHomeAll" class="primary">HOME ALL</button><button id="btnStatus">STATUS</button><button id="btnStop" class="danger">정지 (STOP ALL)</button></div>
+   <div class="row">
+    <label>모터 <select id="mvMotor"><option>1</option><option>2</option><option>3</option><option>4</option></select></label>
+    <label>위치 <input class="num" id="mvPos" value="0"></label>
+    <label>속도 Hz <input class="num" id="mvHz" placeholder="펌웨어"></label>
+    <button id="btnMove">MOVE</button>
+    <label>JOG 거리 <input class="num" id="jogDist" value="100"></label><button id="btnJogMinus">−</button><button id="btnJogPlus">＋</button>
+   </div>
+   <div class="row" id="bookmarks"></div>
+   <table id="statusTable"></table>
+   <pre id="manualLog"></pre>
+  </div>
+ </section>
+
+ <section class="tab" id="tab-camera">
+  <div class="card">
+   <h2>카메라 · 정렬 보정 · 초점</h2>
+   <p class="muted">보정과 초점 모드는 운영 앱의 작업으로 실행됩니다(장비가 움직임). 점검 모드를 끈 상태에서 실행하세요 — 점검 모드 중에는 운영 앱이 장비 명령을 받지 않습니다.</p>
+   <dl id="camInfo"></dl>
+   <div class="row">
+    <label>플레이트 칸 <select id="calSlot"></select></label>
+    <button id="btnAlign" class="primary">정렬 보정 실행</button>
+    <button id="btnFocus">초점 조정 위치로</button>
+    <button id="btnFocusStop">초점 조정 끝 · 복귀</button>
+    <button id="btnTestShot">시험 촬영 1장</button>
+   </div>
+   <div id="focusBox" style="display:none">
+    <p id="focusText"></p>
+    <div class="row" style="align-items:flex-start"><img class="prev" id="focusCrop" style="width:480px"><img class="prev" id="focusFull" style="width:320px"></div>
+   </div>
+   <div id="shotBox" style="display:none"><p id="shotText"></p><img class="prev" id="shotImg" style="width:480px"></div>
+  </div>
+ </section>
+
+ <section class="tab" id="tab-diag">
+  <div class="card">
+   <h2>진단</h2>
+   <div class="row"><button id="btnPing">PING</button><button id="btnVer">VER</button><button id="btnInfo">INFO</button></div>
+   <dl id="diagInfo"></dl>
+   <pre id="diagLog"></pre>
+  </div>
+ </section>
+
+ <section class="tab" id="tab-profile">
+  <div class="card">
+   <h2>배포 프로필</h2>
+   <p class="muted">COLONY_PROFILE 로 고릅니다(testbed · production · virtual). 전환은 systemd 유닛의 환경변수를 바꾸고 서비스를 재시작해야 하므로 여기서는 내용만 보여줍니다.</p>
+   <pre id="profileJson"></pre>
+  </div>
+ </section>
+</main>
+<div id="toast"></div>
+<script>
+const $=id=>document.getElementById(id);
+const PARAM_KEYS=['USED','RANGE','HDIR','HACTIVE','HFAST','HSLOW','HMARGIN','HMAX','HPARK','SPEED','MAXSPEED','START','ACCEL','BACCEL','RESLO','RESHI','HDECEL','HOVER','USTEP','SMOOTH'];
+const RECIPE_FIELDS=[['tiers','단 수'],['wellColumns','웰 열 수'],['wellRows','웰 행 수'],['trayOut','트레이 꺼냄 위치 (풀스텝)'],['captureZ','촬영 높이 Z (풀스텝)'],['wellDiameterMm','웰 안지름 (mm)']];
+let status=null,profile=null,params=null,edited={},recipe=null,calPlates=[];
+const pin=()=>$('pin').value||sessionStorage.getItem('pin')||'';
+$('pin').addEventListener('change',()=>sessionStorage.setItem('pin',$('pin').value));$('pin').value=sessionStorage.getItem('pin')||'';
+const toast=(m,ms=4000)=>{const t=$('toast');t.textContent=m;t.style.display='block';clearTimeout(t.h);t.h=setTimeout(()=>t.style.display='none',ms);};
+async function api(path,{method='GET',body}={}){const r=await fetch('/app'+path,{method,headers:{'content-type':'application/json','x-admin-pin':pin()},body:body?JSON.stringify(body):undefined});const d=await r.json().catch(()=>({}));if(!r.ok)throw Object.assign(new Error(d.message||r.statusText),{code:d.code,data:d});return d;}
+const rid=()=>'admin_'+Math.random().toString(36).slice(2,14);
+async function command(command,deviceId=1,args={}){
+ // operating-app command as the admin: log in with the pin first so ADMIN_ONLY commands pass
+ await api('/api/commands',{method:'POST',body:{requestId:rid(),command:'role.login',deviceId:0,args:{pin:pin()}}}).catch(()=>{});
+ return api('/api/commands',{method:'POST',body:{requestId:rid(),command,deviceId,args}});
+}
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('section.tab').forEach(s=>s.classList.toggle('active',s.id==='tab-'+b.dataset.tab));});
+
+async function refresh(){
+ try{status=await api('/api/v1/maintenance/status');}catch(e){$('hdProfile').textContent='연결 실패: '+e.message;return;}
+ const m=status.maintenance;
+ $('hdProfile').textContent=`프로필 ${status.profile.title} (${status.profile.name})`;
+ $('hdMcb').textContent=status.mcb?(status.mcb.connected?'MCB 연결':'MCB 끊김 '+(status.mcb.error||'')):'MCB 없음';$('hdMcb').className='pill '+(status.mcb?(status.mcb.connected?'on':'off'):'warn');
+ $('hdCam').textContent=status.camera?(status.camera.hardware?.connected?'카메라 연결':'카메라 끊김'):'카메라 없음';$('hdCam').className='pill '+(status.camera?(status.camera.hardware?.connected?'on':'off'):'warn');
+ $('hdMaint').textContent=m?`점검 모드 (${m.by}, ${new Date(m.since).toLocaleTimeString()})`:'점검 모드 꺼짐';$('hdMaint').className='pill '+(m?'warn':'off');
+ $('noMaint').style.display=m?'none':'block';
+ if(status.mcb?.params&&!params)renderParams(status.mcb.params);
+ $('diagInfo').innerHTML=`<dt>펌웨어 검사</dt><dd>${status.firmwareCheck?.ok===null?'미확인':status.firmwareCheck.ok?'프로필 기대값과 일치':'불일치 '+status.firmwareCheck.mismatches.map(x=>`M${x.motor} ${x.key} ${x.actual}≠${x.expected}`).join(', ')}</dd><dt>MCB</dt><dd>${status.mcb?JSON.stringify({connected:status.mcb.connected,checkedAt:status.mcb.checkedAt&&new Date(status.mcb.checkedAt).toLocaleString(),error:status.mcb.error}):'없음'}</dd><dt>카메라</dt><dd>${status.camera?JSON.stringify(status.camera.hardware):'없음'}</dd>`;
+ const h=status.camera?.hardware||{};$('camInfo').innerHTML=`<dt>카메라</dt><dd>${status.camera?(h.connected?'USB 연결':'끊김 '+(h.error||'')):'없음'}</dd><dt>점검 모드</dt><dd>${m?'켜짐 — 보정·초점은 점검 모드를 끈 뒤':'꺼짐'}</dd>`;
+}
+$('btnEnter').onclick=()=>api('/api/v1/maintenance/enter',{method:'POST',body:{by:'관리 툴'}}).then(()=>{toast('점검 모드 시작');refresh();}).catch(e=>toast(e.message));
+$('btnExit').onclick=()=>api('/api/v1/maintenance/exit',{method:'POST'}).then(()=>{toast('점검 모드 종료');refresh();}).catch(e=>toast(e.message));
+
+// ---- firmware parameters
+function renderParams(p){
+ params=p;edited={};
+ const expected=profile?.profile?.mcb?.expected||{};
+ const motors=Object.keys(p).sort((a,b)=>a-b);
+ let html='<thead><tr><th>키</th>'+motors.map(m=>`<th>M${m}${p[m].USED?'':' (미사용)'}</th>`).join('')+'</tr></thead><tbody>';
+ for(const k of PARAM_KEYS){html+=`<tr><td>${k}</td>`;for(const m of motors){const v=p[m][k];const exp=expected[m]?.[k];const cls=exp!==undefined&&exp!==v?'mismatch':'';html+=`<td class="${cls}" title="${exp!==undefined?'기대값 '+exp:''}"><input class="num" data-m="${m}" data-k="${k}" value="${v??''}" style="min-height:28px;padding:2px 4px"></td>`;}html+='</tr>';}
+ $('paramsTable').innerHTML=html+'</tbody>';
+ $('paramsTable').querySelectorAll('input').forEach(i=>i.oninput=()=>{const m=i.dataset.m,k=i.dataset.k,v=Number(i.value);if(Number.isInteger(v)&&v!==params[m][k]){edited[`${m} ${k}`]=v;i.parentElement.classList.add('changed');}else{delete edited[`${m} ${k}`];i.parentElement.classList.remove('changed');}$('paramsNote').textContent=Object.keys(edited).length?`${Object.keys(edited).length}건 변경 대기`:'';});
+}
+function checkParams(){
+ const problems=[];
+ for(const [mk,v] of Object.entries(edited)){const [m,k]=mk.split(' ');const p={...params[m]};p[k]=v;
+  if(k==='RANGE'&&p.HMAX<Math.abs(v))problems.push(`M${m}: HMAX(${p.HMAX}) < |RANGE|(${Math.abs(v)}) — HMAX 를 먼저 올리세요`);
+  if((k==='SPEED'||k==='MAXSPEED')&&p.RESLO<p.RESHI&&v>=p.RESLO&&v<=p.RESHI)problems.push(`M${m}: ${k} ${v} 가 공진 구간 ${p.RESLO}~${p.RESHI} 안입니다`);
+  if(k==='USTEP')problems.push(`M${m}: USTEP 변경 — 위치·속도·가속도 단위가 바뀌고 카메라 정렬 보정값이 무효가 됩니다`);
+ }
+ return problems;
+}
+async function runMcb(steps,timeout=60){const r=await api('/api/v1/maintenance/mcb',{method:'POST',body:{steps,timeout}});return r;}
+$('btnParamsReload').onclick=async()=>{try{const r=await runMcb(['PARAMS'],10);renderParams(r.params);toast('파라미터를 다시 읽었습니다');}catch(e){toast(e.message);}};
+$('btnParamsApply').onclick=async()=>{
+ const steps=Object.entries(edited).map(([mk,v])=>`SET ${mk} ${v}`);if(!steps.length)return toast('변경한 값이 없습니다');
+ const problems=checkParams();if(problems.length&&!confirm('검사 경고:\n'+problems.join('\n')+'\n\n그래도 적용할까요?'))return;
+ try{await api('/api/v1/maintenance/params/backup',{method:'POST',body:{note:'자동 백업 (SET 전)'}});const r=await runMcb([...steps,'PARAMS'],30);renderParams(r.params);loadBackups();
+  const err=(r.replies||[]).filter(x=>x.reply.some(l=>l.startsWith('ERR')));toast(err.length?'일부 거부됨:\n'+err.map(x=>x.step+' → '+x.reply.join(' ')).join('\n'):'적용했습니다 (RAM). 유지하려면 SAVE 를 누르세요');}
+ catch(e){toast(e.message);}
+};
+$('btnParamsSave').onclick=async()=>{if(!confirm('현재 RAM 값을 플래시에 저장합니다.'))return;try{const r=await runMcb(['SAVE','PARAMS'],20);renderParams(r.params);toast('저장했습니다');}catch(e){toast(e.message);}};
+$('btnParamsDefaults').onclick=async()=>{if(!confirm('config.h 기본값을 RAM 에 불러옵니다(저장 전까지는 플래시 값 유지). 계속할까요?'))return;try{await api('/api/v1/maintenance/params/backup',{method:'POST',body:{note:'자동 백업 (DEFAULTS 전)'}});const r=await runMcb(['DEFAULTS','PARAMS'],20);renderParams(r.params);loadBackups();toast('기본값을 불러왔습니다 (RAM)');}catch(e){toast(e.message);}};
+async function loadBackups(){try{const r=await api('/api/v1/maintenance/params/backups');const tb=$('backupTable').querySelector('tbody');tb.innerHTML='';for(const f of r.files){const d=await api('/api/v1/maintenance/params/backups/'+f).catch(()=>({}));const tr=document.createElement('tr');tr.innerHTML=`<td>${f}</td><td>${d.savedAt?new Date(d.savedAt).toLocaleString():''}</td><td>${d.note||''}</td><td><button data-f="${f}">복원 (SET)</button> <button data-f="${f}" data-save="1">복원 + SAVE</button></td>`;tb.appendChild(tr);}
+ tb.querySelectorAll('button').forEach(b=>b.onclick=async()=>{if(!confirm(`${b.dataset.f} 의 값으로 되돌립니다${b.dataset.save?' 하고 플래시에 저장합니다':''}.`))return;try{const r=await api('/api/v1/maintenance/params/restore',{method:'POST',body:{file:b.dataset.f,save:!!b.dataset.save}});renderParams(r.params);toast('복원했습니다');}catch(e){toast(e.message);}});}catch(e){}}
+$('btnBackup').onclick=async()=>{try{const r=await api('/api/v1/maintenance/params/backup',{method:'POST',body:{note:$('backupNote').value}});toast('백업: '+r.file);loadBackups();}catch(e){toast(e.message);}};
+
+// ---- recipe
+function renderRecipe(r){
+ recipe=r;$('recipeFile').textContent=r.file;
+ $('recipeForm').innerHTML=RECIPE_FIELDS.map(([k,l])=>`<label>${l}<br><input class="num" id="r_${k}" value="${r.config[k]??''}"></label>`).join('');
+ const sp=r.config.speedHz;for(const a of ['cameraX','cameraY','trayX','trayZ'])$('r_speed_'+a).value=typeof sp==='number'?sp:(sp?.[a]??'');
+ $('recipeHistory').innerHTML=(r.history||[]).map(h=>`<li>${h}</li>`).join('')||'<li>없음</li>';
+}
+function recipeFromForm(){
+ const c={...recipe.config};for(const [k] of RECIPE_FIELDS){const v=$('r_'+k).value;c[k]=k==='wellDiameterMm'?Number(v):parseInt(v,10);}
+ const sp={};for(const a of ['cameraX','cameraY','trayX','trayZ']){const v=$('r_speed_'+a).value.trim();if(v)sp[a]=parseInt(v,10);}
+ if(Object.keys(sp).length)c.speedHz=sp;else delete c.speedHz;return c;
+}
+const showProblems=p=>{const el=$('recipeProblems');el.style.display='block';el.textContent=p.length?p.join('\n'):'검증 통과';};
+$('btnRecipeReload').onclick=()=>api('/api/v1/maintenance/recipe').then(renderRecipe).catch(e=>toast(e.message));
+$('btnRecipeValidate').onclick=()=>api('/api/v1/maintenance/recipe/validate',{method:'POST',body:{config:recipeFromForm()}}).then(r=>showProblems(r.problems)).catch(e=>toast(e.message));
+$('btnRecipeSave').onclick=async()=>{const config=recipeFromForm();try{const r=await api('/api/v1/maintenance/recipe',{method:'PUT',body:{config}});showProblems(r.problems||[]);toast('저장했습니다 · 이전 파일: '+r.backup);renderRecipe(await api('/api/v1/maintenance/recipe'));}catch(e){if(e.data?.problems){showProblems(e.data.problems);if(confirm('검증 실패 항목이 있습니다. 그래도 저장할까요?')){try{await api('/api/v1/maintenance/recipe',{method:'PUT',body:{config,force:true}});toast('강제 저장했습니다');}catch(e2){toast(e2.message);}}}else toast(e.message);}};
+
+// ---- manual motion
+const mlog=t=>{$('manualLog').textContent=(t+'\n'+$('manualLog').textContent).slice(0,6000);};
+function renderStatus(motors){if(!motors)return;const keys=['POS','HOMED','MOVING','FAULT','SENSOR'];$('statusTable').innerHTML='<thead><tr><th>모터</th>'+keys.map(k=>`<th>${k}</th>`).join('')+'</tr></thead><tbody>'+Object.entries(motors).map(([m,v])=>`<tr><td>M${m}</td>${keys.map(k=>`<td>${v[k]??''}</td>`).join('')}</tr>`).join('')+'</tbody>';}
+async function motion(steps,timeout=120){try{const r=await runMcb(steps,timeout);renderStatus(r.motors);mlog(`${steps.join(' / ')} → ${r.seconds}s ${(r.replies||[]).map(x=>x.reply.join(' ')).join(' | ')}`);return r;}catch(e){mlog('ERR '+e.message);toast(e.message);}}
+$('btnHomeAll').onclick=()=>confirm('HOME ALL: 모든 축이 원점을 찾습니다.')&&motion(['HOME ALL'],400);
+$('btnStatus').onclick=()=>motion(['STATUS'],10);
+$('btnStop').onclick=()=>api('/api/v1/maintenance/mcb/stop',{method:'POST'}).then(()=>{mlog('STOP ALL');toast('정지 명령을 보냈습니다');}).catch(e=>toast(e.message));
+function inRange(m,pos){const p=params?.[m];if(!p)return true;const lo=Math.min(0,p.RANGE),hi=Math.max(0,p.RANGE);return pos>=lo&&pos<=hi;}
+$('btnMove').onclick=()=>{const m=$('mvMotor').value,pos=parseInt($('mvPos').value,10),hz=$('mvHz').value.trim();if(!Number.isInteger(pos))return toast('위치를 넣으세요');if(!inRange(m,pos))return toast(`M${m} RANGE ${params[m].RANGE} 밖입니다`);motion([`MOVE ${m} ${pos}${hz?' '+parseInt(hz,10):''}`],120);};
+const jog=sign=>{const m=$('mvMotor').value,d=parseInt($('jogDist').value,10)*sign;const cur=Number($('statusTable').querySelector(`tr:nth-child(${m}) td:nth-child(2)`)?.textContent||0);if(!inRange(m,cur+d))return toast('RANGE 밖입니다');motion([`JOG ${m} ${d}`],60);};
+$('btnJogMinus').onclick=()=>jog(-1);$('btnJogPlus').onclick=()=>jog(1);
+function renderBookmarks(){
+ if(!params||!recipe)return;const ax=recipe.config.axes||{};const b=$('bookmarks');b.innerHTML='<b>바로 가기:</b> ';
+ const add=(label,steps)=>{const btn=document.createElement('button');btn.textContent=label;btn.onclick=()=>motion(steps,120);b.appendChild(btn);};
+ const u=a=>params[ax[a]]?.USTEP||1,range=a=>params[ax[a]]?.RANGE||0;
+ add('카메라 원위치',[`MOVE ${ax.cameraX} ${params[ax.cameraX]?.HDIR*params[ax.cameraX]?.HPARK}`,`MOVE ${ax.cameraY} ${params[ax.cameraY]?.HDIR*params[ax.cameraY]?.HPARK}`]);
+ add('트레이 꺼냄 (trayOut)',[`MOVE ${ax.trayX} ${recipe.config.trayOut*u('trayX')}`]);add('트레이 넣음',[`MOVE ${ax.trayX} ${params[ax.trayX]?.HDIR*params[ax.trayX]?.HPARK}`]);
+ add('촬영 높이 (captureZ)',[`MOVE ${ax.trayZ} ${recipe.config.captureZ*u('trayZ')}`]);
+ const n=recipe.config.tiers;for(let t=1;t<=n;t++){const k=n+1-t;add(`${t}단 Z`,[`MOVE ${ax.trayZ} ${Math.round(range('trayZ')*(k-0.5)/n)}`]);}
+}
+
+// ---- camera / alignment / focus
+async function loadPlates(){try{const s=await api('/api/state');calPlates=s.plates.filter(p=>!p.removedAt&&p.deviceId===1).sort((a,b)=>a.slot-b.slot);$('calSlot').innerHTML=calPlates.map(p=>`<option value="${p.slot}">슬롯 ${p.slot} · ${p.id}</option>`).join('')||'<option value="">등록된 플레이트 없음</option>';
+ const d=s.devices[0],f=d?.job?.focus;$('focusBox').style.display=f?'block':'none';if(f){$('focusText').textContent=`${f.stage} · 선명도 ${f.sharpness??'—'} / 최대 ${f.best??'—'} ${f.ratio!=null?'('+f.ratio+'%)':''} · ${f.frames}장 · ${f.hint||''}`;if(f.images){$('focusCrop').src='/app/api/v1/hardware/focus/crop.jpg?t='+f.at;$('focusFull').src='/app/api/v1/hardware/focus/full.jpg?t='+f.at;}}
+ const al=d?.hardware?.alignment;if(al)$('camInfo').insertAdjacentHTML('beforeend',`<dt>정렬 보정</dt><dd>${al.calibrated?`보정됨 ${new Date(al.calibratedAt).toLocaleString()} · 링 r=${al.ring?.radius}px · ${al.umPerPx?al.umPerPx+' µm/px':''}`:'미보정'}${al.enabled?' · 정렬 촬영 켜짐':' · 정렬 촬영 꺼짐'}</dd>`);}catch(e){}}
+$('btnAlign').onclick=()=>{const slot=Number($('calSlot').value);if(!slot)return toast('플레이트를 먼저 등록하세요');if(!confirm(`슬롯 ${slot}의 플레이트로 카메라 정렬 보정을 실행합니다(약 30초, 장비 이동).`))return;command('calibrate',1,{kind:'alignment',slot}).then(()=>toast('보정을 시작했습니다. 운영 화면 설정 > 카메라 정렬에서 진행을 볼 수 있습니다')).catch(e=>toast(e.message));};
+$('btnFocus').onclick=()=>{const slot=Number($('calSlot').value);if(!slot)return toast('플레이트를 먼저 등록하세요');command('calibrate',1,{kind:'focus',slot}).then(()=>toast('초점 조정 위치로 이동합니다')).catch(e=>toast(e.message));};
+$('btnFocusStop').onclick=()=>command('focusStop',1).then(()=>toast('복귀합니다')).catch(e=>toast(e.message));
+$('btnTestShot').onclick=async()=>{try{const r=await api('/api/v1/hardware/capture',{method:'POST',body:{format:'YUYV'}});$('shotBox').style.display='block';$('shotText').textContent='촬영 중…';for(let i=0;i<120;i++){await new Promise(r=>setTimeout(r,1000));const s=await api('/api/v1/hardware/status');const j=s.camera?.job;if(j&&j.id===r.job?.id&&j.status==='completed'){const last=s.camera.last;$('shotText').textContent=`완료 · ${last.width}×${last.height} · ${last.totalSeconds}s`;$('shotImg').src='/app/api/v1/hardware/files/'+(last.files.preview||last.files.image);return;}if(j&&j.status==='failed'){$('shotText').textContent='실패: '+(j.error||'');return;}}$('shotText').textContent='시간 초과';}catch(e){toast(e.message);}};
+
+// ---- diagnostics
+const dlog=t=>{$('diagLog').textContent=(t+'\n'+$('diagLog').textContent).slice(0,6000);};
+for(const [id,cmd] of [['btnPing','PING'],['btnVer','VER'],['btnInfo','INFO']])$(id).onclick=()=>runMcb([cmd],10).then(r=>dlog(cmd+' → '+(r.replies||[]).map(x=>x.reply.join(' | ')).join(''))).catch(e=>dlog(cmd+' ERR '+e.message));
+
+async function init(){
+ try{profile=await api('/api/v1/maintenance/profile');$('profileJson').textContent=JSON.stringify(profile,null,1);}catch(e){$('profileJson').textContent=e.message;}
+ await refresh();if(status?.mcb?.params)renderParams(status.mcb.params);
+ try{renderRecipe(await api('/api/v1/maintenance/recipe'));}catch(e){$('recipeFile').textContent=e.message;}
+ renderBookmarks();loadBackups();loadPlates();
+ setInterval(refresh,3000);setInterval(loadPlates,2000);
+}
+init();
+</script>
+</body>
+</html>

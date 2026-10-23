@@ -1,6 +1,6 @@
 import {useState} from 'react';
 import type {AppState} from '../../api/types.ts';
-import {SLOTS_PER_DEVICE, WELL_LABEL} from '../../config/defines.ts';
+import {WELL_LABEL} from '../../config/defines.ts';
 import {Badge} from '../../shared/Badge.tsx';
 import {WellLegend} from '../../shared/Legend.tsx';
 import {Modal} from '../../shared/Modal.tsx';
@@ -12,6 +12,7 @@ import {
   nextAt,
   platesFor,
   pos,
+  slotsPerDevice,
   totalRuns,
   wellState,
 } from '../../utils/plate.ts';
@@ -58,7 +59,7 @@ export function StatusScreen({
   const device = picked ? state.devices.find(x => x.id === picked.deviceId) : undefined;
 
   const plates = platesFor(state, d.id);
-  const free = SLOTS_PER_DEVICE - plates.length;
+  const free = slotsPerDevice(state) - plates.length;
   // 홈과 같이 트레이 원 색으로 센다 — 한 판은 한 칸에만 들어가 넷의 합이 슬롯 수가 된다.
   const states = plates.map(p => wellState(state, p, d));
   const growing = states.filter(w => w === 'ok' || w === 'busy').length;

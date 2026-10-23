@@ -1,6 +1,6 @@
 {
-  "name": "colony-scanner-react-demo",
-  "version": "1.2.0",
+  "name": "colony-scanner-ui",
+  "version": "2.3.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -11,10 +11,16 @@
     "system": "node scripts/system.mjs",
     "engine": "node simulator-app/engine.mjs",
     "simulator": "node simulator-app/server.mjs",
+    "admin": "node tools/admin/server.mjs",
     "open:simulator": "./open-virtual-device.sh",
-    "test": "node --test test/server.test.mjs",
+    "test": "node --test test/server.test.mjs test/button-camera.test.mjs test/local-hardware.test.mjs test/parallel-motion.test.mjs test/pipeline-camera.test.mjs test/alignment.test.mjs test/admin.test.mjs",
+    "test:py": "python3 test/buffer-session.py && python3 test/local-uart.py",
     "test:ui": "node test/ui.mjs",
-    "check": "npm test && npm run build && npm run test:ui"
+    "check": "npm test && npm run build && npm run test:ui",
+    "test:images": "node test/image-detail.mjs",
+    "test:parallel": "node --test test/parallel-motion.test.mjs && python3 test/parallel-uart.py",
+    "build:camera": "gcc -O2 -std=c11 -Wall -Wextra -Werror device/camera-stream.c -o device/camera-stream",
+    "test:pipeline": "node --test test/pipeline-camera.test.mjs && device/camera-stream --self-test && python3 test/buffer-session.py"
   },
   "dependencies": {
     "react": "19.3.0",

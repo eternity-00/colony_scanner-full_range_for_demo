@@ -1,6 +1,9 @@
 node_modules/
 dist/
 data/
-colony-demo.log
 *.log
 .DS_Store
+__pycache__/
+*.pyc
+device/camera-stream
+config/history/
