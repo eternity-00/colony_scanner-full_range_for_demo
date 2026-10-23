@@ -4,7 +4,7 @@
 # One app, one profile. COLONY_PROFILE picks profiles/<name>.json (testbed | production | virtual);
 # the camera device and MCB port below override the profile when set.
 [Unit]
-Description=Colony Scanner UI (LCD + device server, profile %E{COLONY_PROFILE})
+Description=Colony Scanner UI (LCD + device server; profile from COLONY_PROFILE)
 After=network.target
 
 [Service]
