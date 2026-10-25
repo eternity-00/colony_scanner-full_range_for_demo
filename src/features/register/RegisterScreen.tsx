@@ -87,7 +87,7 @@ export function RegisterScreen({state, send, setTab, device = 1, slot: picked}: 
           <div className="p-card-head">
             <h3>수납 위치 선택</h3>
             <p>빈 슬롯을 눌러 지정합니다</p>
-            <em>빈 슬롯 {free.length}</em>
+            <em>빈 슬롯 {slotsPerDevice(state) - platesFor(state, deviceId).length}</em>
           </div>
           {/* 스캐너가 둘 이상일 때만 고르는 탭을 둔다. */}
           {state.devices.length > 1 && (
