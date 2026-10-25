@@ -2,15 +2,46 @@
   "title": "정식 하드웨어 (초안 · 기구 확정 후 값 갱신)",
   "adapter": "real",
   "scanners": 1,
-  "layout": {"tiers": 8, "columns": 3},
+  "layout": {
+    "tiers": 8,
+    "columns": 3,
+    "tierShared": false
+  },
   "recipe": "config/mcb-config.production.json",
   "dataDir": "data/production",
-  "camera": {"device": null, "format": "YUYV", "width": 3840, "height": 3040},
-  "mcb": {"port": "/dev/serial0", "firmwareMin": 19, "expected": {}},
-  "alignment": {"enabled": true},
+  "camera": {
+    "device": null,
+    "format": "YUYV",
+    "width": 3840,
+    "height": 3040
+  },
+  "mcb": {
+    "port": "/dev/serial0",
+    "firmwareMin": 19,
+    "expected": {}
+  },
+  "alignment": {
+    "enabled": true
+  },
   "autoRun": true,
-  "features": {"triggers": false, "simAlarm": false, "demoPlates": false},
-  "network": {"host": "127.0.0.1", "port": 8787, "enginePort": 8790, "consolePort": 8792, "adminPort": 8799},
-  "kiosk": {"scale": 1.0, "width": 1024, "height": 600},
-  "limits": {"captureZMax": 1000}
+  "features": {
+    "triggers": false,
+    "simAlarm": false,
+    "demoPlates": false
+  },
+  "network": {
+    "host": "127.0.0.1",
+    "port": 8787,
+    "enginePort": 8790,
+    "consolePort": 8792,
+    "adminPort": 8799
+  },
+  "kiosk": {
+    "scale": 1.0,
+    "width": 1024,
+    "height": 600
+  },
+  "limits": {
+    "captureZMax": 1000
+  }
 }

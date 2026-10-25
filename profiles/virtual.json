@@ -2,11 +2,29 @@
   "title": "가상 장비 (PC 개발 · CI)",
   "adapter": "virtual",
   "scanners": 1,
-  "layout": {"tiers": 8, "columns": 3},
+  "layout": {
+    "tiers": 8,
+    "columns": 3,
+    "tierShared": false
+  },
   "recipe": "config/mcb-config.testbed.json",
   "dataDir": "data/virtual",
   "autoRun": true,
-  "features": {"triggers": true, "simAlarm": true, "demoPlates": false},
-  "network": {"host": "127.0.0.1", "port": 8787, "enginePort": 8790, "consolePort": 8792, "adminPort": 8799},
-  "kiosk": {"scale": 1.0, "width": 1024, "height": 600}
+  "features": {
+    "triggers": true,
+    "simAlarm": true,
+    "demoPlates": false
+  },
+  "network": {
+    "host": "127.0.0.1",
+    "port": 8787,
+    "enginePort": 8790,
+    "consolePort": 8792,
+    "adminPort": 8799
+  },
+  "kiosk": {
+    "scale": 1.0,
+    "width": 1024,
+    "height": 600
+  }
 }

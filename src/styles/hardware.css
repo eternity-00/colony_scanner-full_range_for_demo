@@ -76,3 +76,5 @@
 .env-settings button.primary{justify-self:end;min-width:12rem}
 .cp-cam .cp-result{position:absolute;left:0.75rem;bottom:0.75rem;min-height:2.75rem;padding:0 1rem;background:#fff;border:1px solid #c3cad5;border-radius:var(--rr);font-weight:700}
 .cp-steps li.fail i{background:#d6202b;border-color:#d6202b}.cp-steps li.fail b{color:#d6202b}
+.tray.tier-shared .cell.linked{opacity:.85}
+.tray.tier-shared .cell.linked b{color:#8a93a3}

@@ -202,6 +202,10 @@ export interface Layout {
   tiers: number;
   columns: number;
   slots: number;
+  /** 테스트 지그: 한 단의 열 칸들이 물리적으로 플레이트 한 장이다. 어느 칸을 눌러도 그 단으로 취급. */
+  tierShared?: boolean;
+  /** 실제로 넣을 수 있는 플레이트 수 — tierShared 면 단 수, 아니면 slots. */
+  capacity?: number;
 }
 
 /** 배포 프로필(server/profile.mjs). 어느 장비 위에서 도는지와 트레이 배치. */

@@ -15,7 +15,7 @@ test('device commands, role policy, retention and persistence (one scanner)',asy
  try{
   assert.equal(c.snapshot().session.role,'analyst');
   assert.equal(c.snapshot().plates.length,0,'no demo plates');
-  assert.deepEqual(c.snapshot().profile.layout,{tiers:8,columns:3,slots:24});
+  assert.deepEqual(c.snapshot().profile.layout,{tiers:8,columns:3,slots:24,tierShared:false,capacity:24});
   for(let i=0;i<4;i++)await rejects(c.execute(request(100+i,'role.login',0,{pin:'9999'})),'INVALID_PIN');
   await rejects(c.execute(request(104,'role.login',0,{pin:'9999'})),'INVALID_PIN');assert.ok(c.snapshot().session.lockedFor>0);
   // admin-only device commands are refused for the analyst
@@ -105,5 +105,17 @@ test('alarms: environment rule, ack, history, early positive, admin-only incubat
   await c.execute(request(216,'sim.input',1,{fault:null}));await c.execute(request(217,'clearError',1));at(now+4000);assert.ok(!c.snapshot().alarms.find(a=>a.kind==='device'&&!a.clearedAt));
   // environment history sampling
   c.lastEnvSample=0;c.sampleEnvironment(now+5000);assert.equal(c.snapshot().envHistory.length,1);assert.equal(c.snapshot().envHistory[0].t,36);
+ }finally{c.close();rmSync(dir,{recursive:true,force:true});}
+});
+
+test('tierShared layout: the three cells of a tier are one plate',async()=>{
+ const dir=mkdtempSync(join(tmpdir(),'colony-test-'));const c=new Controller({dataDir:dir,adapter:new VirtualDeviceAdapter({stageMs:10}),autoTick:false,profile:{...profile,layout:{tiers:8,columns:3,tierShared:true}}});
+ try{
+  assert.equal(c.snapshot().profile.layout.capacity,8);assert.equal(c.snapshot().profile.layout.slots,24);
+  await c.execute(request(300,'register',1,{slot:17}));	// tier 3, column 2
+  await rejects(c.execute(request(301,'register',1,{slot:16})),'SLOT_OCCUPIED');	// same tier
+  await rejects(c.execute(request(302,'register',1,{slot:18})),'SLOT_OCCUPIED');
+  await c.execute(request(303,'register',1,{slot:19}));	// tier 2 is free
+  assert.equal(c.snapshot().plates.length,2);
  }finally{c.close();rmSync(dir,{recursive:true,force:true});}
 });

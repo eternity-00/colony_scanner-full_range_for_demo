@@ -4,7 +4,7 @@ import {type SendCommand, type TabKey} from '../../config/defines.ts';
 import {Modal} from '../../shared/Modal.tsx';
 import {Tray} from '../../shared/Tray.tsx';
 import {kdt} from '../../utils/datetime.ts';
-import {isBusy, platesFor, pos, slotsPerDevice, status, totalRuns} from '../../utils/plate.ts';
+import {currentLayout, isBusy, platesFor, pos, samePlace, slotsPerDevice, status, totalRuns} from '../../utils/plate.ts';
 
 interface Props {
   state: AppState;
@@ -20,8 +20,9 @@ export function RegisterScreen({state, send, setTab, device = 1, slot: picked}: 
   const [deviceId, setDeviceId] = useState(device);
 
   const free = useMemo(() => {
-    const used = new Set(platesFor(state, deviceId).map(p => p.slot));
-    return Array.from({length: slotsPerDevice(state)}, (_, i) => i + 1).filter(n => !used.has(n));
+    // tierShared(테스트 지그)면 같은 단의 다른 칸도 쓸 수 없다.
+    const used = platesFor(state, deviceId).map(p => p.slot);
+    return Array.from({length: currentLayout().slots}, (_, i) => i + 1).filter(n => !used.some(u => samePlace(u, n)));
   }, [state, deviceId]);
 
   // 현황에서 누른 칸이 있으면 그 칸으로 시작한다. 그새 찼으면 첫 빈 칸으로 떨어진다.

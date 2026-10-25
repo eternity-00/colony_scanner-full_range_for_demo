@@ -6,7 +6,7 @@ import {WellLegend} from '../../shared/Legend.tsx';
 import {ScannerHead} from '../../shared/ScannerHead.tsx';
 import {Tray} from '../../shared/Tray.tsx';
 import {elapsedLabel, fmt} from '../../utils/datetime.ts';
-import {nextAt, pending, pos, status, tone, totalRuns} from '../../utils/plate.ts';
+import {nextAt, pending, plateAtSlot, pos, status, tone, totalRuns} from '../../utils/plate.ts';
 import {RunsTable} from './RunsTable.tsx';
 
 interface Props {
@@ -32,7 +32,7 @@ export function DetailScreen({
   if (!device) return null;
 
 
-  const plate = state.plates.find(p => p.deviceId === deviceId && p.slot === slot && !p.removedAt);
+  const plate = plateAtSlot(state, deviceId, slot);
   const done = plate ? plate.runs.length >= totalRuns(state) : false;
 
   return (

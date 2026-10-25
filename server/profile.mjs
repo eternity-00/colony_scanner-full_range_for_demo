@@ -15,7 +15,8 @@ const DEFAULTS = {
  title: '테스트베드',
  adapter: 'real',               // 'real' = scanner 1 on local USB camera + UART MCB, 'virtual' = simulator only
  scanners: 1,
- layout: {tiers: 8, columns: 1}, // tray: plates per tier = columns; slot = (tiers - tier) * columns + col
+ layout: {tiers: 8, columns: 3, tierShared: false}, // tray: plates per tier = columns; slot = (tiers - tier) * columns + col.
+                                                     // tierShared: the columns of a tier are ONE physical plate (test jig) — any of the three cells means that tier
  recipe: 'config/mcb-config.testbed.json',
  dataDir: 'data/testbed',
  camera: {device: null, format: 'YUYV', width: 3840, height: 3040},
@@ -50,6 +51,8 @@ export function loadProfile(name = profileName()) {
  if (!Number.isInteger(tiers) || tiers < 1 || tiers > 32 || !Number.isInteger(columns) || columns < 1 || columns > 6)
   throw Error(`프로필 layout 이 올바르지 않습니다 (tiers 1~32, columns 1~6): ${JSON.stringify(p.layout)}`);
  p.layout.slots = tiers * columns;
+ p.layout.tierShared = !!p.layout.tierShared;
+ p.layout.capacity = p.layout.tierShared ? tiers : p.layout.slots;
  // environment overrides (systemd unit / shell)
  if (process.env.COLONY_CAMERA_DEVICE) p.camera.device = process.env.COLONY_CAMERA_DEVICE;
  if (process.env.COLONY_MCB_PORT) p.mcb.port = process.env.COLONY_MCB_PORT;

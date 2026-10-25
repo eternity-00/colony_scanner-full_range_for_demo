@@ -1,7 +1,7 @@
 import type React from 'react';
 import type {AppState} from '../api/types.ts';
 import {WELL_LABEL} from '../config/defines.ts';
-import {platesFor, pos, wellState} from '../utils/plate.ts';
+import {plateAtSlot, pos, wellState} from '../utils/plate.ts';
 
 interface Props {
   state: AppState;
@@ -23,14 +23,12 @@ export function Tray({
   compact = false,
   registration = false,
 }: Props) {
-  const plates = platesFor(state, deviceId);
-  const bySlot = new Map(plates.map(p => [p.slot, p]));
   const device = state.devices.find(d => d.id === deviceId);
-  const {tiers, columns} = state.profile?.layout ?? {tiers: 8, columns: 3};
+  const {tiers, columns, tierShared} = state.profile?.layout ?? {tiers: 8, columns: 3, tierShared: false};
 
   return (
     <div
-      className={`tray ${compact ? 'compact' : ''} ${registration ? 'registration' : ''} cols-${columns}`}
+      className={`tray ${compact ? 'compact' : ''} ${registration ? 'registration' : ''} cols-${columns} ${tierShared ? 'tier-shared' : ''}`}
       style={{'--tray-cols': columns} as React.CSSProperties}
     >
       {Array.from({length: tiers}, (_, row) => {
@@ -40,7 +38,7 @@ export function Tray({
             <span className="tier">{tier}단</span>
             {Array.from({length: columns}, (_, c) => c + 1).map(col => {
               const slot = row * columns + col;
-              const plate = bySlot.get(slot);
+              const plate = plateAtSlot(state, deviceId, slot);
               const chosen = selected === slot;
               const cell = registration
                 ? plate
@@ -50,7 +48,7 @@ export function Tray({
               return (
                 <button
                   key={slot}
-                  className={`cell w-${cell} ${chosen ? 'selected' : ''}`}
+                  className={`cell w-${cell} ${chosen ? 'selected' : ''} ${tierShared && plate && plate.slot !== slot ? 'linked' : ''}`}
                   disabled={(compact && !onSelect) || (registration && !!plate)}
                   onClick={() => onSelect?.(slot)}
                   title={`${pos(slot)} · ${plate ? plate.id : '빈 슬롯'} · ${WELL_LABEL[cell]}`}

@@ -8,13 +8,22 @@ import type {Layout} from '../api/types.ts';
  * 맞춰 둔다. 모듈 변수인 이유: pos()/coord() 가 알람·현황·이력 등 수십 곳에서 슬롯 번호만
  * 받아 쓰므로, 모든 호출에 layout 을 끌고 다니는 것보다 한 곳에서 갈아 끼우는 편이 안전하다.
  */
-let layout: Layout = {tiers: 8, columns: 3, slots: 24};
+let layout: Layout = {tiers: 8, columns: 3, slots: 24, tierShared: false, capacity: 24};
 export const configureLayout = (next: Layout | undefined) => {
-  if (next && next.tiers > 0 && next.columns > 0) layout = {...next, slots: next.tiers * next.columns};
+  if (next && next.tiers > 0 && next.columns > 0)
+    layout = {...next, slots: next.tiers * next.columns, capacity: next.tierShared ? next.tiers : next.tiers * next.columns};
 };
 export const currentLayout = () => layout;
-/** 스캐너 한 대의 슬롯 수(프로필 배치). */
-export const slotsPerDevice = (s?: AppState) => s?.profile?.layout?.slots ?? layout.slots;
+/** 스캐너 한 대에 실제로 넣을 수 있는 플레이트 수. tierShared(테스트 지그)면 단 수. */
+export const slotsPerDevice = (s?: AppState) => {
+  const l = s?.profile?.layout ?? layout;
+  return l.capacity ?? (l.tierShared ? l.tiers : l.slots);
+};
+/** 두 슬롯이 같은 자리인지. tierShared 면 같은 단이면 같은 자리다. */
+export const samePlace = (a: number, b: number) => a === b || (!!layout.tierShared && coord(a).tier === coord(b).tier);
+/** 그 칸(또는 tierShared 면 그 단)에 수납된 플레이트. */
+export const plateAtSlot = (s: AppState, deviceId: number, slot: number): Plate | undefined =>
+  platesFor(s, deviceId).find(p => samePlace(p.slot, slot));
 
 /** 슬롯 번호(1~slots) → 단/열. 맨 윗단이 슬롯 1. */
 export const coord = (n: number) => ({
@@ -25,7 +34,7 @@ export const coord = (n: number) => ({
 /** 슬롯 번호 → "3단 2열" */
 export const pos = (n: number) => {
   const {tier, col} = coord(n);
-  return layout.columns > 1 ? `${tier}단 ${col}열` : `${tier}단`;
+  return layout.columns > 1 && !layout.tierShared ? `${tier}단 ${col}열` : `${tier}단`;
 };
 
 /** 아직 반출되지 않은 플레이트. */

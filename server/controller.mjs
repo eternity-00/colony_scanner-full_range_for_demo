@@ -38,7 +38,7 @@ export const imagesOf=capture=>{
 export class Controller extends EventEmitter {
  constructor({dataDir,stageMs=1600,tickMs=250,autoTick=true,adapter,profile=null,layout=null,autoRun=null,features=null}={}){
   super();this.dataDir=dataDir;mkdirSync(join(dataDir,'images'),{recursive:true});this.stateFile=join(dataDir,'state.json');this.revision=0;this.adminPin=process.env.ADMIN_PIN||'0000';this.session={role:'analyst',failed:0,lockUntil:0,idleAt:null};this.holdUntil=0;this.maintenance=null;this.extras=null;this.envSince={};this.lastEnvSample=0;this.lastAlarmEval=0;this.startedAt=Date.now();
-  this.profile=profile;this.layout={...DEFAULT_LAYOUT,...(profile?.layout||layout||{})};this.layout.slots=this.layout.tiers*this.layout.columns;
+  this.profile=profile;this.layout={...DEFAULT_LAYOUT,tierShared:false,...(profile?.layout||layout||{})};this.layout.slots=this.layout.tiers*this.layout.columns;this.layout.capacity=this.layout.tierShared?this.layout.tiers:this.layout.slots;
   this.features={triggers:process.env.COLONY_TRIGGERS==='1',simAlarm:process.env.COLONY_TRIGGERS==='1',demoPlates:false,...(profile?.features||{}),...(features||{})};
   if(existsSync(this.stateFile)){this.db=JSON.parse(readFileSync(this.stateFile,'utf8'));assert(this.db.version===1,'BAD_STATE','지원하지 않는 데이터 파일입니다.',500);}
   else {
@@ -102,7 +102,7 @@ export class Controller extends EventEmitter {
   const want=new Map();const put=a=>want.set(a.key,a);
   const devices=this.adapter.snapshot(),one=devices.length===1;
   const name=id=>devices.find(d=>d.id===id)?.name||`SCANNER ${id}`;
-  const pos=slot=>{const t=this.layout.tiers-Math.floor((slot-1)/this.layout.columns),c=((slot-1)%this.layout.columns)+1;return this.layout.columns>1?`${t}단 ${c}열`:`${t}단`;};
+  const pos=slot=>{const t=this.layout.tiers-Math.floor((slot-1)/this.layout.columns),c=((slot-1)%this.layout.columns)+1;return this.layout.columns>1&&!this.layout.tierShared?`${t}단 ${c}열`:`${t}단`;};
   const at=(id,slot)=>one?pos(slot):`${name(id)} · ${pos(slot)}`;
   for(const d of devices){
    const fault=!d.connected?FAULT_LABEL.DISCONNECTED:d.fault?(FAULT_LABEL[d.fault]||d.fault):d.doorOpen?FAULT_LABEL.DOOR_OPEN:null;
@@ -192,7 +192,9 @@ export class Controller extends EventEmitter {
     if(this.session.role==='admin')this.session.idleAt=Date.now();
    }else if(command==='register'){
     const d=this.adapter.get(deviceId);assert(d.connected&&!d.fault&&!d.doorOpen,'UNAVAILABLE','연결·오류·도어 상태를 확인하세요.');assert(!busy(d),'DEVICE_BUSY','작업 중에는 등록할 수 없습니다.');assert(validInt(args.slot,1,this.layout.slots),'INVALID_SLOT',`슬롯은 1~${this.layout.slots}여야 합니다.`,400);
-    assert(!this.db.plates.some(p=>p.deviceId===deviceId&&p.slot===args.slot&&!p.removedAt),'SLOT_OCCUPIED','이미 수납된 슬롯입니다.');
+    // tierShared(테스트 지그): 한 단의 세 칸은 플레이트 한 장이다 — 같은 단에 이미 있으면 어느 칸이든 거부
+    const tierOf=slot=>this.layout.tiers-Math.floor((slot-1)/this.layout.columns);
+    assert(!this.db.plates.some(p=>p.deviceId===deviceId&&!p.removedAt&&(p.slot===args.slot||(this.layout.tierShared&&tierOf(p.slot)===tierOf(args.slot)))),'SLOT_OCCUPIED',this.layout.tierShared?'이 단에는 이미 플레이트가 있습니다.':'이미 수납된 슬롯입니다.');
     // 투입 시각은 서버가 찍는다. 화면에서 고를 수 있게 두면 촬영 일정 전체를 앞뒤로 옮길 수 있다.
     const registeredAt=Date.now();
     const p={id:`PL-${randomUUID().slice(0,8).toUpperCase()}`,deviceId,slot:args.slot,registeredAt,removedAt:null,paused:false,runs:[]};this.db.plates.push(p);result={plateId:p.id};this.log('INFO',`${p.id} · SCANNER ${deviceId} · 슬롯 ${args.slot} 등록`);

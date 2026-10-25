@@ -12,6 +12,7 @@ import {EnvCard} from '../../shared/EnvCard.tsx';
 import {elapsedLabel, hm, kdt} from '../../utils/datetime.ts';
 import {
   nextAt,
+  plateAtSlot,
   platesFor,
   pos,
   slotsPerDevice,
@@ -53,13 +54,13 @@ export function StatusScreen({
 
   /** 칸을 누르면 — 플레이트가 있으면 요약 팝업, 비어 있으면 등록 확인 팝업. */
   const tap = (deviceId: number, slot: number) => {
-    const plate = platesFor(state, deviceId).find(p => p.slot === slot);
+    const plate = plateAtSlot(state, deviceId, slot);
     if (plate) setPicked({deviceId, slot});
     else setEmptyPick({deviceId, slot});
   };
 
   const plate = picked
-    ? platesFor(state, picked.deviceId).find(p => p.slot === picked.slot)
+    ? plateAtSlot(state, picked.deviceId, picked.slot)
     : undefined;
   const device = picked ? state.devices.find(x => x.id === picked.deviceId) : undefined;
 
