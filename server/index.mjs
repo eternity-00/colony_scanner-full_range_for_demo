@@ -1,5 +1,6 @@
 import {createServer} from 'node:http';
 import {spawn} from 'node:child_process';
+import {randomUUID} from 'node:crypto';
 import {createReadStream,existsSync,statSync,readFileSync,writeFileSync,mkdirSync,readdirSync,renameSync} from 'node:fs';
 import {networkInterfaces} from 'node:os';
 import {extname,join,normalize,resolve,sep,basename,dirname} from 'node:path';
@@ -35,6 +36,7 @@ if(motion&&mcbConfig.tiers!==profile.layout.tiers)console.log(JSON.stringify({wa
 const alignment=motion?new AlignmentStore(process.env.COLONY_ALIGNMENT_FILE||join(dataDir,'camera-alignment.json')):null;
 const adapter=real?new RealCameraAdapter({base,camera,dataDir,motion,alignment}):base;
 const controller=new Controller({dataDir,adapter,profile});
+controller.filesDir=camera?.directory||null;	// per-well previews for the run-to-run change score (A11)
 
 // firmware parameters vs the profile's expected values (RANGE, USTEP ...): a warning, not a stop
 let firmwareCheck={checkedAt:null,ok:null,mismatches:[]};
@@ -52,7 +54,11 @@ const mcbProbe=setInterval(()=>{
 },10000);mcbProbe.unref();
 
 // wired / wireless link of the Pi itself (replaces the "238 Mbps" placeholder of the demo)
-const networkStatus=()=>{const out=[];for(const [name,list] of Object.entries(networkInterfaces()))for(const a of list||[])if(!a.internal&&a.family==='IPv4')out.push({name,address:a.address,kind:/^(wl|wlan)/.test(name)?'wifi':/^(eth|en)/.test(name)?'wired':'other'});return out;};
+let wifi={ssid:null,checkedAt:null};
+// 무선 SSID 표시(M3 A9 · 표시 수준): nmcli 가 있으면 30초마다 읽는다. WiFi 선택·비밀번호 입력은 OS 설정의 몫이다.
+const readWifi=()=>{try{const child=spawn('nmcli',['-t','-f','ACTIVE,SSID','dev','wifi'],{stdio:['ignore','pipe','ignore']});let out='';child.stdout.on('data',b=>{out+=b;});child.on('error',()=>{});child.on('close',()=>{const line=out.split('\n').find(l=>l.startsWith('yes:'));wifi={ssid:line?line.slice(4):null,checkedAt:Date.now()};});}catch{}};
+readWifi();const wifiTimer=setInterval(readWifi,30000);wifiTimer.unref();
+const networkStatus=()=>{const out=[];for(const [name,list] of Object.entries(networkInterfaces()))for(const a of list||[])if(!a.internal&&a.family==='IPv4')out.push({name,address:a.address,kind:/^(wl|wlan)/.test(name)?'wifi':/^(eth|en)/.test(name)?'wired':'other',...(/^(wl|wlan)/.test(name)&&wifi.ssid?{ssid:wifi.ssid}:{})});return out;};
 controller.extras=()=>({network:networkStatus(),firmwareCheck,hardware:{camera:camera?.hardware||null,mcb:motion?{enabled:true,connected:!!motion.machine,checkedAt:motion.checkedAt,error:motion.error||null,port:process.env.COLONY_MCB_PORT||'/dev/serial0'}:{enabled:false}}});
 
 const clients=new Set();
@@ -168,6 +174,16 @@ export const server=createServer(async(req,res)=>{
    if(ext==='.yuy2')headers['content-disposition']=`attachment; filename="${name}"`;
    res.writeHead(200,headers);const s=createReadStream(file);s.on('error',()=>res.destroy());s.pipe(res);return;
   }
+  // PC 전송 서버 연결 점검(A8): 설정된 주소로 TCP 연결을 시도한 결과를 돌려준다.
+  if(req.method==='POST'&&url.pathname==='/api/v1/network/check')return json(res,200,await controller.checkServer());
+  // PC 판독 결과 수신(A15): {plateId|barcode, result: positive|negative|contaminated|null, note?} + x-api-key.
+  if(req.method==='POST'&&url.pathname==='/api/v1/results'){
+   const key=controller.db.settings.server.apiKey||process.env.COLONY_RESULT_KEY||'';
+   if(!key)throw fail('판독 결과 수신 API 키가 설정되지 않았습니다(사용자 설정 → 외부 연결).',503,'RESULT_KEY_UNSET');
+   if((req.headers['x-api-key']||'')!==key)throw fail('API 키가 올바르지 않습니다.',401,'BAD_API_KEY');
+   const b=await body(req);const deviceId=Number(b.deviceId)||1;
+   return json(res,202,await controller.execute({requestId:String(b.requestId||randomUUID()),command:'plateResult',deviceId,args:{plateId:b.plateId,barcode:b.barcode,result:b.result??null,...(b.note!==undefined?{note:b.note}:{})}},'pc'));
+  }
   if(req.method==='GET'&&url.pathname==='/api/state')return json(res,200,controller.snapshot());
   if(req.method==='GET'&&url.pathname==='/api/events'){
    res.writeHead(200,{'content-type':'text/event-stream','cache-control':'no-cache','connection':'keep-alive','x-accel-buffering':'no'});clients.add(res);sse(res,controller.snapshot());const keep=setInterval(()=>res.write(': keepalive\n\n'),15000);req.on('close',()=>{clearInterval(keep);clients.delete(res);});return;
@@ -188,6 +204,6 @@ if(process.env.NODE_ENV!=='test'){
  server.on('error',error=>{console.error(`Colony Scanner LCD 기동 실패 · ${error.message}`);process.exit(1);});
  server.listen(port,host,()=>console.log(`Colony Scanner LCD (${profile.name}): http://${host}:${port}`));
 }
-const shutdown=()=>{clearInterval(mcbProbe);camera?.dispose();controller.close();for(const res of clients)res.end();server.closeAllConnections?.();server.close(()=>process.exit(0));setTimeout(()=>process.exit(0),5000).unref();};
+const shutdown=()=>{clearInterval(mcbProbe);clearInterval(wifiTimer);camera?.dispose();controller.close();for(const res of clients)res.end();server.closeAllConnections?.();server.close(()=>process.exit(0));setTimeout(()=>process.exit(0),5000).unref();};
 process.on('SIGINT',shutdown);process.on('SIGTERM',shutdown);
 export {controller,profile};

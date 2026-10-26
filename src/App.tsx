@@ -15,7 +15,9 @@ import {DetailScreen} from './features/detail/DetailScreen.tsx';
 import {DeviceScreen} from './features/device/DeviceScreen.tsx';
 import {HistoryScreen} from './features/history/HistoryScreen.tsx';
 import {OverviewScreen} from './features/overview/OverviewScreen.tsx';
+import {RecentScreen} from './features/recent/RecentScreen.tsx';
 import {RegisterScreen} from './features/register/RegisterScreen.tsx';
+import {RemoveScreen} from './features/remove/RemoveScreen.tsx';
 import {SettingsScreen} from './features/settings/SettingsScreen.tsx';
 import {StatusScreen} from './features/status/StatusScreen.tsx';
 import {Header} from './layout/Header.tsx';
@@ -55,6 +57,9 @@ export default function App() {
   // 관리자 권한이 없어 막힌 동작. PIN 이 맞으면 retry 로 그대로 이어서 보낸다.
   const [gate, setGate] = useState<{reason: string; retry: () => void} | null>(null);
   const [registerAt, setRegisterAt] = useState<{deviceId: number; slot?: number}>({deviceId: 1});
+  const [removeAt, setRemoveAt] = useState<{deviceId: number; slot?: number}>({deviceId: 1});
+  /** 대기 모드 절전 화면 — 마지막 조작 이후 60초 지나면 덮고, 만지면 걷는다. */
+  const [lastTouch, setLastTouch] = useState(() => Date.now());
   const [menu, setMenu] = useState(false);
   const [exitAsk, setExitAsk] = useState(false);
   const [exiting, setExiting] = useState(false);
@@ -90,11 +95,16 @@ export default function App() {
         command('session.touch', 0).catch(() => {});
       }
     };
+    const wake = () => setLastTouch(Date.now());
     document.addEventListener('pointerdown', touch);
     document.addEventListener('keydown', touch);
+    document.addEventListener('pointerdown', wake);
+    document.addEventListener('keydown', wake);
     return () => {
       document.removeEventListener('pointerdown', touch);
       document.removeEventListener('keydown', touch);
+      document.removeEventListener('pointerdown', wake);
+      document.removeEventListener('keydown', wake);
     };
   }, []);
 
@@ -106,6 +116,11 @@ export default function App() {
   const openRegister = (deviceId: number, slot?: number) => {
     setRegisterAt({deviceId, slot});
     setTab('register');
+  };
+
+  const openRemove = (deviceId: number, slot?: number) => {
+    setRemoveAt({deviceId, slot});
+    setTab('remove');
   };
 
   useEffect(() => {
@@ -190,6 +205,8 @@ export default function App() {
         state={state}
         openDetail={openDetail}
         openRegister={openRegister}
+        openRemove={openRemove}
+        onRecent={() => setTab('recent')}
         onDevice={() => setTab('device')}
         onStatus={() => setTab('status')}
         onNeedAdmin={(where, what) => setAdminAsk({where, what})}
@@ -216,6 +233,7 @@ export default function App() {
         openViewer={openViewer}
       />
     ),
+    recent: <RecentScreen state={state} openViewer={openViewer} openDetail={openDetail} />,
     register: (
       <RegisterScreen
         state={state}
@@ -225,6 +243,7 @@ export default function App() {
         slot={registerAt.slot}
       />
     ),
+    remove: <RemoveScreen state={state} send={execute} setTab={setTab} device={removeAt.deviceId} slot={removeAt.slot} />,
     running: <CaptureScreen state={state} send={execute} openViewer={openViewer} />,
     history: (
       <HistoryScreen
@@ -252,6 +271,8 @@ export default function App() {
 
   const idleLeft = Math.max(0, ADMIN_IDLE_LIMIT_SEC - Math.floor(state.session.idleFor / 1000));
   const expiring = isAdmin && state.session.idleFor >= ADMIN_IDLE_WARN_MS;
+  // 대기 모드(서버: 플레이트 없음이 설정 시간 이상) + 화면 무조작 60초 → 절전 덮개(A13)
+  const sleeping = !!state.idle && Date.now() - lastTouch > 60000 && !menu && !viewer && !confirmModal;
 
   return (
     <div className="app" data-w={layoutWidth}>
@@ -380,6 +401,14 @@ export default function App() {
       )}
 
       {viewer && <ShotViewer target={viewer} onClose={() => setViewer(null)} />}
+
+      {sleeping && (
+        <div className="sleep-overlay" onPointerDown={() => setLastTouch(Date.now())}>
+          <b>대기 중</b>
+          <span>배양할 플레이트가 없습니다 · 화면을 누르면 돌아옵니다</span>
+          <small>{hms(state.serverTime)}</small>
+        </div>
+      )}
     </div>
   );
 }

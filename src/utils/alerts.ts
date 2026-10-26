@@ -29,8 +29,8 @@ export interface AlertItem {
   at: number;
   /** 사용자가 「확인」을 눌렀는지(서버 알람만). */
   acked?: boolean;
-  /** 반출 사유(반출 알람만) — 기간 만료 / 조기 양성. */
-  reason?: 'expired' | 'positive';
+  /** 반출 사유(반출 알람만) — 기간 만료 / 조기 양성 / 오염. */
+  reason?: 'expired' | 'positive' | 'contaminated';
   go?: () => void;
   /** 서버 알람이면 확인 처리할 수 있다. */
   ack?: () => void;

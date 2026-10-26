@@ -1,6 +1,6 @@
 import {useState} from 'react';
 import type {Plate, Run} from '../api/types.ts';
-import {WELLS} from '../config/defines.ts';
+import {SHOT_LABEL, WELLS} from '../config/defines.ts';
 import {fmt} from '../utils/datetime.ts';
 import {failedWells, imgSrc, pos, shots} from '../utils/plate.ts';
 import {Badge} from './Badge.tsx';
@@ -11,13 +11,17 @@ import {Modal} from './Modal.tsx';
 const detailImages = (run: Run): DetailImage[] => {
   const list: DetailImage[] = [];
   if (run.image) list.push({src: `/api/images/${run.image}`, label: '6-well 모자이크'});
-  for (const w of run.capture?.wells ?? [])
+  for (const w of run.capture?.wells ?? []) {
     if (w.image)
       list.push({
         src: `/api/v1/hardware/files/${w.image}`,
-        label: `Well ${w.well} 원본${w.alignment ? (w.alignment.aligned ? ' · 정렬됨' : ' · 미정렬') : ''}`,
+        label: `Well ${w.well} 원본${w.alignment ? (w.alignment.aligned ? ' · 정렬됨' : ' · 미정렬') : ''}${w.shots?.length ? ' · 중앙' : ''}`,
         raw: w.raw ? `/api/v1/hardware/files/${w.raw}` : null,
       });
+    // 십자 촬영: 가운데 외 네 장도 원본 목록에 넣는다.
+    for (const s of (w.shots ?? []).filter(s => s.shot !== 'C'))
+      list.push({src: `/api/v1/hardware/files/${s.image}`, label: `Well ${w.well} 십자 ${SHOT_LABEL[s.shot] ?? s.shot}`, raw: s.raw ? `/api/v1/hardware/files/${s.raw}` : null});
+  }
   return list;
 };
 
@@ -41,6 +45,8 @@ export function ShotViewer({target, onClose}: Props) {
   const [detail, setDetail] = useState<number | null>(null);
   const originals = run ? detailImages(run) : [];
   const al = run?.capture?.alignment;
+  const code = run?.capture?.barcode;
+  const cross = run?.capture?.wellShots === 5;
   const alignedSet = new Set(al?.alignedWells ?? []);
   const unalignedSet = new Set(al?.unalignedWells ?? []);
 
@@ -70,6 +76,13 @@ export function ShotViewer({target, onClose}: Props) {
             웰 중심 정렬 {alignedSet.size}/{WELLS}
           </Badge>
         )}
+        {cross && <Badge type="info">십자 촬영 · Well당 5장</Badge>}
+        {code && (
+          <Badge type={code.value ? 'good' : code.scanned ? 'warn' : 'info'}>
+            {code.value ? `바코드 ${code.value}` : code.scanned ? '바코드 미인식' : '바코드 판독 불가'}
+          </Badge>
+        )}
+        {run?.change && run.change.max !== null && <Badge type="info">변화 {run.change.max.toFixed(2)}</Badge>}
         {originals.length > 0 && (
           <button className="sm-detail" onClick={() => setDetail(0)}>
             원본 크게 보기
@@ -98,6 +111,23 @@ export function ShotViewer({target, onClose}: Props) {
                   {alignedSet.has(i + 1) && <em className="wc-al ok"> 정렬</em>}
                   {unalignedSet.has(i + 1) && <em className="wc-al warn"> 미정렬</em>}
                 </figcaption>
+                {cross && file && (
+                  <span className="wc-shots" aria-label="십자 촬영 5장">
+                    {(run.capture?.wells?.find(w => w.well === i + 1)?.shots ?? []).map(s => (
+                      <button
+                        key={s.id}
+                        title={SHOT_LABEL[s.shot] ?? s.shot}
+                        onClick={() => {
+                          const at = originals.findIndex(o => o.src.endsWith(`/${s.image}`));
+                          setDetail(at >= 0 ? at : 0);
+                        }}
+                      >
+                        <img src={`/api/v1/hardware/files/${s.preview}`} alt={`Well ${i + 1} ${SHOT_LABEL[s.shot] ?? s.shot}`} />
+                        <small>{SHOT_LABEL[s.shot] ?? s.shot}</small>
+                      </button>
+                    ))}
+                  </span>
+                )}
                 {file && originals.length > 0 && (
                   <button
                     className="wc-zoom"

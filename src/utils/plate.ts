@@ -1,4 +1,4 @@
-import type {AlarmSettings, AppState, Device, Plate, Run} from '../api/types.ts';
+import type {AlarmSettings, AppState, Device, Plate, Routine, Run} from '../api/types.ts';
 import {FAULT_LABEL, TEMP_TOLERANCE_C, type WellState} from '../config/defines.ts';
 
 import type {Layout} from '../api/types.ts';
@@ -47,19 +47,49 @@ export const platesFor = (s: AppState, deviceId: number) =>
 export const pending = (p: Plate) =>
   p.runs.filter(r => r.imageState !== 'failed' && !r.transferred).length;
 
-/** 루틴 설정 기준 총 촬영 회차. */
-export const totalRuns = (s: AppState) => Math.floor((s.routine.days * 24) / s.routine.cycleHours);
+/** 플레이트가 따르는 레시피. recipeId 가 없거나 지워졌으면 공통 루틴. */
+export const recipeOf = (s: AppState, p?: Plate | null): Routine =>
+  (p?.recipeId && (s.recipes ?? []).find(r => r.id === p.recipeId)) || s.routine;
+
+/** 레시피 이름(공통 루틴이면 「기본」). */
+export const recipeName = (s: AppState, p?: Plate | null) =>
+  (p?.recipeId && (s.recipes ?? []).find(r => r.id === p.recipeId)?.name) || '기본 루틴';
+
+/** 총 촬영 회차 — 플레이트를 주면 그 레시피, 아니면 공통 루틴 기준. */
+export const totalRuns = (s: AppState, p?: Plate | null) => {
+  const r = recipeOf(s, p);
+  return Math.floor((r.days * 24) / r.cycleHours);
+};
 
 /**
  * 다음 촬영 예정 시각. 「주기 시작 지연」이 투입 시각과 1회차 사이의 간격이고,
  * 주기는 회차와 회차 사이의 간격이다. 지연이 0분이면 투입 즉시 1회차를 찍는다.
  */
-export const nextAt = (s: AppState, p: Plate) =>
-  p.registeredAt + s.routine.delay * 60000 + p.runs.length * s.routine.cycleHours * 3600000;
+export const nextAt = (s: AppState, p: Plate) => {
+  const r = recipeOf(s, p);
+  return p.registeredAt + r.delay * 60000 + p.runs.length * r.cycleHours * 3600000;
+};
+
+/** 배양 종료 예정 시각(마지막 회차 시각). */
+export const endAt = (s: AppState, p: Plate) => {
+  const r = recipeOf(s, p);
+  return p.registeredAt + r.delay * 60000 + Math.max(0, totalRuns(s, p) - 1) * r.cycleHours * 3600000;
+};
+
+/** 종료 예정 — 아직 끝나지 않았고 남은 시간이 설정값(endSoonHours) 안인 플레이트(M3 A2). */
+export const endSoon = (s: AppState, p: Plate) =>
+  !plateDone(s, p) && endAt(s, p) - s.serverTime <= (s.settings?.endSoonHours ?? 24) * 3600000;
 
 /** 지금 촬영해야 하는 플레이트인지. */
 export const dueNow = (s: AppState, p: Plate) =>
-  !p.paused && p.runs.length < totalRuns(s) && nextAt(s, p) <= s.serverTime;
+  !p.paused && p.runs.length < totalRuns(s, p) && nextAt(s, p) <= s.serverTime;
+
+/** 투입 후 경과 일수(D+n, 0부터). */
+export const elapsedDays = (p: Plate, now: number) => Math.max(0, Math.floor((now - p.registeredAt) / 86400000));
+
+/** 제거 사유 · 판독 결과의 한글 이름. 서버(controller.mjs REASON_LABEL)와 같다. */
+export const REASON_LABEL: Record<string, string> = {done: '정상 종료', positive: '조기 양성', contaminated: '오염', moved: '위치 이동', other: '기타'};
+export const RESULT_LABEL: Record<string, string> = {positive: '조기 양성', negative: '음성', contaminated: '오염 판정'};
 
 /**
  * 손이 필요한 플레이트인지. 두 가지를 한 뜻으로 묶는다 —
@@ -73,8 +103,21 @@ export const plateBad = (p: Plate) => {
   return last?.imageState === 'failed' || (!!last && failedWells(last).length > 0) || pending(p) >= 2;
 };
 
-/** 배양이 끝나 꺼낼 수 있는 판 — 기간 만료 또는 PC 조기 양성 판정(1차 피드백 1.1). */
-export const plateDone = (s: AppState, p: Plate) => p.result === 'positive' || p.runs.length >= totalRuns(s);
+/** 배양이 끝나 꺼낼 수 있는 판 — 기간 만료 또는 PC 조기 양성 · 오염 판정(1차 피드백 1.1). */
+export const plateDone = (s: AppState, p: Plate) =>
+  p.result === 'positive' || p.result === 'contaminated' || p.runs.length >= totalRuns(s, p);
+
+/**
+ * 확인 필요(M3 홈 3칸) — 문제 발생 플레이트 + 반출 대기 플레이트 + 걸려 있는 장비·환경 알람.
+ * 홈의 「확인 필요」 칸과 현황이 같은 값을 쓴다.
+ */
+export const attentionCount = (s: AppState, deviceId: number) => {
+  const d = s.devices.find(x => x.id === deviceId);
+  const plates = platesFor(s, deviceId);
+  const problem = plates.filter(p => ['bad', 'done'].includes(wellState(s, p, d))).length;
+  const other = (s.alarms ?? []).filter(a => !a.clearedAt && (a.kind === 'device' || a.kind === 'env')).length;
+  return problem + other;
+};
 
 export const wellState = (s: AppState, p: Plate | undefined, d: Device | undefined): WellState => {
   if (!p) return 'empty';

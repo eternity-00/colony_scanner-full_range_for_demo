@@ -11,6 +11,8 @@ import type {SendCommand} from '../../config/defines.ts';
 import {EnvCard} from '../../shared/EnvCard.tsx';
 import {elapsedLabel, hm, kdt} from '../../utils/datetime.ts';
 import {
+  attentionCount,
+  endSoon,
   nextAt,
   plateAtSlot,
   platesFor,
@@ -69,8 +71,8 @@ export function StatusScreen({
   // 홈과 같이 트레이 원 색으로 센다 — 한 판은 한 칸에만 들어가 넷의 합이 슬롯 수가 된다.
   const states = plates.map(p => wellState(state, p, d));
   const growing = states.filter(w => w === 'ok' || w === 'busy').length;
-  const waiting = states.filter(w => w === 'done').length;
-  const bad = states.filter(w => w === 'bad').length;
+  const attention = attentionCount(state, d.id);
+  const soon = plates.filter(p => endSoon(state, p)).length;
   const next = scannerNext(state, d);
   const alerts = alertItems(state, {
     onDevice,
@@ -118,10 +120,17 @@ export function StatusScreen({
               <em>매</em>
             </b>
           </span>
-          <span className={waiting ? 'ready' : 'calm'}>
-            <small>반출 대기</small>
-            <b className={waiting ? '' : 'zero'}>
-              {waiting}
+          <span className={attention ? 'bad' : 'calm'}>
+            <small>확인 필요</small>
+            <b className={attention ? '' : 'zero'}>
+              {attention}
+              <em>건</em>
+            </b>
+          </span>
+          <span className={soon ? 'ready' : 'calm'}>
+            <small>종료 예정</small>
+            <b className={soon ? '' : 'zero'}>
+              {soon}
               <em>매</em>
             </b>
           </span>
@@ -130,13 +139,6 @@ export function StatusScreen({
             <b className={free ? '' : 'zero'}>
               {free}
               <em>칸</em>
-            </b>
-          </span>
-          <span className={bad ? 'bad' : 'calm'}>
-            <small>문제 발생</small>
-            <b className={bad ? '' : 'zero'}>
-              {bad}
-              <em>매</em>
             </b>
           </span>
         </div>
@@ -265,7 +267,7 @@ export function StatusScreen({
             <dd>{elapsedLabel(plate.registeredAt, state.serverTime)}</dd>
             <dt>회차</dt>
             <dd>
-              {plate.runs.length} / {totalRuns(state)}회
+              {plate.runs.length} / {totalRuns(state, plate)}회
             </dd>
             <dt>다음 촬영</dt>
             <dd>{plate.paused ? '일시정지' : kdt(nextAt(state, plate))}</dd>

@@ -23,6 +23,21 @@ const PATHS: Record<TabKey, ReactNode> = {
       <path d="M21 21l-4.3-4.3" />
     </>
   ),
+  // 최근 영상 — 사진 한 장(액자 + 산).
+  recent: (
+    <>
+      <rect x="3.5" y="5" width="17" height="14" rx="1.5" />
+      <path d="M3.5 16l5-5 4 4 3-3 5 5" />
+      <circle cx="15.5" cy="9" r="1.3" />
+    </>
+  ),
+  // 제거 — 상자에서 꺼내는 화살표.
+  remove: (
+    <>
+      <path d="M4 10v8.5a1.5 1.5 0 0 0 1.5 1.5h13a1.5 1.5 0 0 0 1.5-1.5V10" />
+      <path d="M12 15V3.5M8 7.5l4-4 4 4" />
+    </>
+  ),
   register: (
     <>
       <rect x="4" y="4" width="16" height="16" rx="2" />

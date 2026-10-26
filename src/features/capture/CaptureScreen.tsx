@@ -151,7 +151,7 @@ export function CaptureScreen({state, send, openViewer}: Props) {
                 <div className="cp-row now">
                   <b>{pos(current.slot)}</b>
                   <small>
-                    {current.runs.length + 1}/{totalRuns(state)}회차 · {hm(job!.startedAt)} 시작
+                    {current.runs.length + 1}/{totalRuns(state, current)}회차 · {hm(job!.startedAt)} 시작
                   </small>
                   <em>{running ? '촬영 중' : '일시정지'}</em>
                 </div>

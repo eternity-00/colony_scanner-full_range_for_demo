@@ -6,7 +6,7 @@ import {WellLegend} from '../../shared/Legend.tsx';
 import {ScannerHead} from '../../shared/ScannerHead.tsx';
 import {Tray} from '../../shared/Tray.tsx';
 import {elapsedLabel, fmt} from '../../utils/datetime.ts';
-import {nextAt, pending, plateAtSlot, pos, status, tone, totalRuns} from '../../utils/plate.ts';
+import {RESULT_LABEL, nextAt, pending, plateAtSlot, pos, recipeName, recipeOf, status, tone, totalRuns} from '../../utils/plate.ts';
 import {RunsTable} from './RunsTable.tsx';
 
 interface Props {
@@ -33,7 +33,7 @@ export function DetailScreen({
 
 
   const plate = plateAtSlot(state, deviceId, slot);
-  const done = plate ? plate.runs.length >= totalRuns(state) : false;
+  const done = plate ? plate.runs.length >= totalRuns(state, plate) : false;
 
   return (
     <div className="split detail-page">
@@ -74,9 +74,16 @@ export function DetailScreen({
                   <b>{fmt(plate.registeredAt)}</b>
                 </div>
                 <div className="ig">
-                  <small>검사 루틴</small>
+                  <small>레시피 · {recipeName(state, plate)}</small>
                   <b>
-                    {state.routine.cycleHours}시간 <em>· {state.routine.days}일</em>
+                    {recipeOf(state, plate).cycleHours}시간 <em>· {recipeOf(state, plate).days}일 · Well {recipeOf(state, plate).wellShots}장</em>
+                  </b>
+                </div>
+                <div className="ig">
+                  <small>바코드 · 판독</small>
+                  <b className={plate.barcode ? '' : 'warnv'}>
+                    {plate.barcode ?? '미인식'}
+                    {plate.result ? <em> · PC {RESULT_LABEL[plate.result]}</em> : null}
                   </b>
                 </div>
                 <div className="ig">
@@ -84,7 +91,7 @@ export function DetailScreen({
                   <b>
                     {elapsedLabel(plate.registeredAt, state.serverTime)}{' '}
                     <em>
-                      · {plate.runs.length}/{totalRuns(state)}회
+                      · {plate.runs.length}/{totalRuns(state, plate)}회
                     </em>
                   </b>
                 </div>

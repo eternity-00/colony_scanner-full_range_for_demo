@@ -5,7 +5,11 @@ import {copyFileSync,mkdirSync,unlinkSync} from 'node:fs';
 import {join,basename} from 'node:path';
 import {VirtualDeviceAdapter,DeviceError} from './virtual-device.mjs';
 import {alignmentSettings,jacobian,correction,limitCorrection,backlashSteps} from './alignment.mjs';
+import {decodeBarcodes} from './vision.mjs';
 const now=()=>Number(process.hrtime.bigint())/1e9;
+// Well 십자 촬영 (routine.wellShots = 5): the centred frame plus four frames with the camera moved
+// by crossOffsets() along each axis. Labels name the camera-axis direction, not the image side.
+export const CROSS=[{shot:'C',x:0,y:0},{shot:'X+',x:1,y:0},{shot:'Y-',x:0,y:-1},{shot:'X-',x:-1,y:0},{shot:'Y+',x:0,y:1}];
 
 // Scanner 1 keeps the virtual six-stage sequence; frame acquisition is real and, with
 // `motion` (McbMotion), so are 이송 (stage 0), 수납 복귀 (stage 3) and 원점 복귀.
@@ -52,6 +56,7 @@ export class RealCameraAdapter extends EventEmitter {
    if(e.type==='job.failed'||e.type==='job.completed')this.slowCameraAxes(false);
    if(e.job){e.job={...j};if(e.type==='job.completed'){e.image=j.image;e.capture=j.capture;}}
    this.emit('event',e);this.emit('change');
+   if(e.type==='job.completed'&&j.capture?.barcode?.pending)this.fullBarcodePass(j.capture);
   });
  }
  get engineConnected(){return this.base.engineConnected;}
@@ -90,18 +95,23 @@ export class RealCameraAdapter extends EventEmitter {
    if(this.motion?.refreshing)await this.motion.refreshing.catch(()=>{});	// the periodic link check holds the UART for a moment
    if(this.motion?.busy)throw new DeviceError('MOTION_BUSY','모터가 동작 중입니다.');
    await this.checkMcb();
-   // alignment on: the camera must have been calibrated for this microstep setting
-   const known=this.alignmentActive?this.alignment.validCalibration({ustep:this.ustep()}):null;
-   if(this.alignmentActive&&!known)throw new DeviceError('ALIGNMENT_UNCALIBRATED','카메라 정렬 보정값이 없거나 현재 마이크로스텝과 맞지 않습니다. 사용자 설정에서 카메라 정렬 보정을 먼저 실행하세요.');
+   // alignment on: the camera must have been calibrated for this microstep setting.
+   // A trial shot (plate registration) uses the calibration when there is one even with the
+   // user setting off — its job is to report whether the six wells are found.
+   const calibrated=this.motion&&this.alignment&&this.camera.alignFrame?this.alignment.validCalibration({ustep:this.ustep()}):null;
+   if(this.alignmentActive&&!calibrated)throw new DeviceError('ALIGNMENT_UNCALIBRATED','카메라 정렬 보정값이 없거나 현재 마이크로스텝과 맞지 않습니다. 사용자 설정에서 카메라 정렬 보정을 먼저 실행하세요.');
+   const useAlign=this.alignmentActive?!!calibrated:(!!args.trial&&!!calibrated),known=useAlign?calibrated:null;
+   const shots=args.wellShots===5?CROSS.length:1;
    const d=this.sync();d.fault=current.fault;d.failCamera=false;this.owned=true;
    this.sim.command(1,type,args,requestId);d.job.realCamera=true;
+   d.job.wellShots=shots;d.job.trial=!!args.trial;d.job.barcodeRequested=!!args.barcode;
    if(this.motion){
     if(this.camera.beginSession){
-     const ready=this.camera.beginSession(this.motion.wellOrder().length+RETAKES);ready.catch(()=>{});
+     const ready=this.camera.beginSession(this.motion.wellOrder().length*shots+RETAKES);ready.catch(()=>{});
      this.streamSession={jobId:d.job.id,ready};
     }
     const s=d.job.slot;d.job.plateGrid={tier:this.motion.tierOf(s),label:`${this.motion.tierOf(s)}단`};
-    d.job.alignmentRequested=this.alignmentActive;this.slowCameraAxes(this.alignmentActive);
+    d.job.alignmentRequested=useAlign;this.slowCameraAxes(useAlign);
     // 물기 제거 has no hardware on this unit: go straight from 이송 to 촬영 (v 2026-10-16).
     this.startMotion(d,this.motion.loadSteps(s,this.startOffset(this.motion.wellOrder()[0]),this.approach(known)),2,300);
    }
@@ -186,7 +196,7 @@ export class RealCameraAdapter extends EventEmitter {
  // Delete the frames of a capture (Pi 4 local camera folder); the
  // controller calls this when a run expires, the adapter for a failed partial plate.
  purgeCapture(capture){
-  const ids=capture?.wells?.map(w=>w.id)??(capture?.id&&!capture.mosaic?[capture.id]:[]);
+  const ids=capture?.wells?.flatMap(w=>[w.id,...(w.shots||[]).filter(s=>s.shot!=='C').map(s=>s.id)])??(capture?.id&&!capture.mosaic?[capture.id]:[]);
   const valid=ids.filter(id=>/^[0-9a-f-]{36}$/.test(id));
   for(const id of valid)for(const f of [`${id}.yuy2`,`${id}.png`,`${id}-preview.jpg`,`${id}.json`]){
    try{unlinkSync(join(this.camera.directory,f));}catch{}
@@ -202,7 +212,7 @@ export class RealCameraAdapter extends EventEmitter {
    if(this.sim.get(1).job?.id!==id||j.status!=='running')throw new Error('촬영이 중단되었습니다.');
   };
   try{
-   const ready=await(this.streamSession?.jobId===id?this.streamSession.ready:this.camera.beginSession(this.motion.wellOrder().length+RETAKES));
+   const ready=await(this.streamSession?.jobId===id?this.streamSession.ready:this.camera.beginSession(this.motion.wellOrder().length*(j.wellShots||1)+RETAKES));
    j.equipmentStatus='acquiring';j.processingStatus='running';j.bufferCapacity=ready?.bufferCapacity;
    if(j.alignmentRequested){
     const frame={width:ready?.width,height:ready?.height};
@@ -212,24 +222,37 @@ export class RealCameraAdapter extends EventEmitter {
     // expected positions as known before this plate (grid + remembered); the plate model is relative to these
     j.expected={};for(const well of this.motion.wellOrder())j.expected[well]=this.expectedTarget(well);
    }
+   // 십자 촬영: the centre frame first (aligned when alignment is on), then four frames with the
+   // camera shifted by the cross offset along each axis. The shifted moves are plain moves (no
+   // anti-backlash approach): their position only needs to be roughly right.
+   const cross=(j.wellShots||1)>1?this.crossOffsets():null;j.cross=cross;
+   // a shift that runs into an axis end is clamped (recorded as such): the frame is still taken there
+   const shiftedFrame=async(wanted)=>{const target=this.motion.clampXY(wanted);const move=await this.moveXY(target);j.position=null;return {target,clamped:target.x!==Math.round(wanted.x)||target.y!==Math.round(wanted.y),...this.camera.captureFrame(move.readyAt+(this.align.settleMs||0)/1000)};};
    while(j.wellQueue.length){
     await active();
     const well=j.wellQueue.shift();j.well=well;
     // One equipment unit of work: MOVE barrier -> eligible buffered frame -> raw file.
     const frame=await this.acquireWell(d,well,active);
-    j.frameIds.push(frame.id);frames.push({well,...frame});
+    j.frameIds.push(frame.id);frames.push({well,shot:'C',...frame});
+    let last=frame;
+    for(const c of (cross?CROSS.slice(1):[])){
+     await(last.released||last.acquired);await active();j.shot=c.shot;
+     const f=await shiftedFrame({x:frame.target.x+c.x*cross.x,y:frame.target.y+c.y*cross.y});
+     j.frameIds.push(f.id);last={well,shot:c.shot,...f};frames.push(last);this.emit('change');
+    }
+    j.shot=null;
     // Next well as soon as this frame's exposure is over (it is still crossing USB);
     // the last frame is awaited whole before the return.
-    await(j.wellQueue.length&&frame.released?frame.released:frame.acquired);
+    await(j.wellQueue.length&&last.released?last.released:last.acquired);
     this.emit('change');
    }
    // A frame that was not the predicted one (dropped frame) may have been exposed while the
-   // axis was already moving on: take that well again, waiting for the whole frame.
+   // axis was already moving on: take that frame again, waiting for the whole frame.
    const metas=await Promise.all(frames.map(f=>f.acquired));
    for(const [k,old] of frames.entries()){
     if(metas[k]?.onSchedule!==false)continue;
     await active();
-    const frame=await this.acquireWell(d,old.well,active);
+    const frame=old.shot==='C'?{shot:'C',...await this.acquireWell(d,old.well,active)}:{shot:old.shot,...await shiftedFrame(old.target)};
     j.frameIds.push(frame.id);frames[k]={well:old.well,...frame};j.retakes=(j.retakes||0)+1;
     await frame.acquired;
     old.completed.then(()=>this.purgeCapture({wells:[{id:old.id}]}),()=>{});
@@ -243,19 +266,27 @@ export class RealCameraAdapter extends EventEmitter {
    this.sim.event('job.stage',d,{step:3,label:'수납 복귀'});
    this.emit('change');
    await processing;
-   const results=await Promise.all(frames.map(async frame=>({well:frame.well,last:await frame.completed})));
+   const results=await Promise.all(frames.map(async frame=>({well:frame.well,shot:frame.shot,target:frame.target,clamped:!!frame.clamped,last:await frame.completed})));
    await active();
-   for(const {well,last} of results){
+   const byWell=new Map();
+   for(const {well,shot,target,clamped,last} of results){
     if(!last?.nativeYuy2||last.sourceFormat!=='YUYV'||!last.continuousStream)throw new Error('YUY2 스트림 원본 확인 실패');
     const {image,preview,raw}=last.files;
     if(!image||basename(image)!==image||!/^[-a-f0-9]+\.png$/.test(image)||!preview||basename(preview)!==preview)throw new Error('잘못된 영상 파일명');
+    const entry={shot,id:last.id,image,preview,raw,sha256:last.rawSha256,target:target||null,...(clamped?{clamped:true}:{}),totalSeconds:last.totalSeconds};
+    if(shot!=='C'){const w=byWell.get(well);if(!w)throw new Error(`Well ${well} 중앙 프레임 없음`);w.shots.push(entry);continue;}
     const p=this.motion.wellPos(well),alignment=j.alignment?.[well]||null;
-    j.wells.push({well,col:p.col,row:p.row,x:p.x,y:p.y,target:alignment?.target||null,alignment,id:last.id,image,preview,raw,sha256:last.rawSha256,
+    const record={well,col:p.col,row:p.row,x:p.x,y:p.y,target:alignment?.target||target||null,alignment,id:last.id,image,preview,raw,sha256:last.rawSha256,
      width:1280,height:Math.round(1280*last.height/last.width/2)*2,totalSeconds:last.totalSeconds,
      captureSeconds:last.captureSeconds,frameSequence:last.sequence,frameMonotonic:last.frameMonotonic,
      requestedMonotonic:last.requestedMonotonic,readyMonotonic:last.readyMonotonic,eligibleMonotonic:last.eligibleMonotonic,
-     buffered:last.buffered,processingPid:last.processingPid,acquisitionPid:last.acquisitionPid,continuousStream:true});
+     buffered:last.buffered,processingPid:last.processingPid,acquisitionPid:last.acquisitionPid,continuousStream:true,
+     ...(cross?{shots:[entry]}:{})};
+    byWell.set(well,record);j.wells.push(record);
    }
+   // 바코드 판독 (등록 시험 촬영 · 매 회차): 1280 px 미리보기는 여기서(약 1~2초), 거기서 못 읽으면
+   // 원본 PNG 판독(6장 약 7초)은 회차가 기록된 뒤 따로 돌려 결과를 capture.barcode 이벤트로 보낸다.
+   if(j.barcodeRequested){j.barcode=await this.readBarcodes(j,'preview');this.emit('change');}
    this.buildMosaic(d);
   }catch(error){
    if(this.sim.get(1).job?.id===id&&['running','paused'].includes(j.status)){
@@ -267,9 +298,10 @@ export class RealCameraAdapter extends EventEmitter {
  async acquireWell(d,well,active){
   const j=d.job,calibration=j.alignmentCalibration||null;
   if(!calibration){	// previous behaviour: grid position, next exposure after the move
+   const target=this.motion.wellTarget?.(well)||null;
    if(j.positionedWell!==well)await this.motion.run(this.motion.wellSteps(well),60);
    await active();j.positionedWell=well;
-   return this.camera.captureFrame(now());
+   return {target,...this.camera.captureFrame(now())};
   }
   const approach=this.approach(calibration),prediction=this.predictTarget(j,well);
   let target=prediction.target,readyAt=now(),approached=!!approach,frameId=null;
@@ -280,8 +312,37 @@ export class RealCameraAdapter extends EventEmitter {
   if(a.info.aligned){(j.measured||(j.measured={}))[well]=target;this.updatePlateModel(j);}
   j.position=approached?target:null;
   // A frame judged centred is the capture itself; otherwise the next exposure after the move.
-  return this.camera.captureFrame(readyAt,frameId);
+  return {target,...this.camera.captureFrame(readyAt,frameId)};
  }
+ // 십자 촬영 offset in MCB steps per axis. From the camera calibration (pixels per step x image
+ // scale) when there is one, else from the recipe grid pitch assumed to be one well pitch.
+ crossOffsets(){
+  const c=this.motion.config,mm=Number(c.crossOffsetMm)>0?Number(c.crossOffsetMm):8,pitchMm=Number(c.wellPitchMm)>0?Number(c.wellPitchMm):39.2;
+  const cal=this.alignment?.validCalibration({ustep:this.ustep()}),um=this.imageScale().umPerPx;
+  if(cal&&um){const k=cal.pixelsPerStep,sx=Math.hypot(k.xx,k.yx),sy=Math.hypot(k.xy,k.yy);if(sx>0&&sy>0)return {x:Math.round(mm*1000/(um*sx)),y:Math.round(mm*1000/(um*sy)),mm,source:'calibration'};}
+  return {x:Math.round(mm*this.motion.pitch('cameraX')/pitchMm),y:Math.round(mm*this.motion.pitch('cameraY')/pitchMm),mm,source:'grid'};
+ }
+ // Barcode / QR in the frames of this plate. Result: {scanned, decoder, value, values, found[], error, seconds, pending}.
+ // pass 'preview': the 1280 px previews; when nothing is found there `pending` is set and the full
+ // frames are decoded in the background (fullBarcodePass) once the capture record exists.
+ async readBarcodes(j,pass='preview'){
+  const started=now(),wells=[...j.wells].sort((a,b)=>a.well-b.well);
+  const files=wells.map(w=>join(this.camera.directory,w[pass]));
+  const r=await decodeBarcodes(files,{timeoutMs:90000});
+  const found=r.results.flatMap((x,i)=>(x.barcodes||[]).map(b=>({well:wells[i].well,text:b.text,format:b.format,x:b.x,y:b.y,w:b.w,h:b.h,source:pass})));
+  const error=r.results.find(x=>x.error)?.error||null,values=[...new Set(found.map(f=>f.text))];
+  return {scanned:!!r.decoder,decoder:r.decoder,error,value:values[0]||null,values,found,pass,pending:pass==='preview'&&!!r.decoder&&!found.length&&!error,seconds:Math.round((now()-started)*100)/100};
+ }
+ // Second pass on the full frames, after the run is recorded; the controller merges the result by capture id.
+ fullBarcodePass(capture){
+  if(!capture?.barcode?.pending||!capture.wells?.length)return;
+  const j={wells:capture.wells};
+  this.readBarcodes(j,'image').then(result=>{
+   const barcode={...result,seconds:Math.round((capture.barcode.seconds+result.seconds)*100)/100,pending:false};
+   this.emit('event',{type:'capture.barcode',deviceId:1,at:Date.now(),requestId:null,captureId:capture.id,barcode});
+  }).catch(()=>{});
+ }
+ setIdle(on){this.camera.idle=!!on;}
  // Expected camera position of a well before this plate's own seating is known: the recipe grid
  // plus the position remembered from earlier plates (the systematic grid error).
  expectedTarget(well){return this.motion.wellTarget(well,this.startOffset(well));}
@@ -557,7 +618,7 @@ export class RealCameraAdapter extends EventEmitter {
    const w0=now.job.wells[0];
    now.job.image=name;
    now.job.capture={id:name.slice(0,-4),width:w0.width*cols,height:w0.height*Math.ceil(n/cols),sourceFormat:'YUYV',nativeYuy2:true,
-    mosaic:true,plate:now.job.plateGrid,wells:now.job.wells,
+    mosaic:true,plate:now.job.plateGrid,wells:now.job.wells,wellShots:now.job.wellShots||1,cross:now.job.cross||null,barcode:now.job.barcode||null,trial:!!now.job.trial,
     alignment:now.job.alignmentCalibration?{enabled:true,alignedWells:now.job.wells.filter(w=>w.alignment?.aligned).map(w=>w.well),unalignedWells:now.job.wells.filter(w=>!w.alignment?.aligned).map(w=>w.well),tolerancePx:this.align.tolerancePx,calibratedAt:now.job.alignmentCalibration.calibratedAt,
      plateModel:now.job.plateModel?{wells:now.job.plateModel.wells,shift:now.job.plateModel.shift,rotation:now.job.plateModel.rotation,scale:now.job.plateModel.scale}:null}:{enabled:false},
     totalSeconds:now.job.acquisitionDone?(Date.now()-now.job.startedAt)/1000:now.job.wells.reduce((s,w)=>s+(w.totalSeconds||0),0),

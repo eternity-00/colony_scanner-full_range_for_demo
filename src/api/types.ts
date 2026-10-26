@@ -56,6 +56,59 @@ export interface Job {
   calibrationStage?: 'loading' | 'measuring' | 'returning' | 'done' | string;
   focus?: FocusState;
   plateGrid?: {tier: number; label: string};
+  /** 시험 촬영(등록 마법사): 회차로 세지 않는다. */
+  trial?: boolean;
+  /** Well 당 촬영 장수(1 또는 5). */
+  wellShots?: number;
+  /** 십자 촬영 중 지금 찍는 위치(C · X+ · Y− · X− · Y+). */
+  shot?: string | null;
+  /** 바코드 판독 결과(촬영 처리 단계에서 채워진다). */
+  barcode?: BarcodeResult | null;
+}
+
+/** 십자 촬영의 한 장. shot 'C' 가 Well 레코드 자신이다. */
+export interface CaptureShot {
+  shot: 'C' | 'X+' | 'Y-' | 'X-' | 'Y+' | string;
+  id: string;
+  image: string;
+  preview: string;
+  raw?: string;
+  sha256?: string;
+  target?: {x: number; y: number} | null;
+}
+
+export interface BarcodeHit {
+  well: number;
+  text: string;
+  format: string;
+  x?: number;
+  y?: number;
+  w?: number;
+  h?: number;
+  source?: 'preview' | 'image' | string;
+}
+
+/** 바코드 판독 결과(zxing-cpp). scanned=false 면 판독기가 없거나 실패한 것이다. */
+export interface BarcodeResult {
+  scanned: boolean;
+  decoder: string | null;
+  value: string | null;
+  values: string[];
+  found: BarcodeHit[];
+  error?: string | null;
+  seconds?: number;
+  /** 미리보기에서 못 읽어 원본 판독이 아직 도는 중. */
+  pending?: boolean;
+  pass?: 'preview' | 'image' | string;
+}
+
+/** 회차 간 영상 변화 지표(device/change_score.py). wells: Well 번호 → 0~1. */
+export interface ChangeScore {
+  wells: Record<string, number>;
+  max: number | null;
+  maxWell: number | null;
+  against?: number;
+  at?: number;
 }
 
 /** 실장비 어댑터가 스캐너 1에 붙이는 하드웨어 상태. */
@@ -112,6 +165,8 @@ export interface Run {
   requestId?: string;
   /** 실장비 촬영의 원본 정보(6-well 프레임, 모자이크, 정렬 결과). 가상 장비 회차에는 없다. */
   capture?: CaptureRecord | null;
+  /** 직전 회차와의 영상 변화(실장비, 비동기로 채워진다). */
+  change?: ChangeScore | null;
 }
 
 export interface CaptureWell {
@@ -124,6 +179,8 @@ export interface CaptureWell {
   width?: number;
   height?: number;
   alignment?: {aligned: boolean; residual?: {x: number; y: number}; looks?: number} | null;
+  /** 십자 촬영이면 다섯 장(가운데 포함), 아니면 없음. */
+  shots?: CaptureShot[];
 }
 
 export interface CaptureRecord {
@@ -144,7 +201,15 @@ export interface CaptureRecord {
   };
   totalSeconds?: number;
   acquisitionSeconds?: number;
+  wellShots?: number;
+  /** 십자 촬영 offset(MCB step · mm). */
+  cross?: {x: number; y: number; mm: number; source: string} | null;
+  barcode?: BarcodeResult | null;
+  trial?: boolean;
 }
+
+export type RemoveReason = 'done' | 'positive' | 'contaminated' | 'moved' | 'other';
+export type PlateResult = 'positive' | 'negative' | 'contaminated';
 
 export interface Plate {
   id: string;
@@ -154,20 +219,37 @@ export interface Plate {
   removedAt: number | null;
   paused: boolean;
   runs: Run[];
-  /** PC 판독 결과. positive 면 조기 양성 → 반출 알람. */
-  result?: 'positive' | 'negative' | null;
+  /** PC 판독 결과. positive(조기 양성) · contaminated(오염) 면 반출 알람. */
+  result?: PlateResult | null;
   resultAt?: number | null;
+  resultNote?: string | null;
+  /** 레시피(없으면 공통 루틴). */
+  recipeId?: string | null;
+  /** 플레이트 바코드 — 등록 시 입력했거나 처음 판독된 값. */
+  barcode?: string | null;
+  barcodeFormat?: string | null;
+  /** 등록 직후 시험 촬영 결과(회차 아님). */
+  trial?: Run | null;
+  removeReason?: RemoveReason | null;
+  removeNote?: string | null;
 }
 
 export interface Routine {
   cycleHours: number;
   days: number;
   delay: number;
-  /**
-   * Well 한 칸을 몇 장 찍는지. 1 = 가운데 한 장, 5 = 가운데 + 상하좌우 십자.
-   * 아직 화면 표시용이다 — 가상장비는 그대로 Well 당 한 장을 만든다.
-   */
+  /** Well 한 칸을 몇 장 찍는지. 1 = 가운데 한 장, 5 = 가운데 + 상하좌우 십자(실장비 구현, 2026-10-26). */
   wellShots: number;
+}
+
+/** 레시피 — 플레이트마다 고를 수 있는 촬영 일정(M3 A7). 기본 레시피는 공통 루틴이다. */
+export interface Recipe extends Routine {
+  id: string;
+  name: string;
+  /** 검사 항목 라벨(표시용). */
+  label?: string;
+  createdAt?: number;
+  updatedAt?: number;
 }
 
 export interface SessionState {
@@ -226,12 +308,22 @@ export interface AlarmSettings {
   humidityMin: number;
   humidityMax: number;
   humidityMinutes: number;
+  /** 회차 간 영상 변화 지표(0~1)가 이 값을 넘으면 「이전 영상과 차이 큼」 알람. */
+  changeThreshold: number;
 }
 
 /** 사용자 설정(state.json). alignment = 웰 중심 자동 정렬 촬영. */
 export interface UserSettings {
   alignment: boolean;
   alarms: AlarmSettings;
+  /** 「종료 예정」으로 세는 남은 시간(시간). */
+  endSoonHours: number;
+  /** 촬영마다 바코드를 판독하고 미인식이면 알람. */
+  barcode: boolean;
+  /** 플레이트가 하나도 없는 상태가 이어지면 대기 모드로(분, 0 = 끔). */
+  idleMinutes: number;
+  /** PC 전송 서버. API 키는 내려오지 않고 있는지만(hasKey). */
+  server: {host: string; port: number; hasKey: boolean};
 }
 
 export type AlarmKind = 'device' | 'env' | 'plate' | 'done';
@@ -242,8 +334,8 @@ export interface Alarm {
   key: string;
   kind: AlarmKind;
   level: 'high' | 'normal';
-  /** 반출 대기의 사유 — 기간 만료 / 조기 양성(1차 피드백 1.1). */
-  reason?: 'expired' | 'positive';
+  /** 반출 대기의 사유 — 기간 만료 / 조기 양성(1차 피드백 1.1) / 오염 판정(PC). */
+  reason?: 'expired' | 'positive' | 'contaminated';
   where: string;
   what: string;
   plateId?: string;
@@ -264,6 +356,18 @@ export interface NetworkLink {
   name: string;
   address: string;
   kind: 'wired' | 'wifi' | 'other';
+  /** 무선이면 접속 중인 SSID(nmcli). */
+  ssid?: string;
+}
+
+/** PC 전송 서버 연결 점검 결과(TCP). */
+export interface ServerLink {
+  at: number;
+  ok: boolean;
+  ms: number | null;
+  error: string | null;
+  host?: string;
+  port?: number;
 }
 
 export interface FirmwareCheck {
@@ -285,8 +389,12 @@ export interface AppState {
   devices: Device[];
   plates: Plate[];
   routine: Routine;
+  recipes: Recipe[];
   autoRun: boolean;
   settings: UserSettings;
+  /** 대기 모드(플레이트 없음) 진입 시각. 아니면 null. */
+  idle: {since: number} | null;
+  serverLink: ServerLink | null;
   alarms: Alarm[];
   envHistory: EnvSample[];
   /** 등록하는 동안 촬영을 붙잡아 둔 상태. 「완료」를 누르면 풀린다. */

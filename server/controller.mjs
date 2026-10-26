@@ -2,7 +2,10 @@ import {EventEmitter} from 'node:events';
 import {mkdirSync,readFileSync,writeFileSync,renameSync,existsSync,unlinkSync} from 'node:fs';
 import {join} from 'node:path';
 import {randomUUID} from 'node:crypto';
+import {createConnection} from 'node:net';
+import {basename} from 'node:path';
 import {VirtualDeviceAdapter,DeviceError} from './virtual-device.mjs';
+import {changeScores} from './vision.mjs';
 
 // Merged controller (2026-10-23): the testbed operating app (real camera / MCB / alignment,
 // capture records with per-well frames) plus the v2.2 LCD UI additions (registration hold,
@@ -15,9 +18,19 @@ const MAX_INCUBATION_DAYS=42;
 // 관리자만. 플레이트를 넣고 찍고 결과를 받는 일(capture/pause/resume/retry/register/remove)과
 // 루틴·autoRun·촬영 방식(settings)은 사용자의 정상 업무이므로 열어둔다.
 // src/config/defines.ts 의 ADMIN_ACTION 과 같은 목록이어야 한다.
-const ADMIN_ONLY=['stop','home','reset','clearError','calibrate','focusStop','environment','alarmSettings','plateResult'];
+const ADMIN_ONLY=['stop','home','reset','clearError','calibrate','focusStop','environment','alarmSettings','plateResult','serverSettings'];
 // 알림 규칙 기본값(1차 피드백 2.2 · 3.2, M3 환경 설정): 관리자만 바꾼다(alarmSettings).
-const DEFAULT_ALARMS={tempTolerance:1,tempMinutes:5,humidityMin:60,humidityMax:95,humidityMinutes:10};
+// changeThreshold: 회차 간 Well 영상 변화 지표(0~1, device/change_score.py)가 이 값을 넘으면 「이전 영상과 차이 큼」 알람(M3 A11).
+const DEFAULT_ALARMS={tempTolerance:1,tempMinutes:5,humidityMin:60,humidityMax:95,humidityMinutes:10,changeThreshold:0.15};
+// 사용자 설정 기본값: endSoonHours = 「종료 예정」으로 세는 남은 시간(M3 A2), barcode = 촬영마다 바코드 판독 + 미인식 알람(M3 B6→적용),
+// idleMinutes = 플레이트가 하나도 없는 상태가 이어지면 대기 모드(카메라 점검 간격 완화 · 화면 절전, M3 A13; 0 = 끔), server = PC 전송 서버 주소(M3 A8).
+const DEFAULT_SETTINGS={endSoonHours:24,barcode:true,idleMinutes:10,server:{host:'',port:8080,apiKey:''}};
+// 플레이트 제거 사유(M3 A4 — 제거 흐름에 사유 기록). done: 배양 종료, positive: 조기 양성, contaminated: 오염, moved: 위치 이동, other: 기타.
+export const REMOVE_REASONS=['done','positive','contaminated','moved','other'];
+export const REASON_LABEL={done:'정상 종료',positive:'조기 양성',contaminated:'오염',moved:'위치 이동',other:'기타'};
+// PC 판독 결과 종류(M3 A15): 양성 · 음성 · 오염.
+const RESULTS=['positive','negative','contaminated'];
+const RESULT_LABEL={positive:'조기 양성',negative:'음성',contaminated:'오염 판정'};
 const FAULT_LABEL={Z_LIMIT:'Z축 한계 오류',HEATER:'히터 오류',ESTOP:'비상 정지됨',DISCONNECTED:'연결 끊김',DOOR_OPEN:'도어 열림',CAMERA_TIMEOUT:'카메라 응답 없음',ENGINE_OFFLINE:'장비 엔진 연결 끊김'};
 const ENV_SAMPLE_MS=5*60*1000,ENV_KEEP=7*24*12;	// 5분 간격 · 7일
 const ALARM_HISTORY=300;
@@ -52,8 +65,12 @@ export class Controller extends EventEmitter {
    if(r.imageState==='held'&&!r.images?.length){const list=imagesOf(r.capture);if(list)r.images=list;}
   }
   // user settings: alignment = 웰 중심 자동 정렬 (off = the previous grid capture); alarms = 환경 알림 규칙(관리자)
-  this.db.settings={alignment:profile?.alignment?.enabled??false,...(this.db.settings||{})};
+  this.db.settings={alignment:profile?.alignment?.enabled??false,...DEFAULT_SETTINGS,...(this.db.settings||{})};
   this.db.settings.alarms={...DEFAULT_ALARMS,...(this.db.settings.alarms||{})};
+  this.db.settings.server={...DEFAULT_SETTINGS.server,...(this.db.settings.server||{})};
+  // 레시피(M3 A7): 이름 · 배양 기간 · 촬영 주기 · 지연 · Well 장수 · 검사 항목. 기본 레시피는 공통 루틴(routine)이고 플레이트는 recipeId 로 참조한다.
+  this.db.recipes=Array.isArray(this.db.recipes)?this.db.recipes:[];
+  this.idleSince=null;this.noPlatesSince=Date.now();this.serverLink=null;this.lastServerCheck=0;
   this.db.alarms=Array.isArray(this.db.alarms)?this.db.alarms:[];
   this.db.envHistory=Array.isArray(this.db.envHistory)?this.db.envHistory:[];
   this.adapter=adapter||new VirtualDeviceAdapter({stageMs,config:this.db.devices});
@@ -68,7 +85,8 @@ export class Controller extends EventEmitter {
   const now=Date.now();
   return {revision:this.revision,serverTime:now,mode:this.adapter.engineConnected===undefined?'embedded-test':'external',
    profile:this.profile?{name:this.profile.name,title:this.profile.title,adapter:this.profile.adapter,layout:this.layout,features:this.features,kiosk:this.profile.kiosk,recipe:this.profile.recipe}:{name:'embedded',title:'내장',adapter:'virtual',layout:this.layout,features:this.features},
-   devices:this.adapter.snapshot(),plates:structuredClone(this.db.plates),routine:{wellShots:1,...this.db.routine},autoRun:this.db.autoRun,settings:structuredClone(this.db.settings),captureHold:this.holdUntil>now,
+   devices:this.adapter.snapshot(),plates:structuredClone(this.db.plates),routine:{wellShots:1,...this.db.routine},recipes:structuredClone(this.db.recipes),autoRun:this.db.autoRun,settings:this.publicSettings(),captureHold:this.holdUntil>now,
+   idle:this.idleSince?{since:this.idleSince}:null,serverLink:this.serverLink,
    alarms:structuredClone(this.db.alarms.slice(0,ALARM_HISTORY)),envHistory:this.db.envHistory.slice(-288),
    maintenance:this.maintenance?{...this.maintenance}:null,
    session:{role:this.session.role,lockedFor:Math.max(0,this.session.lockUntil-now),idleFor:this.session.idleAt?Math.max(0,now-this.session.idleAt):0},
@@ -78,8 +96,54 @@ export class Controller extends EventEmitter {
  persist(){this.db.devices=this.adapter.snapshot();const tmp=this.stateFile+'.tmp';writeFileSync(tmp,JSON.stringify(this.db));renameSync(tmp,this.stateFile);}
  publish(){this.revision++;this.emit('state',this.snapshot());}
  tick(ms){this.adapter.tick?.(ms);if(this.session.role==='admin'&&Date.now()-this.session.idleAt>=300000){this.session={role:'analyst',failed:0,lockUntil:0,idleAt:null};this.log('INFO','관리자 권한 자동 해제');}if(this.db.autoRun&&!this.maintenance)this.schedule();
-  const now=Date.now();if(now-this.lastAlarmEval>=1000){this.lastAlarmEval=now;this.sampleEnvironment(now);this.evaluateAlarms(now);}
+  const now=Date.now();if(now-this.lastAlarmEval>=1000){this.lastAlarmEval=now;this.sampleEnvironment(now);this.evaluateAlarms(now);this.evaluateIdle(now);if(this.db.settings.server.host&&now-this.lastServerCheck>=60000)this.checkServer().catch(()=>{});}
   this.publish();}
+ // API 키는 화면에 내려보내지 않는다(있는지만).
+ publicSettings(){const s=structuredClone(this.db.settings);s.server={host:s.server.host,port:s.server.port,hasKey:!!s.server.apiKey};return s;}
+ // 레시피(플레이트별 촬영 일정). recipeId 가 없거나 삭제됐으면 공통 루틴.
+ recipeOf(p){return (p?.recipeId&&this.db.recipes.find(r=>r.id===p.recipeId))||this.db.routine;}
+ // 대기 모드(M3 A13): 배양 중인 플레이트가 하나도 없는 상태가 idleMinutes 이상 이어지면 카메라 점검 간격을 늦추고 화면에 절전 안내를 띄운다.
+ evaluateIdle(now){
+  const live=this.db.plates.some(p=>!p.removedAt),minutes=this.db.settings.idleMinutes;
+  if(live||!(minutes>0)||this.adapter.snapshot().some(busy)){this.noPlatesSince=live?null:now;if(this.idleSince){this.idleSince=null;this.adapter.setIdle?.(false);this.log('INFO','대기 모드 해제');}return;}
+  this.noPlatesSince??=now;
+  if(!this.idleSince&&now-this.noPlatesSince>=minutes*60000){this.idleSince=now;this.adapter.setIdle?.(true);this.log('INFO',`배양할 플레이트 없음 ${minutes}분 · 대기 모드`);}
+ }
+ // PC 전송 서버 연결 점검(M3 A8): TCP 연결만 본다(HTTP 는 PC 측 규격이 정해진 뒤).
+ checkServer(){
+  const {host,port}=this.db.settings.server;this.lastServerCheck=Date.now();
+  if(!host)return Promise.resolve(this.serverLink={at:Date.now(),ok:false,ms:null,error:'서버 주소가 없습니다.'});
+  return new Promise(resolve=>{
+   const started=Date.now();let done=false;
+   const finish=(ok,error=null)=>{if(done)return;done=true;clearTimeout(timer);try{socket.destroy();}catch{}this.serverLink={at:Date.now(),ok,ms:ok?Date.now()-started:null,error,host,port};this.publish();resolve(this.serverLink);};
+   const socket=createConnection({host,port,timeout:3000});
+   const timer=setTimeout(()=>finish(false,'응답 없음 (3초)'),3500);
+   socket.on('connect',()=>finish(true));socket.on('timeout',()=>finish(false,'응답 없음 (3초)'));socket.on('error',e=>finish(false,e.code||e.message));
+  });
+ }
+ // 마지막 바코드 판독 결과(최근 회차 또는 시험 촬영) — 알람 판정용.
+ lastBarcode(p){
+  const r=[...p.runs].reverse().find(x=>x.imageState!=='failed'&&x.capture?.barcode);
+  if(r)return {...r.capture.barcode,when:`${r.n}회차`,at:r.at};
+  if(p.trial?.capture?.barcode)return {...p.trial.capture.barcode,when:'시험 촬영',at:p.trial.at};
+  return null;
+ }
+ // 회차 간 Well 영상 변화(M3 A11): 직전 보관 회차와 이번 회차의 미리보기를 Well 별로 정합·차분한다(device/change_score.py).
+ scoreChange(p,r){
+  const dir=this.filesDir;if(!dir||!r.images?.length)return;
+  const prev=[...p.runs].reverse().find(x=>x!==r&&x.imageState==='held'&&x.images?.length);if(!prev)return;
+  const file=u=>typeof u==='string'&&u.startsWith('/api/v1/hardware/files/')?`${dir}/${basename(u)}`:null;
+  const pairs=[],wells=[];
+  r.images.forEach((cur,i)=>{const a=file(prev.images[i]),b=file(cur);if(a&&b){pairs.push([a,b]);wells.push(i+1);}});
+  if(!pairs.length)return;
+  changeScores(pairs).then(scores=>{
+   const byWell={};let max=null,maxWell=null;
+   scores.forEach((s,i)=>{if(Number.isFinite(s?.score)){byWell[wells[i]]=s.score;if(max===null||s.score>max){max=s.score;maxWell=wells[i];}}});
+   r.change={wells:byWell,max,maxWell,against:prev.n,at:Date.now()};
+   if(max!==null&&max>this.db.settings.alarms.changeThreshold)this.log('WARN',`${p.id} · ${r.n}회차 · 이전 영상과 차이 큼 (Well ${maxWell} ${max.toFixed(2)})`);
+   this.evaluateAlarms(Date.now());this.persist();this.publish();
+  }).catch(()=>{});
+ }
  // 온도·습도 추이(M3 홈): 5분마다 한 점, 7일 보관.
  sampleEnvironment(now){
   if(now-this.lastEnvSample<ENV_SAMPLE_MS)return;this.lastEnvSample=now;
@@ -110,16 +174,27 @@ export class Controller extends EventEmitter {
    if(fault&&!(fault===FAULT_LABEL.DISCONNECTED&&now-this.startedAt<30000))put({key:`device:${d.id}`,kind:'device',level:'high',where:d.name,what:fault,deviceId:d.id});
    for(const e of this.envProblem(d,now))put(e);
   }
-  const total=this.totalRuns();
+  const a=this.db.settings.alarms;
   for(const p of this.db.plates){
    if(p.removedAt)continue;
+   const total=this.totalRuns(p),where=at(p.deviceId,p.slot),ref={plateId:p.id,deviceId:p.deviceId};
    const last=p.runs.at(-1);const failedWells=last&&last.imageState==='held'&&last.images?.length?last.images.flatMap((f,i)=>f?[]:[i+1]):[];
    const unsent=p.runs.filter(r=>r.imageState!=='failed'&&!r.transferred).length;
-   if(last?.imageState==='failed')put({key:`plate:${p.id}`,kind:'plate',level:'high',where:at(p.deviceId,p.slot),what:'촬영 실패',plateId:p.id,deviceId:p.deviceId});
-   else if(failedWells.length)put({key:`plate:${p.id}`,kind:'plate',level:'high',where:at(p.deviceId,p.slot),what:`Well ${failedWells.join('·')} 촬영 실패`,plateId:p.id,deviceId:p.deviceId});
-   else if(unsent>=2)put({key:`plate:${p.id}`,kind:'plate',level:'normal',where:at(p.deviceId,p.slot),what:`미전송 ${unsent}건`,plateId:p.id,deviceId:p.deviceId});
-   if(p.result==='positive')put({key:`done:${p.id}`,kind:'done',level:'high',reason:'positive',where:at(p.deviceId,p.slot),what:'조기 양성 · 슬롯을 비울 수 있습니다',plateId:p.id,deviceId:p.deviceId});
-   else if(p.runs.length>=total)put({key:`done:${p.id}`,kind:'done',level:'normal',reason:'expired',where:at(p.deviceId,p.slot),what:`기간 만료 · 촬영 완료 ${p.runs.length}/${total} · 반출 대기`,plateId:p.id,deviceId:p.deviceId});
+   // Well 미검출(M3 A10): 정렬 촬영에서 테두리를 찾지 못한 Well (시험 촬영 결과도 같은 기준).
+   const missed=last?.imageState==='held'?(last.capture?.alignment?.unalignedWells||[]):(!last&&p.trial?.imageState==='held'?(p.trial.capture?.alignment?.unalignedWells||[]):[]);
+   if(last?.imageState==='failed')put({key:`plate:${p.id}`,kind:'plate',level:'high',where,what:'촬영 실패',...ref});
+   else if(failedWells.length)put({key:`plate:${p.id}`,kind:'plate',level:'high',where,what:`Well ${failedWells.join('·')} 촬영 실패`,...ref});
+   else if(missed.length)put({key:`plate:${p.id}`,kind:'plate',level:'normal',where,what:`Well ${missed.join('·')} 미검출 · 플레이트 안착 확인`,...ref});
+   else if(unsent>=2)put({key:`plate:${p.id}`,kind:'plate',level:'normal',where,what:`미전송 ${unsent}건`,...ref});
+   // 바코드: 판독 안 됨 / 등록된 코드와 다름 / 판독기 없음.
+   const b=this.db.settings.barcode?this.lastBarcode(p):null;
+   if(b&&b.scanned&&!b.value&&!b.pending)put({key:`barcode:${p.id}`,kind:'plate',level:'normal',where,what:`바코드 미인식 (${b.when})`,...ref});
+   else if(b&&b.value&&p.barcode&&b.value!==p.barcode)put({key:`barcode:${p.id}`,kind:'plate',level:'high',where,what:`바코드 불일치 · 등록 ${p.barcode} / 판독 ${b.value}`,...ref});
+   else if(b&&!b.scanned)put({key:`barcode:${p.id}`,kind:'plate',level:'normal',where,what:`바코드 판독 불가 · ${b.error||'판독기 없음'}`,...ref});
+   if(Number.isFinite(last?.change?.max)&&last.change.max>a.changeThreshold)put({key:`change:${p.id}`,kind:'plate',level:'high',where,what:`이전 영상과 차이 큼 · Well ${last.change.maxWell} (${last.change.max.toFixed(2)} > ${a.changeThreshold})`,...ref});
+   if(p.result==='positive')put({key:`done:${p.id}`,kind:'done',level:'high',reason:'positive',where,what:'조기 양성 · 슬롯을 비울 수 있습니다',...ref});
+   else if(p.result==='contaminated')put({key:`done:${p.id}`,kind:'done',level:'high',reason:'contaminated',where,what:'오염 판정 · 반출하세요',...ref});
+   else if(p.runs.length>=total)put({key:`done:${p.id}`,kind:'done',level:'normal',reason:'expired',where,what:`기간 만료 · 촬영 완료 ${p.runs.length}/${total} · 반출 대기`,...ref});
   }
   let changed=false;
   for(const a of this.db.alarms){
@@ -133,10 +208,21 @@ export class Controller extends EventEmitter {
   if(changed)this.persist();
  }
  // 지연은 투입~1회차, 주기는 회차~회차. 지연 0분이면 등록 완료 즉시 1회차를 찍는다(등록 중에는 보류).
- nextAt(p){return p.registeredAt+this.db.routine.delay*60000+p.runs.length*this.db.routine.cycleHours*3600000;}
- totalRuns(){return Math.floor(this.db.routine.days*24/this.db.routine.cycleHours);}
- async schedule(){if(this.scheduling||this.holdUntil>Date.now())return;this.scheduling=true;try{for(const d of this.adapter.devices){if(!d.connected||d.doorOpen||d.fault||busy(d))continue;if(d.id===1&&this.adapter.camera?.snapshot().job.status==='running')continue;const p=this.db.plates.find(p=>p.deviceId===d.id&&!p.removedAt&&!p.paused&&p.runs.length<this.totalRuns()&&this.nextAt(p)<=Date.now());if(p)await this.execute({requestId:randomUUID(),command:'capture',deviceId:d.id,args:{plateId:p.id}},'scheduler');}}catch(error){this.log('WARN',`자동 촬영 시작 실패 · ${error.message}`);}finally{this.scheduling=false;}}
+ nextAt(p){const r=this.recipeOf(p);return p.registeredAt+r.delay*60000+p.runs.length*r.cycleHours*3600000;}
+ totalRuns(p=null){const r=this.recipeOf(p);return Math.floor(r.days*24/r.cycleHours);}
+ async schedule(){if(this.scheduling||this.holdUntil>Date.now())return;this.scheduling=true;try{for(const d of this.adapter.devices){if(!d.connected||d.doorOpen||d.fault||busy(d))continue;if(d.id===1&&this.adapter.camera?.snapshot().job.status==='running')continue;const p=this.db.plates.find(p=>p.deviceId===d.id&&!p.removedAt&&!p.paused&&p.runs.length<this.totalRuns(p)&&this.nextAt(p)<=Date.now());if(p)await this.execute({requestId:randomUUID(),command:'capture',deviceId:d.id,args:{plateId:p.id}},'scheduler');}}catch(error){this.log('WARN',`자동 촬영 시작 실패 · ${error.message}`);}finally{this.scheduling=false;}}
  onEvent(e){
+  if(e.type==='capture.barcode'){
+   // 원본 PNG 2차 바코드 판독 결과(비동기): capture id 로 회차(또는 시험 촬영)를 찾아 합친다.
+   for(const p of this.db.plates){
+    const r=[...p.runs,...(p.trial?[p.trial]:[])].find(x=>x.capture?.id===e.captureId);if(!r)continue;
+    r.capture.barcode=e.barcode;const code=e.barcode;
+    if(code?.value&&!p.barcode){p.barcode=code.value;p.barcodeFormat=code.found?.[0]?.format||null;this.log('INFO',`${p.id} · 바코드 ${code.value} 등록 (원본 판독)`);}
+    else if(code?.scanned&&!code.value&&this.db.settings.barcode)this.log('WARN',`${p.id} · 바코드 미인식 (${r.n?`${r.n}회차`:'시험 촬영'})`);
+    this.evaluateAlarms(Date.now());this.persist();this.publish();break;
+   }
+   return;
+  }
   this.io('RX',e.type,e.deviceId,e.requestId,e);
   if(e.type==='job.completed'||e.type==='job.failed'){
    const j=e.job;if(j.type==='capture'){
@@ -145,8 +231,21 @@ export class Controller extends EventEmitter {
       if(e.capture){r.capture=e.capture;r.image=e.image||null;r.images=imagesOf(e.capture)||(e.image?[`/api/images/${e.image}`]:null);}
       else {r.image=e.image||null;r.images=Array.from({length:WELLS},()=>e.image?`/api/images/${e.image}`:PLACEHOLDER);}
      }
-     p.runs.push(r);this.retainCaptures(p);
-     if(p.runs.filter(r=>r.imageState!=='failed'&&!r.transferred).length>=2)this.log('WARN',`${p.id} · 미전송 2건 이상 · 삭제 전 전송 상태 확인`);
+     const code=r.capture?.barcode;
+     if(j.trial){
+      // 시험 촬영(등록 마법사, M3 A6): 회차로 세지 않고 플레이트에 하나만 남긴다(웰 검출 · 바코드 · 미리보기).
+      if(p.trial)this.expire(p.trial);
+      p.trial={...r,n:0,transferred:true};
+      if(success){const wells=r.capture?.alignment;this.log(code?.scanned&&!code.value?'WARN':'INFO',`${p.id} · 시험 촬영 ${wells?.enabled?`· 웰 검출 ${wells.alignedWells?.length??0}/${WELLS}`:''}${code?` · 바코드 ${code.value||(code.pending?'판독 중':code.scanned?'미인식':'판독 불가')}`:''}`);}
+     }else{
+      p.runs.push(r);this.retainCaptures(p);
+      if(p.runs.filter(r=>r.imageState!=='failed'&&!r.transferred).length>=2)this.log('WARN',`${p.id} · 미전송 2건 이상 · 삭제 전 전송 상태 확인`);
+      if(success)this.scoreChange(p,r);
+     }
+     // 처음 판독된 바코드는 플레이트 번호로 삼는다. 그 뒤 다른 값이 읽히면 불일치 알람.
+     if(code?.value&&!p.barcode){p.barcode=code.value;p.barcodeFormat=code.found?.[0]?.format||null;this.log('INFO',`${p.id} · 바코드 ${code.value} 등록`);}
+     if(code?.scanned&&!code.value&&!code.pending&&this.db.settings.barcode)this.log('WARN',`${p.id} · 바코드 미인식 (${j.trial?'시험 촬영':`${r.n}회차`})`);
+     this.evaluateAlarms(Date.now());
     }
    }
    this.log(e.type==='job.failed'?'ERROR':'INFO',`SCANNER ${e.deviceId} · ${j.type} ${e.type==='job.failed'?`실패 (${e.message})`:'완료'}`);
@@ -177,8 +276,8 @@ export class Controller extends EventEmitter {
   const previous=this.db.receipts.find(r=>r.requestId===requestId);
   if(previous){assert(previous.fingerprint===fingerprint,'REQUEST_ID_REUSED','다른 명령에 같은 requestId를 사용할 수 없습니다.',409);return {...previous.result,replayed:true};}
   assert(args&&typeof args==='object'&&!Array.isArray(args),'INVALID_ARGS','args 객체가 필요합니다.',400);
-  assert(!ADMIN_ONLY.includes(command)||this.session.role==='admin'||source==='admin-tool','FORBIDDEN','관리자 권한이 필요합니다.',403);
-  assert(!this.maintenance||source==='admin-tool'||['role.login','role.logout','session.touch','settings','routine','autoRun','registerDone','platePause'].includes(command),'MAINTENANCE','점검 모드입니다. 관리 툴을 닫은 뒤 다시 시도하세요.',423);
+  assert(!ADMIN_ONLY.includes(command)||this.session.role==='admin'||source==='admin-tool'||(command==='plateResult'&&source==='pc'),'FORBIDDEN','관리자 권한이 필요합니다.',403);
+  assert(!this.maintenance||source==='admin-tool'||['role.login','role.logout','session.touch','settings','routine','autoRun','registerDone','platePause','recipe.save','recipe.delete','serverSettings','alarm.ack'].includes(command),'MAINTENANCE','점검 모드입니다. 관리 툴을 닫은 뒤 다시 시도하세요.',423);
   this.io('TX',command,deviceId,requestId,safeArgs);
   try{
    let result={};
@@ -197,15 +296,27 @@ export class Controller extends EventEmitter {
     assert(!this.db.plates.some(p=>p.deviceId===deviceId&&!p.removedAt&&(p.slot===args.slot||(this.layout.tierShared&&tierOf(p.slot)===tierOf(args.slot)))),'SLOT_OCCUPIED',this.layout.tierShared?'이 단에는 이미 플레이트가 있습니다.':'이미 수납된 슬롯입니다.');
     // 투입 시각은 서버가 찍는다. 화면에서 고를 수 있게 두면 촬영 일정 전체를 앞뒤로 옮길 수 있다.
     const registeredAt=Date.now();
-    const p={id:`PL-${randomUUID().slice(0,8).toUpperCase()}`,deviceId,slot:args.slot,registeredAt,removedAt:null,paused:false,runs:[]};this.db.plates.push(p);result={plateId:p.id};this.log('INFO',`${p.id} · SCANNER ${deviceId} · 슬롯 ${args.slot} 등록`);
+    assert(args.recipeId===undefined||args.recipeId===null||this.db.recipes.some(r=>r.id===args.recipeId),'RECIPE_NOT_FOUND','레시피를 찾을 수 없습니다.',404);
+    assert(args.barcode===undefined||args.barcode===null||(typeof args.barcode==='string'&&/^[\x20-\x7e]{1,64}$/.test(args.barcode)),'INVALID_VALUE','바코드는 64자 이내의 문자열이어야 합니다.',400);
+    const recipe=args.recipeId?this.db.recipes.find(r=>r.id===args.recipeId):null;
+    const p={id:`PL-${randomUUID().slice(0,8).toUpperCase()}`,deviceId,slot:args.slot,registeredAt,removedAt:null,paused:false,runs:[],recipeId:recipe?.id||null,barcode:args.barcode||null,trial:null};this.db.plates.push(p);result={plateId:p.id};this.log('INFO',`${p.id} · SCANNER ${deviceId} · 슬롯 ${args.slot} 등록${recipe?` · 레시피 ${recipe.name}`:''}${p.barcode?` · 바코드 ${p.barcode}`:''}`);
     this.holdUntil=Date.now()+REGISTER_HOLD_MS;
    }else if(command==='registerDone'){
     if(this.holdUntil)this.log('INFO','등록 완료 · 밀어 둔 촬영 시작');
     this.holdUntil=0;
-   }else if(['remove','platePause','retry','capture'].includes(command)){
+   }else if(['remove','platePause','retry','capture','testShot'].includes(command)){
     const p=this.db.plates.find(p=>p.id===args.plateId);assert(p&&!p.removedAt,'PLATE_NOT_FOUND','수납 중인 플레이트를 찾을 수 없습니다.',404);assert(p.deviceId===deviceId,'DEVICE_MISMATCH','플레이트와 스캐너가 일치하지 않습니다.',400);const d=this.adapter.get(deviceId);
-    if(command==='capture')await this.adapter.command(deviceId,'capture',{plateId:p.id,slot:p.slot},requestId);
-    if(command==='remove'){assert(!busy(d),'DEVICE_BUSY','스캐너 작업을 끝내거나 정지한 후 반출하세요.');p.runs.filter(r=>r.imageState==='held').forEach(r=>this.expire(r));p.removedAt=Date.now();this.log('INFO',`${p.id} · 반출 · 영상 삭제, 이력 보존`);}
+    if(command==='capture')await this.adapter.command(deviceId,'capture',{plateId:p.id,slot:p.slot,wellShots:this.recipeOf(p).wellShots||1,barcode:!!this.db.settings.barcode},requestId);
+    // 시험 촬영(M3 A6): 등록 직후 한 번 찍어 웰 검출 · 바코드를 확인한다. 회차로 세지 않는다(onEvent).
+    if(command==='testShot')await this.adapter.command(deviceId,'capture',{plateId:p.id,slot:p.slot,trial:true,wellShots:1,barcode:!!this.db.settings.barcode},requestId);
+    if(command==='remove'){
+     assert(!busy(d),'DEVICE_BUSY','스캐너 작업을 끝내거나 정지한 후 반출하세요.');
+     assert(args.reason===undefined||REMOVE_REASONS.includes(args.reason),'INVALID_VALUE',`사유는 ${REMOVE_REASONS.join(' · ')} 중 하나입니다.`,400);
+     assert(args.note===undefined||(typeof args.note==='string'&&args.note.length<=200),'INVALID_VALUE','메모는 200자 이내입니다.',400);
+     p.runs.filter(r=>r.imageState==='held').forEach(r=>this.expire(r));if(p.trial)this.expire(p.trial);
+     p.removedAt=Date.now();p.removeReason=args.reason||null;p.removeNote=args.note||null;
+     this.log('INFO',`${p.id} · 반출${args.reason?` (${REASON_LABEL[args.reason]})`:''} · 영상 삭제, 이력 보존`);
+    }
     if(command==='platePause'){assert(typeof args.paused==='boolean','INVALID_VALUE','paused는 boolean이어야 합니다.',400);p.paused=args.paused;}
     if(command==='retry'){assert(d.connected&&d.pcConnected,'PC_OFFLINE','장비 및 PC 전송 연결이 필요합니다.');let count=0;p.runs.forEach(r=>{if(r.imageState==='held'&&!r.transferred){r.transferred=true;count++;}});result={count};this.log('INFO',`${p.id} · ${count}장 PC 재전송 완료`);}
    }else if(command==='routine'){
@@ -217,15 +328,45 @@ export class Controller extends EventEmitter {
    }else if(command==='autoRun'){
     assert(typeof args.enabled==='boolean','INVALID_VALUE','enabled는 boolean이어야 합니다.',400);this.db.autoRun=args.enabled;this.log('INFO',`자동 촬영 ${args.enabled?'활성화':'비활성화'}`);
    }else if(command==='settings'){
-    assert(typeof args.alignment==='boolean','INVALID_VALUE','alignment는 boolean이어야 합니다.',400);
-    this.db.settings={...this.db.settings,alignment:args.alignment};this.adapter.configure?.(this.db.settings);
-    this.log('INFO',`촬영 방식 · ${args.alignment?'웰 중심 자동 정렬':'기존 격자 위치'}`);
+    // 사용자 설정: alignment(촬영 방식) · endSoonHours(종료 예정 기준) · barcode(바코드 판독) · idleMinutes(대기 모드)
+    const next={...this.db.settings},notes=[];
+    if(args.alignment!==undefined){assert(typeof args.alignment==='boolean','INVALID_VALUE','alignment는 boolean이어야 합니다.',400);next.alignment=args.alignment;notes.push(`촬영 방식 · ${args.alignment?'웰 중심 자동 정렬':'기존 격자 위치'}`);}
+    if(args.endSoonHours!==undefined){assert(validInt(args.endSoonHours,1,168),'INVALID_VALUE','종료 예정 기준은 1~168시간입니다.',400);next.endSoonHours=args.endSoonHours;notes.push(`종료 예정 기준 ${args.endSoonHours}시간`);}
+    if(args.barcode!==undefined){assert(typeof args.barcode==='boolean','INVALID_VALUE','barcode는 boolean이어야 합니다.',400);next.barcode=args.barcode;notes.push(`바코드 판독 ${args.barcode?'켜짐':'꺼짐'}`);}
+    if(args.idleMinutes!==undefined){assert(validInt(args.idleMinutes,0,240),'INVALID_VALUE','대기 모드 진입 시간은 0~240분입니다.',400);next.idleMinutes=args.idleMinutes;notes.push(`대기 모드 ${args.idleMinutes?`${args.idleMinutes}분`:'끔'}`);}
+    assert(notes.length,'INVALID_VALUE','바꿀 설정이 없습니다.',400);
+    this.db.settings=next;this.adapter.configure?.(this.db.settings);
+    this.log('INFO',notes.join(' · '));
+   }else if(command==='recipe.save'){
+    // 레시피 등록/수정(M3 A7). 배양 기간은 공통 루틴과 같은 규칙: 기본값과 다르게 두려면 관리자.
+    const r={id:args.id,name:String(args.name??'').trim(),cycleHours:args.cycleHours,days:args.days,delay:args.delay,wellShots:args.wellShots??1,label:String(args.label??'').trim().slice(0,40)};
+    assert(r.name.length>=1&&r.name.length<=30,'INVALID_RECIPE','레시피 이름은 1~30자입니다.',400);
+    assert(validInt(r.cycleHours,1,48)&&validInt(r.days,1,MAX_INCUBATION_DAYS)&&validInt(r.delay,0,720)&&r.delay%15===0,'INVALID_RECIPE',`주기 1~48시간, 배양 1~${MAX_INCUBATION_DAYS}일, 지연 0~720분(15분 단위)을 입력하세요.`,400);
+    assert([1,5].includes(r.wellShots),'INVALID_RECIPE','Well 촬영 장수는 1 또는 5여야 합니다.',400);
+    const existing=r.id?this.db.recipes.find(x=>x.id===r.id):null;
+    assert(!r.id||existing,'RECIPE_NOT_FOUND','레시피를 찾을 수 없습니다.',404);
+    assert(r.days===(existing?existing.days:this.db.routine.days)||this.session.role==='admin'||source==='admin-tool','FORBIDDEN','배양 기간 변경은 관리자 권한이 필요합니다.',403);
+    assert(!this.db.recipes.some(x=>x.name===r.name&&x.id!==r.id),'INVALID_RECIPE','같은 이름의 레시피가 있습니다.',400);
+    assert(existing||this.db.recipes.length<20,'INVALID_RECIPE','레시피는 20개까지입니다.',400);
+    if(existing)Object.assign(existing,r,{updatedAt:Date.now()});else{r.id=`R-${randomUUID().slice(0,6).toUpperCase()}`;r.createdAt=Date.now();this.db.recipes.push(r);}
+    result={recipeId:r.id};this.log('INFO',`레시피 ${existing?'수정':'등록'} · ${r.name} (${r.cycleHours}시간 · ${r.days}일 · 지연 ${r.delay}분 · Well ${r.wellShots}장)`);
+   }else if(command==='recipe.delete'){
+    const i=this.db.recipes.findIndex(x=>x.id===args.id);assert(i>=0,'RECIPE_NOT_FOUND','레시피를 찾을 수 없습니다.',404);
+    const used=this.db.plates.filter(p=>!p.removedAt&&p.recipeId===args.id).length;assert(!used,'RECIPE_IN_USE',`배양 중인 플레이트 ${used}매가 이 레시피를 씁니다.`,409);
+    const [r]=this.db.recipes.splice(i,1);this.log('INFO',`레시피 삭제 · ${r.name}`);
+   }else if(command==='serverSettings'){
+    // PC 전송 서버(M3 A8): 주소 · 포트 · (선택) 판독 결과 수신 API 키. 관리자.
+    const s={...this.db.settings.server};
+    if(args.host!==undefined){assert(typeof args.host==='string'&&(args.host===''||/^[A-Za-z0-9.-]{1,100}$/.test(args.host)),'INVALID_VALUE','서버 주소는 호스트명 또는 IP 입니다.',400);s.host=args.host;}
+    if(args.port!==undefined){assert(validInt(args.port,1,65535),'INVALID_VALUE','포트는 1~65535 입니다.',400);s.port=args.port;}
+    if(args.apiKey!==undefined){assert(typeof args.apiKey==='string'&&args.apiKey.length<=64&&/^[\x21-\x7e]*$/.test(args.apiKey),'INVALID_VALUE','API 키는 64자 이내의 영문·숫자·기호입니다.',400);s.apiKey=args.apiKey;}
+    this.db.settings.server=s;this.serverLink=null;this.lastServerCheck=0;this.log('INFO',`PC 서버 설정 · ${s.host||'(없음)'}:${s.port}${args.apiKey!==undefined?' · API 키 변경':''}`);
    }else if(command==='environment'){
     assert(Number.isFinite(args.temperature)&&args.temperature>=4&&args.temperature<=55,'INVALID_ENV','목표 온도는 4~55℃ 범위로 입력하세요.',400);
     await this.adapter.environment?.({temperature:args.temperature},requestId);if(!this.adapter.environment)for(const d of this.adapter.devices){d.targetTemperature=args.temperature;}this.log('INFO',`목표 온도 ${args.temperature}℃`);
    }else if(command==='alarmSettings'){
     const a={...this.db.settings.alarms};
-    for(const [k,min,max] of [['tempTolerance',0.1,10],['tempMinutes',0,120],['humidityMin',0,100],['humidityMax',0,100],['humidityMinutes',0,120]])if(args[k]!==undefined){assert(Number.isFinite(args[k])&&args[k]>=min&&args[k]<=max,'INVALID_VALUE',`${k}: ${min}~${max}`,400);a[k]=args[k];}
+    for(const [k,min,max] of [['tempTolerance',0.1,10],['tempMinutes',0,120],['humidityMin',0,100],['humidityMax',0,100],['humidityMinutes',0,120],['changeThreshold',0.01,1]])if(args[k]!==undefined){assert(Number.isFinite(args[k])&&args[k]>=min&&args[k]<=max,'INVALID_VALUE',`${k}: ${min}~${max}`,400);a[k]=args[k];}
     assert(a.humidityMin<a.humidityMax,'INVALID_VALUE','습도 하한은 상한보다 작아야 합니다.',400);
     this.db.settings.alarms=a;this.envSince={};this.log('INFO','알림 규칙 변경 (관리자)');
    }else if(command==='alarm.ack'){
@@ -233,9 +374,12 @@ export class Controller extends EventEmitter {
     assert(list.length,'NOT_FOUND','확인할 알람이 없습니다.',404);for(const a of list)a.ackAt=a.ackAt||Date.now();result={count:list.length};
    }else if(command==='plateResult'){
     // PC 판독 결과(조기 양성 등). 지금은 관리자 입력, PC 연동이 생기면 그 채널이 같은 명령을 보낸다.
-    const p=this.db.plates.find(p=>p.id===args.plateId);assert(p&&!p.removedAt,'PLATE_NOT_FOUND','수납 중인 플레이트를 찾을 수 없습니다.',404);
-    assert([null,'positive','negative'].includes(args.result),'INVALID_VALUE','result 는 positive · negative · null 중 하나입니다.',400);
-    p.result=args.result;p.resultAt=args.result?Date.now():null;this.log('INFO',`${p.id} · 판독 결과 ${args.result||'없음'}`);
+    // PC 는 plateId 또는 barcode 로 플레이트를 가리킨다(A15, /api/v1/results).
+    const p=this.db.plates.find(p=>!p.removedAt&&(p.id===args.plateId||(args.barcode&&p.barcode===args.barcode)));assert(p,'PLATE_NOT_FOUND','수납 중인 플레이트를 찾을 수 없습니다.',404);
+    assert([null,...RESULTS].includes(args.result),'INVALID_VALUE',`result 는 ${RESULTS.join(' · ')} · null 중 하나입니다.`,400);
+    assert(args.note===undefined||(typeof args.note==='string'&&args.note.length<=200),'INVALID_VALUE','메모는 200자 이내입니다.',400);
+    p.result=args.result;p.resultAt=args.result?Date.now():null;p.resultNote=args.note||null;p.resultBy=source;result={plateId:p.id};
+    this.log(args.result&&args.result!=='negative'?'WARN':'INFO',`${p.id} · 판독 결과 ${args.result?RESULT_LABEL[args.result]:'없음'} (${source==='pc'?'PC':'관리자'})`);
     this.evaluateAlarms(Date.now());
    }else if(command==='sim.alarm'){
     // 알람 시험(트리거 페이지 /trigger.html). 프로필 features.simAlarm 이 켜져 있을 때만 받는다.
@@ -254,7 +398,7 @@ export class Controller extends EventEmitter {
      if(args.kind==='captureFail')run({imageState:'failed',images:null,transferred:false,error:'카메라 응답 없음(시험)'});
      if(args.kind==='partial'){const r=run({});r.images=r.images.map((f,i)=>[1,3,4].includes(i)?null:f);}
      if(args.kind==='unsent'){run({transferred:false});run({transferred:false});}
-     if(args.kind==='done'){const total=this.totalRuns();while(p.runs.length<total)run({imageState:p.runs.length<total-5?'expired':'held',images:p.runs.length<total-5?null:placeholder()});}
+     if(args.kind==='done'){const total=this.totalRuns(p);while(p.runs.length<total)run({imageState:p.runs.length<total-5?'expired':'held',images:p.runs.length<total-5?null:placeholder()});}
      const held=p.runs.filter(r=>r.imageState==='held');for(const r of held.slice(0,Math.max(0,held.length-5))){if(!r.sim)r.simHeld=r.images;r.images=null;r.imageState='expired';}
      this.log('INFO',`알람 시험 · ${p.id} · ${args.kind}`);result={plateId:p.id,slot:p.slot};
     }

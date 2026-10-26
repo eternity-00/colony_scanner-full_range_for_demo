@@ -6,7 +6,7 @@ import {Badge} from './Badge.tsx';
 /** 다음 촬영 시각과 배지 문구. 홈과 상세가 같은 말을 해야 해서 한 곳에서 셈한다. */
 export function scannerNext(state: AppState, d: Device) {
   const next = platesFor(state, d.id)
-    .filter(p => !p.paused && p.runs.length < totalRuns(state))
+    .filter(p => !p.paused && p.runs.length < totalRuns(state, p))
     .map(p => nextAt(state, p))
     .sort((a, b) => a - b)[0];
   const running = d.job?.status === 'running';

@@ -174,3 +174,37 @@ test('focus mode holds the first well under the camera, streams focus snapshots 
   await assert.rejects(x.adapter.command(1,'focusStop'),e=>e.code==='NO_FOCUS_JOB');
  }finally{x.close();}
 });
+
+test('십자 촬영 (wellShots 5): centre frame then four shifted frames per well, recorded as shots; barcode result lands in the capture',async()=>{
+ const x=setup({alignment:false});try{
+  x.adapter.readBarcodes=async j=>({scanned:true,decoder:'fake',value:'PL-1',values:['PL-1'],found:[{well:1,text:'PL-1',format:'Code 128'}],error:null,seconds:0.1});
+  await x.adapter.command(1,'capture',{slot:18,plateId:'p',wellShots:5,barcode:true});
+  assert.equal(x.adapter.sim.get(1).job.wellShots,5);
+  x.moves[0].resolve({seconds:1});await flush();x.adapter.tick(100);await flush();await flush();
+  assert.equal(x.frames.length,1,'centre frame of well 1');
+  const cross=x.adapter.crossOffsets();assert.equal(cross.source,'grid');assert.ok(cross.x>0&&cross.y>0);
+  // each shifted frame: one XY move then one exposure
+  for(let k=0;k<4;k++){x.frames.at(-1).acquired.resolve({});await flush();const m=x.moves.at(-1);assert.equal(m.steps.length,1);m.resolve({});await flush();assert.equal(x.frames.length,2+k);}
+  const first=x.motion.wellTarget(1);
+  assert.deepEqual(x.moves[1].steps,[{parallel:[`MOVE 1 ${first.x+cross.x}`,`MOVE 3 ${first.y}`]}],'X+ shot');
+  assert.deepEqual(x.moves[2].steps,[{parallel:[`MOVE 1 ${first.x}`,`MOVE 3 ${first.y-cross.y}`]}],'Y- shot');
+  // the next well starts after the last shifted frame is released
+  x.frames.at(-1).acquired.resolve({});await flush();assert.deepEqual(x.moves.at(-1).steps,x.motion.wellSteps(2));
+  // finish the plate: 6 wells x 5 shots
+  while(x.frames.length<30||x.moves.length<=30){
+   const m=x.moves.at(-1);if(m&&!m.done){m.done=true;m.resolve({});await flush();}
+   const f=x.frames.at(-1);if(f&&!f.done){f.done=true;f.acquired.resolve({});await flush();}
+   if(x.frames.length>=30&&x.frames.every(f=>f.done))break;
+  }
+  assert.equal(x.frames.length,30);
+  await flush();const ret=x.moves.at(-1);assert.deepEqual(ret.steps,x.motion.returnSteps(18));
+  for(const f of x.frames)f.completed.resolve({id:f.id,nativeYuy2:true,sourceFormat:'YUYV',continuousStream:true,width:3840,height:3040,files:{image:f.id+'.png',preview:f.id+'-preview.jpg',raw:f.id+'.yuy2'}});
+  for(let i=0;i<20&&!x.mosaics;i++)await flush();
+  const j=x.adapter.sim.get(1).job;assert.equal(x.mosaics,1);
+  assert.equal(j.wells.length,6);assert.deepEqual(j.wells[0].shots.map(s=>s.shot),['C','X+','Y-','X-','Y+']);
+  assert.equal(j.wells[0].id,j.wells[0].shots[0].id,'the well record is the centre frame');
+  assert.equal(j.barcode.value,'PL-1');
+  // purge covers the shifted frames too
+  const purged=[];x.motion.purge=async ids=>{purged.push(...ids);return {};};x.adapter.purgeCapture({wells:j.wells});assert.equal(purged.length,30);
+ }finally{x.close();}
+});

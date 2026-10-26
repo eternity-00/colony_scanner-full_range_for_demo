@@ -78,7 +78,7 @@ test('alarms: environment rule, ack, history, early positive, admin-only incubat
  const dir=mkdtempSync(join(tmpdir(),'colony-test-'));const c=new Controller({dataDir:dir,adapter:new VirtualDeviceAdapter({stageMs:10}),autoTick:false,profile});
  const at=n=>c.evaluateAlarms(n);
  try{
-  assert.deepEqual(c.snapshot().settings.alarms,{tempTolerance:1,tempMinutes:5,humidityMin:60,humidityMax:95,humidityMinutes:10});
+  assert.deepEqual(c.snapshot().settings.alarms,{tempTolerance:1,tempMinutes:5,humidityMin:60,humidityMax:95,humidityMinutes:10,changeThreshold:0.15});
   // analyst may change cycle/delay but not the incubation limit
   await c.execute(request(200,'routine',0,{cycleHours:6,days:42,delay:0}));
   await rejects(c.execute(request(201,'routine',0,{cycleHours:6,days:30,delay:0})),'FORBIDDEN');
@@ -117,5 +117,58 @@ test('tierShared layout: the three cells of a tier are one plate',async()=>{
   await rejects(c.execute(request(302,'register',1,{slot:18})),'SLOT_OCCUPIED');
   await c.execute(request(303,'register',1,{slot:19}));	// tier 2 is free
   assert.equal(c.snapshot().plates.length,2);
+ }finally{c.close();rmSync(dir,{recursive:true,force:true});}
+});
+
+test('recipes, trial shot, remove reason, barcode / change / result alarms, settings, PC result source',async()=>{
+ const dir=mkdtempSync(join(tmpdir(),'colony-test-'));const c=new Controller({dataDir:dir,adapter:new VirtualDeviceAdapter({stageMs:10}),autoTick:false,profile});
+ try{
+  // recipes: default routine + a named recipe; the analyst may not shorten the incubation
+  await rejects(c.execute(request(300,'recipe.save',0,{name:'빠른 검사',cycleHours:6,days:7,delay:0,wellShots:5})),'FORBIDDEN');
+  await c.execute(request(301,'role.login',0,{pin:'0000'}));
+  await c.execute(request(299,'autoRun',0,{enabled:false}));	// captures are started by hand below
+  const saved=await c.execute(request(302,'recipe.save',0,{name:'빠른 검사',cycleHours:6,days:7,delay:0,wellShots:5,label:'대장균'}));
+  assert.equal(c.snapshot().recipes.length,1);await rejects(c.execute(request(303,'recipe.save',0,{name:'빠른 검사',cycleHours:6,days:7,delay:0})),'INVALID_RECIPE');
+  await rejects(c.execute(request(304,'register',1,{slot:16,recipeId:'R-NOPE'})),'RECIPE_NOT_FOUND');
+  const reg=await c.execute(request(305,'register',1,{slot:16,recipeId:saved.recipeId,barcode:'PL-2026-00042'}));const p=()=>c.snapshot().plates.find(x=>x.id===reg.plateId);
+  assert.equal(p().recipeId,saved.recipeId);assert.equal(p().barcode,'PL-2026-00042');assert.equal(c.totalRuns(p()),28);assert.equal(c.totalRuns(),84);
+  await rejects(c.execute(request(306,'recipe.delete',0,{id:saved.recipeId})),'RECIPE_IN_USE');
+  // trial shot: a capture job flagged trial becomes plate.trial, not a run
+  await c.execute(request(307,'registerDone',0));
+  await c.execute(request(308,'testShot',1,{plateId:p().id}));assert.equal(c.snapshot().devices[0].job.trial,true);c.tick(100);
+  assert.equal(p().runs.length,0);assert.equal(p().trial.imageState,'held');assert.equal(p().trial.n,0);
+  // a real run whose capture read no barcode -> 바코드 미인식 alarm; a different code -> 불일치
+  await c.execute(request(309,'capture',1,{plateId:p().id}));c.tick(100);assert.equal(p().runs.length,1);
+  const plate=c.db.plates.find(x=>x.id===reg.plateId);
+  plate.runs[0].capture={id:'x',wells:[],barcode:{scanned:true,value:null,values:[],found:[],decoder:'zxing-cpp'}};c.evaluateAlarms(Date.now());
+  assert.ok(c.snapshot().alarms.some(a=>a.key===`barcode:${plate.id}`&&!a.clearedAt&&/미인식/.test(a.what)));
+  plate.runs[0].capture.barcode={scanned:true,value:'OTHER-1',values:['OTHER-1'],found:[]};c.evaluateAlarms(Date.now());
+  assert.ok(c.snapshot().alarms.some(a=>a.key===`barcode:${plate.id}`&&!a.clearedAt&&/불일치/.test(a.what)));
+  await c.execute(request(310,'settings',0,{barcode:false}));c.evaluateAlarms(Date.now());assert.ok(!c.snapshot().alarms.some(a=>a.key===`barcode:${plate.id}`&&!a.clearedAt));
+  // Well 미검출 from the alignment result, 변화 큼 from the change score
+  plate.runs[0].capture.alignment={enabled:true,alignedWells:[1,2,3,4],unalignedWells:[5,6]};c.evaluateAlarms(Date.now());
+  assert.ok(c.snapshot().alarms.some(a=>a.key===`plate:${plate.id}`&&!a.clearedAt&&/Well 5·6 미검출/.test(a.what)));
+  plate.runs[0].change={wells:{1:0.02,3:0.4},max:0.4,maxWell:3};c.evaluateAlarms(Date.now());
+  assert.ok(c.snapshot().alarms.some(a=>a.key===`change:${plate.id}`&&!a.clearedAt&&/차이 큼 · Well 3/.test(a.what)));
+  await c.execute(request(311,'alarmSettings',0,{changeThreshold:0.5}));c.evaluateAlarms(Date.now());assert.ok(!c.snapshot().alarms.some(a=>a.key===`change:${plate.id}`&&!a.clearedAt));
+  // PC result by barcode through the 'pc' source without an admin session; contaminated -> 반출 alarm
+  await c.execute(request(312,'role.logout',0));
+  await rejects(c.execute(request(313,'plateResult',1,{plateId:plate.id,result:'positive'})),'FORBIDDEN');
+  const pc=await c.execute({requestId:'pc_result_0001',command:'plateResult',deviceId:1,args:{barcode:'PL-2026-00042',result:'contaminated',note:'PC 판독'}},'pc');
+  assert.equal(pc.plateId,plate.id);assert.ok(c.snapshot().alarms.some(a=>a.key===`done:${plate.id}`&&!a.clearedAt&&a.reason==='contaminated'));
+  // user settings and server settings (admin)
+  await c.execute(request(314,'settings',0,{endSoonHours:6,idleMinutes:0}));assert.equal(c.snapshot().settings.endSoonHours,6);
+  await rejects(c.execute(request(315,'settings',0,{endSoonHours:0})),'INVALID_VALUE');
+  await rejects(c.execute(request(316,'serverSettings',0,{host:'pc.local',port:9000})),'FORBIDDEN');
+  await c.execute(request(317,'role.login',0,{pin:'0000'}));await c.execute(request(318,'serverSettings',0,{host:'127.0.0.1',port:1,apiKey:'k1'}));
+  assert.deepEqual(c.snapshot().settings.server,{host:'127.0.0.1',port:1,hasKey:true});
+  const link=await c.checkServer();assert.equal(link.ok,false);
+  // remove with a reason, trial frames expire with the plate
+  await rejects(c.execute(request(319,'remove',1,{plateId:plate.id,reason:'lost'})),'INVALID_VALUE');
+  await c.execute(request(320,'remove',1,{plateId:plate.id,reason:'contaminated',note:'PC 판독'}));assert.equal(p().removeReason,'contaminated');assert.equal(p().trial.imageState,'expired');
+  await c.execute(request(321,'recipe.delete',0,{id:saved.recipeId}));assert.equal(c.snapshot().recipes.length,0);
+  // idle mode: no plates for idleMinutes -> idle, cleared by a registration
+  await c.execute(request(322,'settings',0,{idleMinutes:1}));c.noPlatesSince=Date.now()-61000;c.evaluateIdle(Date.now());assert.ok(c.snapshot().idle);
+  await c.execute(request(323,'register',1,{slot:1}));c.evaluateIdle(Date.now());assert.equal(c.snapshot().idle,null);
  }finally{c.close();rmSync(dir,{recursive:true,force:true});}
 });

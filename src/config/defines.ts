@@ -6,8 +6,10 @@ export type WellState = 'ok' | 'empty' | 'busy' | 'done' | 'bad';
 export type TabKey =
   | 'overview'
   | 'status'
+  | 'recent'
   | 'detail'
   | 'register'
+  | 'remove'
   | 'running'
   | 'history'
   | 'device'
@@ -38,7 +40,9 @@ export type SendCommand = (
 export const TABS: readonly (readonly [TabKey, string, string, boolean])[] = [
   ['overview', '홈', 'Home', false],
   ['status', '현황', 'Status', false],
+  ['recent', '최근 영상', 'Recent', false],
   ['register', '등록', 'Register', false],
+  ['remove', '제거', 'Remove', false],
   ['detail', '상세', 'Detail', false],
   ['running', '촬영', 'Capture', false],
   ['history', '이력', 'History', false],
@@ -68,7 +72,13 @@ export const ADMIN_ACTION: Record<string, string> = {
   plateResult: '판독 결과 입력',
   focusStop: '초점 조정 종료',
   settings: '촬영 방식 변경',
+  serverSettings: 'PC 서버 설정',
+  'recipe.save': '레시피 배양 기간 변경',
+  'recipe.delete': '레시피 삭제',
 };
+
+/** 십자 촬영 위치의 한글 이름. 카메라 축 방향 기준이다(영상의 상하좌우가 아니다). */
+export const SHOT_LABEL: Record<string, string> = {C: '중앙', 'X+': 'X+', 'Y-': 'Y−', 'X-': 'X−', 'Y+': 'Y+'};
 
 /**
  * 화면에 표시할 UI 버전.

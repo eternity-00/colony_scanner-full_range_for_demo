@@ -3,7 +3,7 @@ import type {AppState, Plate} from '../../api/types.ts';
 import {ROW_HEIGHT_REM} from '../../config/defines.ts';
 import {fmt} from '../../utils/datetime.ts';
 import {download} from '../../utils/download.ts';
-import {coord, currentLayout, failedWells, nextAt, pending, pos, totalRuns} from '../../utils/plate.ts';
+import {REASON_LABEL, coord, currentLayout, failedWells, nextAt, pending, pos, totalRuns} from '../../utils/plate.ts';
 import {rootFontPx} from '../../utils/viewport.ts';
 
 interface Props {
@@ -79,16 +79,18 @@ export function HistoryScreen({state, openDetail, openPlateViewer}: Props) {
   const shown = rows.slice(pg * per, pg * per + per);
 
   const csv = [
-    'ID,위치,투입,회차,다음 촬영,미전송,상태',
+    'ID,바코드,위치,투입,회차,다음 촬영,미전송,상태,제거 사유',
     ...rows.map(p =>
       [
         p.id,
+        p.barcode ?? '',
         `S${p.deviceId} ${pos(p.slot)}`,
         fmt(p.registeredAt),
         p.runs.length,
         fmt(nextAt(state, p)),
         pending(p),
         p.removedAt ? '반출' : '수납',
+        p.removeReason ? REASON_LABEL[p.removeReason] : '',
       ].join(','),
     ),
   ].join('\n');
@@ -172,10 +174,10 @@ export function HistoryScreen({state, openDetail, openPlateViewer}: Props) {
                 <b>
                   {state.devices.length > 1 && `S${p.deviceId} · `}
                   {coord(p.slot).tier}-{coord(p.slot).col}
-                  {p.removedAt && <em>반출</em>}
+                  {p.removedAt && <em>{p.removeReason ? `반출 · ${REASON_LABEL[p.removeReason]}` : '반출'}</em>}
                 </b>
                 <span className="num">
-                  {p.runs.length} / {totalRuns(state)}
+                  {p.runs.length} / {totalRuns(state, p)}
                 </span>
                 <span>{fmt(p.registeredAt)}</span>
                 <strong>{p.removedAt ? '–' : fmt(nextAt(state, p))}</strong>

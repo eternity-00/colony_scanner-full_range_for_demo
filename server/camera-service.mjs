@@ -21,7 +21,7 @@ export class CameraService extends EventEmitter {
   const session={frames:new Map(),aligns:new Map(),closed:false,ending:false};this.session=session;
   const deferred=()=>{let resolve,reject;const promise=new Promise((a,b)=>{resolve=a;reject=b;});promise.catch(()=>{});return {promise,resolve,reject};};
   session.deferred=deferred;session.ready=deferred();session.acquisitionEnded=deferred();session.done=deferred();
-  const child=spawn(process.env.COLONY_PYTHON||'python3',[process.env.COLONY_CAPTURE_SESSION_SCRIPT||fileURLToPath(new URL('../device/capture-session.py',import.meta.url))],{env:{...process.env,COLONY_RECEIVE_DIR:this.directory,COLONY_CAPTURE_COUNT:String(frameCount)},stdio:['pipe','pipe','pipe'],detached:true});
+  const child=spawn(process.env.COLONY_PYTHON||'python3',[process.env.COLONY_CAPTURE_SESSION_SCRIPT||fileURLToPath(new URL('../device/capture-session.py',import.meta.url))],{env:{...process.env,COLONY_RECEIVE_DIR:this.directory,COLONY_CAPTURE_COUNT:String(frameCount),COLONY_CAPTURE_QUEUE_FRAMES:String(Math.max(Number(process.env.COLONY_CAPTURE_QUEUE_FRAMES)||24,frameCount))},stdio:['pipe','pipe','pipe'],detached:true});
   this.child=child;session.child=child;
   let buffer='',error='';
   const fail=message=>{
@@ -97,6 +97,8 @@ export class CameraService extends EventEmitter {
  snapshot(){return {job:this.job,last:this.last,hardware:this.hardware};}
  check(){
   if(this.child||this.probing)return Promise.resolve(this.hardware);
+  // 대기 모드(배양할 플레이트 없음): 10초 간격 카메라 점검을 60초로 늦춘다 (A13).
+  if(this.idle&&this.hardware.checkedAt&&Date.now()-this.hardware.checkedAt<60000)return Promise.resolve(this.hardware);
   this.probing=true;
   return new Promise(resolve=>{
    const probe=spawn(process.env.COLONY_PYTHON||'python3',[fileURLToPath(new URL('../device/local_agent.py',import.meta.url))],{stdio:['pipe','pipe','pipe']});

@@ -3,14 +3,17 @@ import {ActIcon} from '../../shared/ActIcon.tsx';
 import {Badge} from '../../shared/Badge.tsx';
 import {scannerNext} from '../../shared/ScannerHead.tsx';
 import {EnvCard} from '../../shared/EnvCard.tsx';
+import {TabIcon} from '../../shared/TabIcon.tsx';
 import {ALERT_TAG, alertItems} from '../../utils/alerts.ts';
 import {hm} from '../../utils/datetime.ts';
-import {active, plateDone, slotsPerDevice, wellState} from '../../utils/plate.ts';
+import {active, attentionCount, endSoon, plateDone, slotsPerDevice, wellState} from '../../utils/plate.ts';
 
 interface Props {
   state: AppState;
   openDetail: (deviceId: number, slot?: number) => void;
   openRegister: (deviceId: number, slot?: number) => void;
+  openRemove: (deviceId: number, slot?: number) => void;
+  onRecent: () => void;
   onDevice: () => void;
   /** 스캐너 상태 칸을 눌렀을 때 — 칸별로 보는 현황 화면. */
   onStatus: () => void;
@@ -18,71 +21,70 @@ interface Props {
 }
 
 /**
- * 홈 (v2.1) — 윗줄 큰 버튼 둘(등록 · 반출), 가운데 스캐너 한 줄, 아랫줄 정보 넷.
+ * 홈 (v2.3) — 윗줄 큰 버튼 셋(추가 · 제거 · 최근 영상), 요약 줄, 스캐너 한 줄, 아랫줄 배양 현황 셋.
  *
- * 디자인 캔버스 「홈 화면 배치안」에서 혜원님이 고른 꼴(10/14). 알람 목록은 홈에서 빼고
- * 메뉴의 현황에서 본다. 대신 「문제 발생」 칸이 손봐야 할 플레이트 수를 말한다.
- *
- * 누르는 것(버튼 둘 · 스캐너 줄)과 읽는 것(정보 넷)을 꼴로 가른다 — 버튼은 그림자 없이
- * 남색 테두리, 정보 칸은 그림자 없는 납작한 면. 진한 남색 판은 너무 무거워 등록 · 반출
- * 모두 연한 남색 면으로 둔다(캔버스 「플레이트 등록 버튼안」 E안에서 출발, 10/22).
- * 정보 칸 색은 트레이 원과 같은 뜻이다: 배양 중 = 노랑, 반출 대기 = 초록, 문제 발생 = 빨강.
- * 세는 법도 트레이 원과 같다 — 한 칸은 한 곳에만 들어가서
- * 넷을 더하면 슬롯 수(24)가 된다. 문제가 난 판은 다 찍었어도 반출 대기가 아니라 문제로 센다.
- *
- * 2차 피드백(상무님 요구): 홈을 단순하게, 등록 · 반출로 바로 들어가게.
+ * M3 홈: 플레이트 추가 · 제거 · 최근 영상 확인이 홈의 세 버튼이고, 배양 현황은
+ * 「배양 중 · 확인 필요 · 종료 예정」 세 칸이다(2026-10-26 결정: 반출 대기는 확인 필요에 합친다).
+ * 확인 필요 = 문제 발생 플레이트 + 반출 대기 플레이트 + 걸려 있는 장비·환경 알람 수.
+ * 종료 예정 = 남은 배양 시간이 설정값(기본 24시간) 안인 플레이트 수.
+ * 이슈가 없으면 요약 줄이 조용해진다(알람 0건이면 로그를 한 줄로 접는다, A14).
  */
-export function OverviewScreen({state, openDetail, openRegister, onStatus, onDevice, onNeedAdmin}: Props) {
+export function OverviewScreen({state, openDetail, openRegister, openRemove, onRecent, onStatus, onDevice, onNeedAdmin}: Props) {
   const device = state.devices[0];
   if (!device) return null;
 
   const plates = active(state).filter(p => p.deviceId === device.id);
   const done = plates.filter(p => plateDone(state, p)).sort((a, b) => a.slot - b.slot);
-  /*
-   * 반출은 따로 탭이 없다. 상세에서 꺼낼 칸을 골라 둔 채로 연다 — 촬영을 다 마친
-   * 판 중 첫 칸, 그런 판이 없으면 맨 앞 칸. 상세의 「플레이트 반출」이 확인을 받는다.
-   */
   const removeTarget = done[0] ?? [...plates].sort((a, b) => a.slot - b.slot)[0];
-  const openRemove = () => removeTarget && openDetail(device.id, removeTarget.slot);
   const free = slotsPerDevice(state) - plates.length;
   const states = plates.map(p => wellState(state, p, device));
   const growing = states.filter(w => w === 'ok' || w === 'busy').length;
-  const ready = states.filter(w => w === 'done').length;
-  const bad = states.filter(w => w === 'bad').length;
+  const attention = attentionCount(state, device.id);
+  const soon = plates.filter(p => endSoon(state, p)).length;
+  const withImages = plates.filter(p => p.runs.some(r => r.imageState === 'held')).length;
   const next = scannerNext(state, device);
   const capturing = device.job?.status === 'running' && device.job.type === 'capture';
-  // 홈 알람 줄 — 2차 피드백 5(홈에 현황 요약 + 알람) · M3 홈(알람 · 로그 표시) · 1차(반출 알림 최우선).
-  // 요약만 둔다: 처리할 건수와 최신 두 줄. 누르면 현황의 알람 목록으로.
   const alerts = alertItems(state, {onDevice, onPlate: openDetail, onNeedAdmin}).filter(a => a.kind !== 'shot');
-  const logs = state.logs.slice(0, 2);
+  const quiet = alerts.length === 0;
+  const logs = state.logs.slice(0, quiet ? 1 : 2);
+
+  const go = (
+    <svg className="ha-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M9 6l6 6-6 6" />
+    </svg>
+  );
 
   return (
-    <div className="hm-page">
-      {/* 등록 · 반출 — 홈에서 가장 큰 두 칸. */}
-      <div className="hm-acts">
+    <div className={`hm-page ${quiet ? 'quiet' : ''}`}>
+      {/* 추가 · 제거 · 최근 영상 — 홈에서 가장 큰 세 칸(M3 홈). */}
+      <div className="hm-acts three">
         <button className="home-act reg" onClick={() => openRegister(device.id)} disabled={!free}>
           <ActIcon name="plus" />
           <span>
-            <b>플레이트 등록</b>
-            <small>{free ? `빈 슬롯 ${free}칸` : '빈 슬롯 없음 · 반출 먼저'}</small>
+            <b>플레이트 추가</b>
+            <small>{free ? `빈 슬롯 ${free}칸` : '빈 슬롯 없음 · 제거 먼저'}</small>
           </span>
-          <svg className="ha-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M9 6l6 6-6 6" />
-          </svg>
+          {go}
         </button>
-        <button className="home-act out" onClick={openRemove} disabled={!plates.length}>
+        <button className="home-act out" onClick={() => removeTarget && openRemove(device.id, removeTarget.slot)} disabled={!plates.length}>
           <ActIcon name="eject" />
           <span>
-            <b>플레이트 반출</b>
-            <small>{ready ? `반출 대기 ${ready}매` : `배양 중 ${plates.length}매`}</small>
+            <b>플레이트 제거</b>
+            <small>{done.length ? `반출 대기 ${done.length}매` : `배양 중 ${plates.length}매`}</small>
           </span>
-          <svg className="ha-go" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M9 6l6 6-6 6" />
-          </svg>
+          {go}
+        </button>
+        <button className="home-act recent" onClick={onRecent} disabled={!plates.length}>
+          <TabIcon tab="recent" />
+          <span>
+            <b>최근 영상 확인</b>
+            <small>{withImages ? `영상 보관 ${withImages}매` : '보관 중인 영상 없음'}</small>
+          </span>
+          {go}
         </button>
       </div>
 
-      {/* 환경 · 알람 · 로그 요약 줄. 이슈 없을 때는 조용하고(10-12 원칙), 있을 때만 색이 든다. */}
+      {/* 환경 · 알람 · 로그 요약 줄. 이슈 없을 때는 조용하고, 있을 때만 색이 든다. */}
       <div className="hm-strip">
         <EnvCard state={state} compact />
         <button className={`hm-alerts ${alerts.length ? 'has' : ''}`} onClick={onStatus} aria-label="알람 목록 보기">
@@ -121,17 +123,12 @@ export function OverviewScreen({state, openDetail, openRegister, onStatus, onDev
         </div>
       </div>
 
-      {/* 스캐너 한 줄 — 이름 · 상태 · 다음 촬영, 오른쪽 끝에 「현황 보기」. 줄 전체가 현황으로
-          가는 버튼이다 — 오른쪽 작은 단추만 노리고 누르지 않아도 된다. */}
       <button className="hm-bar" onClick={onStatus}>
         <b>{device.name}</b>
         <Badge type={next.badgeType}>{next.badge}</Badge>
         <span className="hm-next">
           다음 촬영{' '}
-          {/* 찍고 있는 동안은 다음 시각이 아직 없다. 빈칸 대신 「지금」이라고 답한다. */}
-          <b className={capturing || next.scheduled ? '' : 'idle'}>
-            {capturing ? '지금 촬영 중' : next.label}
-          </b>
+          <b className={capturing || next.scheduled ? '' : 'idle'}>{capturing ? '지금 촬영 중' : next.label}</b>
         </span>
         <span className="hm-go">
           현황 보기
@@ -141,8 +138,8 @@ export function OverviewScreen({state, openDetail, openRegister, onStatus, onDev
         </span>
       </button>
 
-      {/* 정보 넷 — 읽는 칸. 0 이면 판까지 회색으로 가라앉힌다. 빈 슬롯은 회색 판. */}
-      <div className="hm-big">
+      {/* 배양 현황 셋 — 읽는 칸. 0 이면 판까지 회색으로 가라앉힌다. */}
+      <div className="hm-big three">
         <span className={growing ? 'grow' : 'calm'}>
           <small>배양 중</small>
           <b>
@@ -150,26 +147,21 @@ export function OverviewScreen({state, openDetail, openRegister, onStatus, onDev
             <em>매</em>
           </b>
         </span>
-        <span className={ready ? 'ready' : 'calm'}>
-          <small>반출 대기</small>
+        <button className={attention ? 'bad' : 'calm'} onClick={onStatus}>
+          <small>확인 필요</small>
           <b>
-            {ready}
+            {attention}
+            <em>건</em>
+          </b>
+          <i>문제 · 반출 대기 · 장비 알람</i>
+        </button>
+        <span className={soon ? 'ready' : 'calm'}>
+          <small>종료 예정</small>
+          <b>
+            {soon}
             <em>매</em>
           </b>
-        </span>
-        <span className={free ? 'free' : 'calm'}>
-          <small>빈 슬롯</small>
-          <b>
-            {free}
-            <em>칸</em>
-          </b>
-        </span>
-        <span className={bad ? 'bad' : 'calm'}>
-          <small>문제 발생</small>
-          <b>
-            {bad}
-            <em>매</em>
-          </b>
+          <i>{state.settings.endSoonHours}시간 안에 배양 종료</i>
         </span>
       </div>
     </div>

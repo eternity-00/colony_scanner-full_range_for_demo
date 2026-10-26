@@ -22,19 +22,39 @@ try{
   const drawer=async label=>{await page.locator('.hd-menu').click();await page.locator('.drawer.open .drawer-list').getByRole('button',{name:new RegExp(label)}).first().click();await page.waitForTimeout(200);};
   await page.goto(`http://127.0.0.1:${appPort}`);await page.waitForSelector('.hm-page');
   await page.waitForFunction(()=>document.querySelector('header')?.textContent.includes('유선 연결 1 / 1'));
-  assert.equal(await page.locator('.hm-big span').count(),4);
+  assert.equal(await page.locator('.hm-big > *').count(),3,'home: 배양 중 · 확인 필요 · 종료 예정');
+  assert.equal(await page.locator('.hm-acts .home-act').count(),3,'home: 추가 · 제거 · 최근 영상');
   // admin by PIN
   await page.locator('.role-chip').click();await page.getByRole('button',{name:'관리자 전환'}).click();
   for(let i=0;i<4;i++)await page.locator('.modal').getByRole('button',{name:'0',exact:true}).click();
   await page.locator('.modal').getByRole('button',{name:/^확인$/}).click();await page.waitForTimeout(200);assert.match(await page.locator('.role-chip').innerText(),/관리자/);
   // tray follows the profile layout (virtual profile: 8 x 3)
   await drawer('등록');assert.equal(await page.locator('.registration .cell').count(),24);
-  await page.locator('.registration .cell:not([disabled])').nth(4).click();await page.locator('.rg-page').getByRole('button',{name:/등록$/}).first().click();await page.locator('.modal').getByRole('button',{name:/^확인$/}).click();await page.waitForTimeout(400);
+  // registration wizard: 위치 → 레시피 → 투입(확인) → 시험 촬영(건너뛰기) → 배양 시작
+  await page.locator('.registration .cell:not([disabled])').nth(4).click();
+  await page.getByRole('button',{name:/다음 · 레시피 선택/}).click();assert.equal(await page.locator('.rg-recipe-list button').count(),1,'기본 루틴만');
+  await page.getByRole('button',{name:/다음 · 플레이트 투입/}).click();await page.getByRole('button',{name:/넣고 닫았습니다/}).click();
+  await page.locator('.rg-trial').waitFor();assert.match(await page.locator('.rg-side').innerText(),/시험 촬영/);
+  await page.getByRole('button',{name:/^시험 촬영$/}).click();await page.waitForTimeout(900);await page.locator('.rg-trial-result, .rg-trial-run').first().waitFor();
+  await page.waitForFunction(()=>!document.querySelector('.rg-trial-run'),null,{timeout:8000});
+  await page.getByRole('button',{name:/다음 · 배양 시작|건너뛰기/}).click();await page.getByRole('button',{name:/^배양 시작$/}).click();await page.waitForSelector('.hm-page');
+  // the trial is not a run: 최근 영상 says 촬영 전, home 배양 중 = 1
+  await drawer('최근 영상');assert.match(await page.locator('.rc-body').innerText(),/촬영 전/);
   // settings: alignment section exists, virtual profile says so
   await drawer('사용자 설정');await page.locator('.settings-nav').getByRole('button',{name:/카메라 정렬/}).click();assert.match(await page.locator('main').innerText(),/가상 장비 — 해당 없음|웰 중심 자동 정렬/);
   // capture now from the detail screen, then the viewer shows six placeholders
   await drawer('상세');await page.locator('.tray .cell').nth(4).click();await page.getByRole('button',{name:/촬영 시작/}).click();await page.waitForTimeout(1200);
   await drawer('상세');await page.locator('.tray .cell').nth(4).click();await page.getByRole('button',{name:'보기'}).first().click();assert.match(await page.locator('.modal').innerText(),/Well 1–6/);assert.equal(await page.locator('.well-set img').count(),6);await page.locator('.modal-x').click();
+  // 최근 영상 now shows the run; 제거 flow with a reason
+  await drawer('최근 영상');assert.equal(await page.locator('.rc-wells img').count(),6);assert.match(await page.locator('.rc-title').innerText(),/D\+0/);
+  await drawer('제거');await page.locator('.rm-reasons button',{hasText:'기타'}).click();await page.getByRole('button',{name:/^플레이트 제거$/}).click();await page.locator('.modal').getByRole('button',{name:/^제거$/}).click();
+  await page.locator('.modal').getByRole('button',{name:/꺼내고 문을 닫았습니다/}).click();await page.waitForSelector('.hm-page');
+  await drawer('이력');assert.match(await page.locator('.hs-row').first().innerText(),/반출 · 기타/);
+  // settings: 레시피 추가, 알림 · 대기, 외부 연결
+  await drawer('사용자 설정');await page.locator('.settings-nav').getByRole('button',{name:'레시피'}).click();await page.getByRole('button',{name:/레시피 추가/}).click();
+  await page.locator('.rp-edit input').first().fill('빠른 검사');await page.locator('.rp-edit').getByRole('button',{name:'저장'}).click();await page.locator('.rp-row:not(.base)').waitFor();
+  await page.locator('.settings-nav').getByRole('button',{name:/알림 · 대기/}).click();await page.locator('.sg-choice button',{hasText:'6시간'}).first().click();await page.waitForTimeout(200);
+  await page.locator('.settings-nav').getByRole('button',{name:'외부 연결'}).click();assert.match(await page.locator('main').innerText(),/PC 전송 서버/);
   // device fault from the external console propagates, device screen shows it
   const sim=await browser.newPage({viewport:{width:1100,height:820}});await sim.goto(`http://127.0.0.1:${consolePort}?api=http://127.0.0.1:${enginePort}/api`);await sim.waitForSelector('.device');await sim.locator('.device').first().getByText('Z축 오류 주입').click();await sim.locator('.device').first().getByText('오류 Z_LIMIT').waitFor({timeout:5000});
   await drawer('장비');await page.locator('.dv-alert.bad').getByText(/Z축/).waitFor({timeout:5000});
@@ -49,4 +69,4 @@ try{
   assert.deepEqual(errors,[]);
  }finally{await browser.close()}
 }finally{await Promise.all([stop(server),stop(consoleServer),stop(engine)]);rmSync(dir,{recursive:true,force:true,maxRetries:5,retryDelay:100})}
-console.log('PASS: profile layout, roles, registration, capture, viewer, fault propagation, maintenance lock.');
+console.log('PASS: home 3-cells, wizard registration + trial, recent, remove with reason, recipes, settings, capture, viewer, fault propagation, maintenance lock.');
