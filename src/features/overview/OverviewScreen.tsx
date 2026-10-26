@@ -21,7 +21,8 @@ interface Props {
 }
 
 /**
- * 홈 (v2.3) — 윗줄 큰 버튼 셋(추가 · 제거 · 최근 영상), 요약 줄, 스캐너 한 줄, 아랫줄 배양 현황 셋.
+ * 홈 (v2.3) — 맨 윗줄 배양 현황 셋(배양 중 · 확인 필요 · 종료 예정), 둘째 줄 버튼 셋(추가 · 제거 · 최근 영상),
+ * 그 아래 요약 줄과 스캐너 한 줄(2026-10-26 배치 변경).
  *
  * M3 홈: 플레이트 추가 · 제거 · 최근 영상 확인이 홈의 세 버튼이고, 배양 현황은
  * 「배양 중 · 확인 필요 · 종료 예정」 세 칸이다(2026-10-26 결정: 반출 대기는 확인 필요에 합친다).
@@ -56,12 +57,38 @@ export function OverviewScreen({state, openDetail, openRegister, openRemove, onR
 
   return (
     <div className={`hm-page ${quiet ? 'quiet' : ''}`}>
-      {/* 추가 · 제거 · 최근 영상 — 홈에서 가장 큰 세 칸(M3 홈). */}
+      {/* 배양 현황 셋 — 맨 윗줄, 읽는 칸. 0 이면 판까지 회색으로 가라앉힌다. */}
+      <div className="hm-big three">
+        <span className={growing ? 'grow' : 'calm'}>
+          <small>배양 중</small>
+          <b>
+            {growing}
+            <em>매</em>
+          </b>
+        </span>
+        <button className={attention ? 'bad' : 'calm'} onClick={onStatus}>
+          <small>확인 필요</small>
+          <b>
+            {attention}
+            <em>건</em>
+          </b>
+          <i>문제 · 반출 대기 · 장비 알람</i>
+        </button>
+        <span className={soon ? 'ready' : 'calm'}>
+          <small>종료 예정</small>
+          <b>
+            {soon}
+            <em>매</em>
+          </b>
+          <i>{state.settings.endSoonHours}시간 안에 배양 종료</i>
+        </span>
+      </div>
+      {/* 추가 · 제거 · 최근 영상 — 현황 바로 아래 줄(2026-10-26 요청: 현황이 맨 위, 버튼은 둘째 줄). */}
       <div className="hm-acts three">
         <button className="home-act reg" onClick={() => openRegister(device.id)} disabled={!free}>
           <ActIcon name="plus" />
           <span>
-            <b>플레이트 추가</b>
+            <b>추가</b>
             <small>{free ? `빈 슬롯 ${free}칸` : '빈 슬롯 없음 · 제거 먼저'}</small>
           </span>
           {go}
@@ -69,7 +96,7 @@ export function OverviewScreen({state, openDetail, openRegister, openRemove, onR
         <button className="home-act out" onClick={() => removeTarget && openRemove(device.id, removeTarget.slot)} disabled={!plates.length}>
           <ActIcon name="eject" />
           <span>
-            <b>플레이트 제거</b>
+            <b>제거</b>
             <small>{done.length ? `반출 대기 ${done.length}매` : `배양 중 ${plates.length}매`}</small>
           </span>
           {go}
@@ -77,7 +104,7 @@ export function OverviewScreen({state, openDetail, openRegister, openRemove, onR
         <button className="home-act recent" onClick={onRecent} disabled={!plates.length}>
           <TabIcon tab="recent" />
           <span>
-            <b>최근 영상 확인</b>
+            <b>최근 영상</b>
             <small>{withImages ? `영상 보관 ${withImages}매` : '보관 중인 영상 없음'}</small>
           </span>
           {go}
@@ -138,32 +165,6 @@ export function OverviewScreen({state, openDetail, openRegister, openRemove, onR
         </span>
       </button>
 
-      {/* 배양 현황 셋 — 읽는 칸. 0 이면 판까지 회색으로 가라앉힌다. */}
-      <div className="hm-big three">
-        <span className={growing ? 'grow' : 'calm'}>
-          <small>배양 중</small>
-          <b>
-            {growing}
-            <em>매</em>
-          </b>
-        </span>
-        <button className={attention ? 'bad' : 'calm'} onClick={onStatus}>
-          <small>확인 필요</small>
-          <b>
-            {attention}
-            <em>건</em>
-          </b>
-          <i>문제 · 반출 대기 · 장비 알람</i>
-        </button>
-        <span className={soon ? 'ready' : 'calm'}>
-          <small>종료 예정</small>
-          <b>
-            {soon}
-            <em>매</em>
-          </b>
-          <i>{state.settings.endSoonHours}시간 안에 배양 종료</i>
-        </span>
-      </div>
     </div>
   );
 }
