@@ -5,7 +5,7 @@ import {copyFileSync,mkdirSync,unlinkSync} from 'node:fs';
 import {join,basename} from 'node:path';
 import {VirtualDeviceAdapter,DeviceError} from './virtual-device.mjs';
 import {alignmentSettings,jacobian,correction,limitCorrection,backlashSteps} from './alignment.mjs';
-import {decodeBarcodes} from './vision.mjs';
+import {decodeBarcodes,measureShifts} from './vision.mjs';
 const now=()=>Number(process.hrtime.bigint())/1e9;
 // Well 십자 촬영 (routine.wellShots = 5): the centred frame plus four frames with the camera moved
 // by crossOffsets() along each axis. Labels name the camera-axis direction, not the image side.
@@ -223,8 +223,10 @@ export class RealCameraAdapter extends EventEmitter {
     j.expected={};for(const well of this.motion.wellOrder())j.expected[well]=this.expectedTarget(well);
    }
    // 십자 촬영: the centre frame first (aligned when alignment is on), then four frames with the
-   // camera shifted by the cross offset along each axis. The shifted moves are plain moves (no
-   // anti-backlash approach): their position only needs to be roughly right.
+   // camera shifted by the cross offset along each axis. Every shifted position is reached in the
+   // calibration's approach direction (anti-backlash pre-travel, like alignment moves), so the four
+   // displacements are the same size around the centre; plain moves lost up to 1 mm to backlash on
+   // each reversal (2026-10-26).
    // Motion never overlaps an exposure (2026-10-26): a shifted frame is requested crossGuardMs after
    // the move finished, and the next move waits until the frame is fully received plus crossAfterMs,
    // instead of trusting the predicted exposure window.
@@ -236,8 +238,9 @@ export class RealCameraAdapter extends EventEmitter {
    const settled=async f=>{await f.acquired;if(guardAfter>0)await new Promise(r=>setTimeout(r,guardAfter*1000));};
    // a shift that runs into an axis end is clamped (recorded as such): the frame is still taken there
    // camera-stream refuses a ready time more than 1 s ahead: hold the request until it is within reach
+   const crossApproach=j.alignmentCalibration?this.approach(j.alignmentCalibration):null;
    const shiftedFrame=async(wanted)=>{
-    const target=this.motion.clampXY(wanted);const move=await this.moveXY(target);j.position=null;
+    const target=this.motion.clampXY(wanted);const move=await this.moveXY(target,crossApproach,j.position||null);j.position=move.approached?target:null;
     const readyAt=move.readyAt+guardBefore,wait=readyAt-0.8-now();
     if(wait>0)await new Promise(r=>setTimeout(r,wait*1000));
     return {target,clamped:target.x!==Math.round(wanted.x)||target.y!==Math.round(wanted.y),movedAt:move.readyAt,...this.camera.captureFrame(readyAt)};
@@ -301,6 +304,9 @@ export class RealCameraAdapter extends EventEmitter {
      ...(cross?{shots:[entry]}:{})};
     byWell.set(well,record);j.wells.push(record);
    }
+   // 십자 촬영: 각 이동 프레임이 중앙 프레임 대비 실제로 얼마나 움직였는지 재서 기록하고(mm), 축별
+   // step/mm 를 학습해 다음 플레이트의 이동량을 보정한다(네 방향 이동 거리를 같게 맞추기 위해).
+   if(cross)await this.measureCross(j).catch(error=>console.log(JSON.stringify({crossMeasure:'failed',error:error.message})));
    // 바코드 판독 (등록 시험 촬영 · 매 회차): 1280 px 미리보기는 여기서(약 1~2초), 거기서 못 읽으면
    // 원본 PNG 판독(6장 약 7초)은 회차가 기록된 뒤 따로 돌려 결과를 capture.barcode 이벤트로 보낸다.
    if(j.barcodeRequested){j.barcode=await this.readBarcodes(j,'preview');this.emit('change');}
@@ -335,9 +341,36 @@ export class RealCameraAdapter extends EventEmitter {
  // scale) when there is one, else from the recipe grid pitch assumed to be one well pitch.
  crossOffsets(){
   const c=this.motion.config,mm=Number(c.crossOffsetMm)>0?Number(c.crossOffsetMm):8,pitchMm=Number(c.wellPitchMm)>0?Number(c.wellPitchMm):39.2;
+  const learned=this.alignment?.crossScale;
+  if(learned)return {x:Math.round(mm*learned.x),y:Math.round(mm*learned.y),mm,source:'measured',scale:learned};
   const cal=this.alignment?.validCalibration({ustep:this.ustep()}),um=this.imageScale().umPerPx;
   if(cal&&um){const k=cal.pixelsPerStep,sx=Math.hypot(k.xx,k.yx),sy=Math.hypot(k.xy,k.yy);if(sx>0&&sy>0)return {x:Math.round(mm*1000/(um*sx)),y:Math.round(mm*1000/(um*sy)),mm,source:'calibration'};}
   return {x:Math.round(mm*this.motion.pitch('cameraX')/pitchMm),y:Math.round(mm*this.motion.pitch('cameraY')/pitchMm),mm,source:'grid'};
+ }
+ // Image displacement of every shifted frame against its well's centre frame (preview phase
+ // correlation, scaled to full-resolution pixels and mm). Learns MCB steps per mm per axis from the
+ // shots whose move was not clamped, as the median over the plate, and stores it for the next run.
+ async measureCross(j){
+  const um=this.imageScale().umPerPx;if(!um)return;
+  const pairs=[],refs=[];
+  for(const w of j.wells)for(const s of w.shots||[]){if(s.shot==='C'||!s.preview)continue;pairs.push([join(this.camera.directory,w.preview),join(this.camera.directory,s.preview)]);refs.push({w,s});}
+  if(!pairs.length)return;
+  const results=await measureShifts(pairs,{timeoutMs:60000});
+  const scale=3840/1280;	// previews are 1280 px wide
+  const samples={x:[],y:[]};
+  results.forEach((r,i)=>{
+   const {w,s}=refs[i];if(!Number.isFinite(r?.dx))return;
+   const dx=r.dx*scale,dy=r.dy*scale,px=Math.hypot(dx,dy);
+   s.measured={dxPx:Math.round(dx),dyPx:Math.round(dy),mm:Math.round(px*um/1000*100)/100,strength:r.strength};
+   const centre=w.shots.find(x=>x.shot==='C'),steps=centre?.target&&s.target?{x:s.target.x-centre.target.x,y:s.target.y-centre.target.y}:null;
+   if(!steps||s.clamped||px<50)return;
+   const axis=s.shot.startsWith('X')?'x':'y',moved=Math.abs(steps[axis]);
+   if(moved>0)samples[axis].push(moved/(px*um/1000));
+  });
+  const median=a=>{const b=[...a].sort((p,q)=>p-q);return b.length?b[Math.floor(b.length/2)]:null;};
+  const sx=median(samples.x),sy=median(samples.y);
+  j.crossMeasured={stepsPerMm:{x:sx,y:sy},samples:{x:samples.x.length,y:samples.y.length}};
+  if(sx&&sy&&samples.x.length>=2&&samples.y.length>=2&&this.alignment){this.alignment.setCrossScale({x:sx,y:sy,samples:j.crossMeasured.samples});console.log(JSON.stringify({crossScale:{x:sx,y:sy},samples:j.crossMeasured.samples}));}
  }
  // Barcode / QR in the frames of this plate. Result: {scanned, decoder, value, values, found[], error, seconds, pending}.
  // pass 'preview': the 1280 px previews; when nothing is found there `pending` is set and the full
@@ -635,7 +668,7 @@ export class RealCameraAdapter extends EventEmitter {
    const w0=now.job.wells[0];
    now.job.image=name;
    now.job.capture={id:name.slice(0,-4),width:w0.width*cols,height:w0.height*Math.ceil(n/cols),sourceFormat:'YUYV',nativeYuy2:true,
-    mosaic:true,plate:now.job.plateGrid,wells:now.job.wells,wellShots:now.job.wellShots||1,cross:now.job.cross?{...now.job.cross,guardMs:this.align.crossGuardMs??1100,afterMs:this.align.crossAfterMs??150}:null,barcode:now.job.barcode||null,trial:!!now.job.trial,
+    mosaic:true,plate:now.job.plateGrid,wells:now.job.wells,wellShots:now.job.wellShots||1,cross:now.job.cross?{...now.job.cross,guardMs:this.align.crossGuardMs??1100,afterMs:this.align.crossAfterMs??150,measured:now.job.crossMeasured||null}:null,barcode:now.job.barcode||null,trial:!!now.job.trial,
     alignment:now.job.alignmentCalibration?{enabled:true,alignedWells:now.job.wells.filter(w=>w.alignment?.aligned).map(w=>w.well),unalignedWells:now.job.wells.filter(w=>!w.alignment?.aligned).map(w=>w.well),tolerancePx:this.align.tolerancePx,calibratedAt:now.job.alignmentCalibration.calibratedAt,
      plateModel:now.job.plateModel?{wells:now.job.plateModel.wells,shift:now.job.plateModel.shift,rotation:now.job.plateModel.rotation,scale:now.job.plateModel.scale}:null}:{enabled:false},
     totalSeconds:now.job.acquisitionDone?(Date.now()-now.job.startedAt)/1000:now.job.wells.reduce((s,w)=>s+(w.totalSeconds||0),0),

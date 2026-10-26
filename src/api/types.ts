@@ -77,6 +77,8 @@ export interface CaptureShot {
   target?: {x: number; y: number} | null;
   /** 요청한 이동량이 축 끝에 걸려 줄어든 프레임. */
   clamped?: boolean;
+  /** 중앙 프레임 대비 실제 영상 이동량(원본 px · mm). */
+  measured?: {dxPx: number; dyPx: number; mm: number; strength?: number} | null;
 }
 
 export interface BarcodeHit {
@@ -204,8 +206,8 @@ export interface CaptureRecord {
   totalSeconds?: number;
   acquisitionSeconds?: number;
   wellShots?: number;
-  /** 십자 촬영 offset(MCB step · mm). */
-  cross?: {x: number; y: number; mm: number; source: string} | null;
+  /** 십자 촬영 offset(MCB step · mm). source: calibration | grid | measured(이전 회차에서 학습한 step/mm). */
+  cross?: {x: number; y: number; mm: number; source: string; guardMs?: number; afterMs?: number; measured?: {stepsPerMm: {x: number | null; y: number | null}; samples: {x: number; y: number}} | null} | null;
   barcode?: BarcodeResult | null;
   trial?: boolean;
   /** 십자 이동 프레임이 보관 정책(최근 1회)으로 지워진 회차. */

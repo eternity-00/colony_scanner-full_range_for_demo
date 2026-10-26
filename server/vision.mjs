@@ -47,3 +47,10 @@ export async function changeScores(pairs,{timeoutMs=60000}={}){
  const {rows}=await lines([script('change_score.py'),...pairs.flat()],timeoutMs);
  return pairs.map((_,i)=>rows[i]||{score:null,error:'NO_RESULT'});
 }
+
+/** pairs: [[ref,img],...] -> [{dx,dy,strength}|{dx:null,error}] in input-image pixels (device/shift_measure.py). */
+export async function measureShifts(pairs,{timeoutMs=60000}={}){
+ if(!pairs.length)return [];
+ const {rows}=await lines([script('shift_measure.py'),...pairs.flat()],timeoutMs);
+ return pairs.map((_,i)=>rows[i]||{dx:null,dy:null,error:'NO_RESULT'});
+}

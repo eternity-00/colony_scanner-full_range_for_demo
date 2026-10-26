@@ -44,6 +44,7 @@ export function CrossViewer({plate, run, well: initial = 1, onClose}: Props) {
         <img src={file(s.preview)} alt={`Well ${well} ${SHOT_LABEL[k]}`} />
         <b>
           {SHOT_LABEL[k] ?? k}
+          {s.measured && <small> {s.measured.mm.toFixed(1)} mm</small>}
           {s.clamped && <em> · 축 끝 잘림</em>}
         </b>
       </button>
@@ -57,7 +58,7 @@ export function CrossViewer({plate, run, well: initial = 1, onClose}: Props) {
         <Badge type="info">Well당 {run.capture?.wellShots ?? 5}장</Badge>
         {cross && (
           <Badge type="info">
-            이동 {cross.mm} mm ({cross.x} / {cross.y} step · {cross.source === 'calibration' ? '보정값' : '격자'})
+            이동 {cross.mm} mm ({cross.x} / {cross.y} step · {cross.source === 'measured' ? '실측 보정' : cross.source === 'calibration' ? '보정값' : '격자'})
           </Badge>
         )}
         <span className="cv-wells">

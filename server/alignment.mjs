@@ -102,6 +102,10 @@ export class AlignmentStore{
  offset(well){const o=this.data.offsets?.[well];return o&&Number.isFinite(o.x)&&Number.isFinite(o.y)?{x:o.x,y:o.y}:{x:0,y:0};}
  rememberOffset(well,offset){this.data.offsets[well]={x:Math.round(offset.x),y:Math.round(offset.y),at:Date.now()};this.save();}
  forgetOffsets(){this.data.offsets={};this.save();}
+ // 십자 촬영 scale learned from the shots themselves: MCB steps per mm of image displacement per axis
+ // (median over a plate's non-clamped shots). Overrides the calibration-derived estimate once known.
+ get crossScale(){const c=this.data.crossScale;return c&&Number.isFinite(c.x)&&Number.isFinite(c.y)&&c.x>0&&c.y>0?c:null;}
+ setCrossScale(scale){this.data.crossScale={x:Math.round(scale.x*100)/100,y:Math.round(scale.y*100)/100,samples:scale.samples||null,at:Date.now()};this.save();}
  status(){
   const c=this.data.calibration;
   return {file:this.file,calibrated:!!c?.pixelsPerStep,calibratedAt:c?.calibratedAt??null,ring:c?.ring??null,frame:c?.frame??null,ustep:c?.ustep??null,pixelsPerStep:c?.pixelsPerStep??null,rememberedWells:Object.keys(this.data.offsets||{}).map(Number).sort((a,b)=>a-b)};
