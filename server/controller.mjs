@@ -319,8 +319,7 @@ export class Controller extends EventEmitter {
     this.holdUntil=0;
    }else if(['remove','platePause','retry','capture','testShot'].includes(command)){
     const p=this.db.plates.find(p=>p.id===args.plateId);assert(p&&!p.removedAt,'PLATE_NOT_FOUND','수납 중인 플레이트를 찾을 수 없습니다.',404);assert(p.deviceId===deviceId,'DEVICE_MISMATCH','플레이트와 스캐너가 일치하지 않습니다.',400);const d=this.adapter.get(deviceId);
-    // manual: 화면의 「촬영 시작」(지금 촬영). 예약 촬영(schedule)은 이 표시가 없어 화면이 잠기지 않는다(2026-10-26).
-    if(command==='capture')await this.adapter.command(deviceId,'capture',{plateId:p.id,slot:p.slot,wellShots:this.recipeOf(p).wellShots||1,barcode:!!this.db.settings.barcode,manual:true},requestId);
+    if(command==='capture')await this.adapter.command(deviceId,'capture',{plateId:p.id,slot:p.slot,wellShots:this.recipeOf(p).wellShots||1,barcode:!!this.db.settings.barcode},requestId);
     // 시험 촬영(M3 A6): 등록 직후 한 번 찍어 웰 검출 · 바코드를 확인한다. 회차로 세지 않는다(onEvent).
     if(command==='testShot')await this.adapter.command(deviceId,'capture',{plateId:p.id,slot:p.slot,trial:true,wellShots:1,barcode:!!this.db.settings.barcode},requestId);
     if(command==='remove'){

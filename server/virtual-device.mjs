@@ -28,7 +28,7 @@ export class VirtualDeviceAdapter extends EventEmitter {
   if(d.fault)throw new DeviceError('DEVICE_FAULT',`장비 오류: ${d.fault}`);
   if(d.doorOpen)throw new DeviceError('DOOR_OPEN','도어가 열려 있습니다.');
   if(!['capture','home','calibrate','reset'].includes(type))throw new DeviceError('UNKNOWN_COMMAND','지원하지 않는 장비 명령입니다.',400);
-  d.job={id:randomUUID(),type,plateId:args.plateId??null,slot:args.slot??null,requestId,status:'running',step:0,progress:0,elapsed:0,startedAt:Date.now(),finishedAt:null,error:null,...(args.trial?{trial:true}:{}),...(args.manual?{manual:true}:{}),...(args.wellShots?{wellShots:args.wellShots}:{})};
+  d.job={id:randomUUID(),type,plateId:args.plateId??null,slot:args.slot??null,requestId,status:'running',step:0,progress:0,elapsed:0,startedAt:Date.now(),finishedAt:null,error:null,...(args.trial?{trial:true}:{}),...(args.wellShots?{wellShots:args.wellShots}:{})};
   this.event('job.started',d,{operation:type});
  }
  fail(d,code,message){
