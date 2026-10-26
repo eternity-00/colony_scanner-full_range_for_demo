@@ -47,7 +47,8 @@ export function CaptureScreen({state, send, openViewer}: Props) {
   const refPlate = current ?? finishedPlate;
   const stageLabel = ref ? (capture ? STAGES[Math.min(ref.step, STAGES.length - 1)] : SHORT_STAGES[Math.min(ref.step, SHORT_STAGES.length - 1)]) : null;
   // 재시작: 일시정지면 재개, 중단된 촬영이면 같은 플레이트를 다시 촬영(플레이트가 아직 있을 때만).
-  const restartable = cancelled && finishedPlate && !finishedPlate.removedAt;
+  const returning = cancelled && finished?.equipmentStatus === 'returning';
+  const restartable = cancelled && finishedPlate && !finishedPlate.removedAt && !returning;
 
   return (
     <div className="cp-page">
@@ -104,7 +105,7 @@ export function CaptureScreen({state, send, openViewer}: Props) {
               <button className="restart" disabled={!restartable} onClick={() => finishedPlate && void send('capture', d.id, {plateId: finishedPlate.id})}>
                 <ActIcon name="play" />
                 재시작
-                {!restartable && <small>플레이트가 없어 다시 촬영할 수 없습니다</small>}
+                {returning ? <small>트레이를 수납 위치로 되돌리는 중…</small> : !restartable && <small>플레이트가 없어 다시 촬영할 수 없습니다</small>}
               </button>
             </div>
           ) : (

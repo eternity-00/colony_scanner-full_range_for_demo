@@ -93,6 +93,7 @@ export class RealCameraAdapter extends EventEmitter {
    if(busy)throw new DeviceError('DEVICE_BUSY','스캐너가 작업 중입니다.');
    if(this.camera.snapshot().job.status==='running')throw new DeviceError('CAMERA_BUSY','카메라 촬영이 진행 중입니다.');
    if(this.motion?.refreshing)await this.motion.refreshing.catch(()=>{});	// the periodic link check holds the UART for a moment
+   if(this.returning)await this.returning;	// a cancelled capture is still bringing the tray back
    if(this.motion?.busy)throw new DeviceError('MOTION_BUSY','모터가 동작 중입니다.');
    await this.checkMcb();
    // alignment on: the camera must have been calibrated for this microstep setting.
@@ -317,7 +318,12 @@ export class RealCameraAdapter extends EventEmitter {
     else this.sim.fail(d,'CAMERA_ERROR',error.message.slice(0,600));
    }
    // 사용자 중단: 진행 중이던 이동은 끝까지 가게 두고(모터 위치를 잃지 않게) 트레이를 수납 위치로 되돌린다.
-   else if(j.cancelled&&!j.acquisitionDone&&this.motion&&j.slot!=null){j.equipmentStatus='returning';this.emit('change');await this.motion.run(this.motion.returnSteps(j.slot),180).catch(()=>{});}
+   else if(j.cancelled&&!j.acquisitionDone&&this.motion&&j.slot!=null){
+    j.equipmentStatus='returning';this.emit('change');
+    // 재시작(다음 capture 명령)은 이 복귀가 끝날 때까지 기다린다(MOTION_BUSY 대신).
+    this.returning=this.motion.run(this.motion.returnSteps(j.slot),180).catch(()=>{}).finally(()=>{this.returning=null;j.equipmentStatus='returned';this.emit('change');});
+    await this.returning;
+   }
   }
  }
  async acquireWell(d,well,active){

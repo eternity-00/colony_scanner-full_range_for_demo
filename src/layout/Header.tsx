@@ -16,6 +16,8 @@ interface Props {
   onAccount: () => void;
   /** 홈 버튼 — 어느 화면에서든 한 번에 홈으로. */
   onHome: () => void;
+  /** 촬영 중: 메뉴 · 홈 · 사용자 칩으로 화면을 벗어나지 못한다(2026-10-26). */
+  locked?: boolean;
 }
 
 
@@ -30,7 +32,7 @@ interface Props {
  *
  * 알림 종은 없다 — 알람은 홈의 알람 칸이 맡는다.
  */
-export function Header({state, tab, clock, day, onMenu, onAccount, onHome}: Props) {
+export function Header({state, tab, clock, day, onMenu, onAccount, onHome, locked = false}: Props) {
   const devices = state.devices;
   const linked = devices.filter(d => d.connected).length;
   const envAlarm = envAlarmActive(state);
@@ -44,7 +46,7 @@ export function Header({state, tab, clock, day, onMenu, onAccount, onHome}: Prop
         * 로고는 칸 밖 흰 바탕에 두고, 누르면 홈 — 따로 홈 버튼을 두지 않는다(혜원님 10/15).
         */}
       <div className="hd-brand">
-        <button className="hd-menu" onClick={onMenu} aria-label="메뉴 열기">
+        <button className={`hd-menu ${locked ? 'locked' : ''}`} onClick={onMenu} aria-label={locked ? '촬영 중에는 메뉴를 열 수 없습니다' : '메뉴 열기'} aria-disabled={locked}>
           <span />
           <span />
           <span />
@@ -53,6 +55,7 @@ export function Header({state, tab, clock, day, onMenu, onAccount, onHome}: Prop
       <button
         className="wm wm-home"
         onClick={onHome}
+        aria-disabled={locked}
         aria-label="홈으로"
         aria-current={tab === 'overview' ? 'page' : undefined}
       >
@@ -84,7 +87,7 @@ export function Header({state, tab, clock, day, onMenu, onAccount, onHome}: Prop
           {day} {clock}
         </span>
 
-        <button className={`role-chip ${state.session.role}`} onClick={onAccount}>
+        <button className={`role-chip ${state.session.role} ${locked ? 'locked' : ''}`} onClick={onAccount} aria-disabled={locked}>
           <i>{role.slice(0, 1)}</i>
           <span className="who">{role}</span>
         </button>

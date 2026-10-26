@@ -60,6 +60,8 @@ export interface Job {
   trial?: boolean;
   /** 사용자가 「중단」으로 끝낸 작업(status failed, 장비 오류 없음). */
   cancelled?: boolean;
+  /** 실장비 기구 상태(acquiring · returning · returned …). 중단 뒤 트레이 복귀 중이면 'returning'. */
+  equipmentStatus?: string;
   /** Well 당 촬영 장수(1 또는 5). */
   wellShots?: number;
   /** 십자 촬영 중 지금 찍는 위치(C · X+ · Y− · X− · Y+). */

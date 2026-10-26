@@ -224,3 +224,8 @@
 .cp-ctrl-done .cp-result{position:static;margin-top:0.5rem}
 .cp-acts.estop{grid-template-columns:minmax(0,1fr)}
 @media (max-height:700px){.cp-ctrl-btns>button{font-size:1.75rem}.cp-ctrl-btns>button .acti{width:2.5rem;height:2.5rem}}
+/* 촬영 큐: 오른쪽에 비상 정지(관리자)가 없으면 두 줄을 다 차지해 아래 빈 칸이 남지 않게 */
+.cp-side .cp-queue:last-child{grid-row:1/3}
+.cp-queue{align-self:stretch;min-height:0}
+/* 촬영 중 잠금: 헤더의 메뉴 · 로고 · 사용자 칩을 흐리게(누르면 안내 토스트) */
+header .hd-menu.locked,header .role-chip.locked,header [aria-disabled='true']{opacity:.45;cursor:not-allowed}

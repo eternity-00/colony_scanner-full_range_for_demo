@@ -293,6 +293,12 @@ export default function App() {
   const isAdmin = state.session.role === 'admin';
   // 관리자 권한이 5분 무조작으로 풀리면, 보고 있던 관리자 화면에서도 빠져나온다.
   const visible = tab === 'running' || tabsFor(isAdmin).some(([key]) => key === tab) ? tab : 'overview';
+  // 촬영 중(진행 · 일시정지)에는 촬영 화면을 벗어나지 못한다. 중단 · 완료 뒤에는 풀린다(2026-10-26).
+  const captureLocked = visible === 'running' && !!job && job.type === 'capture' && !job.trial && ['running', 'paused'].includes(job.status);
+  const guard = (go: () => void) => () => {
+    if (captureLocked) setNotice({bad: true, text: '촬영 중에는 이 화면을 벗어날 수 없습니다. 일시정지 · 중단 뒤에 이동하세요.'});
+    else go();
+  };
 
 
   const idleLeft = Math.max(0, ADMIN_IDLE_LIMIT_SEC - Math.floor(state.session.idleFor / 1000));
@@ -307,9 +313,10 @@ export default function App() {
         tab={visible}
         clock={hms(state.serverTime)}
         day={ymd(state.serverTime)}
-        onMenu={() => setMenu(true)}
-        onAccount={() => setUserCard(true)}
-        onHome={() => setTab('overview')}
+        onMenu={guard(() => setMenu(true))}
+        onAccount={guard(() => setUserCard(true))}
+        onHome={guard(() => setTab('overview'))}
+        locked={captureLocked}
       />
       <main>{screens[visible]}</main>
       <MenuDrawer
