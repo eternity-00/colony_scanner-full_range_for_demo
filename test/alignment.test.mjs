@@ -10,7 +10,7 @@ import {VirtualDeviceAdapter} from '../server/virtual-device.mjs';
 import {AlignmentStore} from '../server/alignment.mjs';
 import {Controller} from '../server/controller.mjs';
 
-const config={axes:{cameraX:1,trayX:2,cameraY:3,trayZ:4},tiers:8,wellColumns:3,wellRows:2,trayOut:450,captureZ:720,alignment:{backlashMarginFullSteps:0,tolerancePx:40}};
+const config={axes:{cameraX:1,trayX:2,cameraY:3,trayZ:4},tiers:8,wellColumns:3,wellRows:2,trayOut:450,captureZ:720,alignment:{backlashMarginFullSteps:0,tolerancePx:40,crossAfterMs:0,crossGuardMs:0}};
 const params={1:{USED:1,RANGE:-500,HDIR:1,HPARK:5},2:{USED:1,RANGE:460,HDIR:-1,HPARK:5},3:{USED:1,RANGE:300,HDIR:-1,HPARK:5},4:{USED:1,RANGE:2800,HDIR:-1,HPARK:5}};
 // 2 px per step on each camera axis, no backlash: a 200 px offset needs 100 steps
 const calibration={frame:{width:3840,height:3040},ustep:{cameraX:1,cameraY:1},pixelsPerStep:{xx:2,xy:0,yx:0,yy:2},approach:{x:1,y:1},backlash:{x:0,y:0},ring:{radius:1950,polarity:-1}};
@@ -183,8 +183,8 @@ test('십자 촬영 (wellShots 5): centre frame then four shifted frames per wel
   x.moves[0].resolve({seconds:1});await flush();x.adapter.tick(100);await flush();await flush();
   assert.equal(x.frames.length,1,'centre frame of well 1');
   const cross=x.adapter.crossOffsets();assert.equal(cross.source,'grid');assert.ok(cross.x>0&&cross.y>0);
-  // each shifted frame: one XY move then one exposure
-  for(let k=0;k<4;k++){x.frames.at(-1).acquired.resolve({});await flush();const m=x.moves.at(-1);assert.equal(m.steps.length,1);m.resolve({});await flush();assert.equal(x.frames.length,2+k);}
+  // each shifted frame: the previous frame must be fully received before the XY move, then one exposure
+  for(let k=0;k<4;k++){const before=x.moves.length;await flush();assert.equal(x.moves.length,before,'no move while the frame is still being received');x.frames.at(-1).acquired.resolve({});await flush();const m=x.moves.at(-1);assert.equal(x.moves.length,before+1);assert.equal(m.steps.length,1);m.resolve({});await flush();assert.equal(x.frames.length,2+k);}
   const first=x.motion.wellTarget(1);
   assert.deepEqual(x.moves[1].steps,[{parallel:[`MOVE 1 ${first.x+cross.x}`,`MOVE 3 ${first.y}`]}],'X+ shot');
   assert.deepEqual(x.moves[2].steps,[{parallel:[`MOVE 1 ${first.x}`,`MOVE 3 ${first.y-cross.y}`]}],'Y- shot');

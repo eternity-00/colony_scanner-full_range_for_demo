@@ -20,6 +20,9 @@ export const ALIGNMENT_DEFAULTS=Object.freeze({
  backlashMarginFullSteps:4,	// extra pre-travel beyond the measured backlash (full steps)
  cameraSpeedHz:190,	// camera-axis speed (full steps/s) while aligning; short reversing moves lose repeatability at the firmware's fast setting
  settleMs:300,	// an alignment frame must start exposing this long after the move finished
+ // 십자 촬영 (wellShots 5) guards around every shifted frame, independent of the exposure-window model:
+ crossGuardMs:1100,	// a shifted frame's timestamp must be this long after the move finished: more than one frame period (1 fps) + margin, so no frame overlapping the move can be picked whatever the exposure model says
+ crossAfterMs:150,	// after a frame is fully received, wait this long before the next move starts
 });
 
 export function alignmentSettings(config){
@@ -28,7 +31,7 @@ export function alignmentSettings(config){
  if(a===true)return {...ALIGNMENT_DEFAULTS,enabled:true};
  if(typeof a!=='object'||Array.isArray(a))throw Error('scanner recipe config: alignment must be an object');
  const s={...ALIGNMENT_DEFAULTS,...a,enabled:a.enabled!==false};
- for(const [key,min,max] of [['tolerancePx',1,2000],['maxIterations',0,10],['maxCorrectionPitch',0.05,1],['probeFullSteps',1,100000],['backlashMarginFullSteps',0,1000],['cameraSpeedHz',0,20000],['settleMs',0,5000]])
+ for(const [key,min,max] of [['tolerancePx',1,2000],['maxIterations',0,10],['maxCorrectionPitch',0.05,1],['probeFullSteps',1,100000],['backlashMarginFullSteps',0,1000],['cameraSpeedHz',0,20000],['settleMs',0,5000],['crossGuardMs',0,5000],['crossAfterMs',0,5000]])
   if(typeof s[key]!=='number'||!(s[key]>=min&&s[key]<=max))throw Error(`scanner recipe config: alignment.${key} must be ${min}..${max}`);
  if(!['capture','fail'].includes(s.onFailure))throw Error('scanner recipe config: alignment.onFailure must be capture or fail');
  return s;

@@ -225,9 +225,23 @@ export class RealCameraAdapter extends EventEmitter {
    // 십자 촬영: the centre frame first (aligned when alignment is on), then four frames with the
    // camera shifted by the cross offset along each axis. The shifted moves are plain moves (no
    // anti-backlash approach): their position only needs to be roughly right.
+   // Motion never overlaps an exposure (2026-10-26): a shifted frame is requested crossGuardMs after
+   // the move finished, and the next move waits until the frame is fully received plus crossAfterMs,
+   // instead of trusting the predicted exposure window.
    const cross=(j.wellShots||1)>1?this.crossOffsets():null;j.cross=cross;
+   // The stream treats a frame as usable when its timestamp is >= readyAt - exposureStart; add that
+   // offset back so the guard applies to the frame timestamp itself (>= move end + crossGuardMs).
+   const exposureStart=(ready?.exposureWindowMs?.[0]??400)/1000;
+   const guardBefore=(this.align.crossGuardMs??1100)/1000+exposureStart,guardAfter=(this.align.crossAfterMs??150)/1000;
+   const settled=async f=>{await f.acquired;if(guardAfter>0)await new Promise(r=>setTimeout(r,guardAfter*1000));};
    // a shift that runs into an axis end is clamped (recorded as such): the frame is still taken there
-   const shiftedFrame=async(wanted)=>{const target=this.motion.clampXY(wanted);const move=await this.moveXY(target);j.position=null;return {target,clamped:target.x!==Math.round(wanted.x)||target.y!==Math.round(wanted.y),...this.camera.captureFrame(move.readyAt+(this.align.settleMs||0)/1000)};};
+   // camera-stream refuses a ready time more than 1 s ahead: hold the request until it is within reach
+   const shiftedFrame=async(wanted)=>{
+    const target=this.motion.clampXY(wanted);const move=await this.moveXY(target);j.position=null;
+    const readyAt=move.readyAt+guardBefore,wait=readyAt-0.8-now();
+    if(wait>0)await new Promise(r=>setTimeout(r,wait*1000));
+    return {target,clamped:target.x!==Math.round(wanted.x)||target.y!==Math.round(wanted.y),movedAt:move.readyAt,...this.camera.captureFrame(readyAt)};
+   };
    while(j.wellQueue.length){
     await active();
     const well=j.wellQueue.shift();j.well=well;
@@ -236,14 +250,16 @@ export class RealCameraAdapter extends EventEmitter {
     j.frameIds.push(frame.id);frames.push({well,shot:'C',...frame});
     let last=frame;
     for(const c of (cross?CROSS.slice(1):[])){
-     await(last.released||last.acquired);await active();j.shot=c.shot;
+     await settled(last);await active();j.shot=c.shot;
      const f=await shiftedFrame({x:frame.target.x+c.x*cross.x,y:frame.target.y+c.y*cross.y});
      j.frameIds.push(f.id);last={well,shot:c.shot,...f};frames.push(last);this.emit('change');
     }
     j.shot=null;
     // Next well as soon as this frame's exposure is over (it is still crossing USB);
-    // the last frame is awaited whole before the return.
-    await(j.wellQueue.length&&last.released?last.released:last.acquired);
+    // the last frame is awaited whole before the return. In cross mode every move waits for the
+    // whole frame plus the guard.
+    if(cross)await settled(last);
+    else await(j.wellQueue.length&&last.released?last.released:last.acquired);
     this.emit('change');
    }
    // A frame that was not the predicted one (dropped frame) may have been exposed while the
@@ -254,7 +270,7 @@ export class RealCameraAdapter extends EventEmitter {
     await active();
     const frame=old.shot==='C'?{shot:'C',...await this.acquireWell(d,old.well,active)}:{shot:old.shot,...await shiftedFrame(old.target)};
     j.frameIds.push(frame.id);frames[k]={well:old.well,...frame};j.retakes=(j.retakes||0)+1;
-    await frame.acquired;
+    if(cross)await settled(frame);else await frame.acquired;
     old.completed.then(()=>this.purgeCapture({wells:[{id:old.id}]}),()=>{});
    }
    await active();
@@ -266,14 +282,15 @@ export class RealCameraAdapter extends EventEmitter {
    this.sim.event('job.stage',d,{step:3,label:'수납 복귀'});
    this.emit('change');
    await processing;
-   const results=await Promise.all(frames.map(async frame=>({well:frame.well,shot:frame.shot,target:frame.target,clamped:!!frame.clamped,last:await frame.completed})));
+   const results=await Promise.all(frames.map(async frame=>({well:frame.well,shot:frame.shot,target:frame.target,clamped:!!frame.clamped,movedAt:frame.movedAt,last:await frame.completed})));
    await active();
    const byWell=new Map();
-   for(const {well,shot,target,clamped,last} of results){
+   for(const {well,shot,target,clamped,movedAt,last} of results){
     if(!last?.nativeYuy2||last.sourceFormat!=='YUYV'||!last.continuousStream)throw new Error('YUY2 스트림 원본 확인 실패');
     const {image,preview,raw}=last.files;
     if(!image||basename(image)!==image||!/^[-a-f0-9]+\.png$/.test(image)||!preview||basename(preview)!==preview)throw new Error('잘못된 영상 파일명');
-    const entry={shot,id:last.id,image,preview,raw,sha256:last.rawSha256,target:target||null,...(clamped?{clamped:true}:{}),totalSeconds:last.totalSeconds};
+    const entry={shot,id:last.id,image,preview,raw,sha256:last.rawSha256,target:target||null,...(clamped?{clamped:true}:{}),totalSeconds:last.totalSeconds,
+     frameMonotonic:last.frameMonotonic,readyMonotonic:last.readyMonotonic,movedAt:movedAt||null};
     if(shot!=='C'){const w=byWell.get(well);if(!w)throw new Error(`Well ${well} 중앙 프레임 없음`);w.shots.push(entry);continue;}
     const p=this.motion.wellPos(well),alignment=j.alignment?.[well]||null;
     const record={well,col:p.col,row:p.row,x:p.x,y:p.y,target:alignment?.target||target||null,alignment,id:last.id,image,preview,raw,sha256:last.rawSha256,
@@ -618,7 +635,7 @@ export class RealCameraAdapter extends EventEmitter {
    const w0=now.job.wells[0];
    now.job.image=name;
    now.job.capture={id:name.slice(0,-4),width:w0.width*cols,height:w0.height*Math.ceil(n/cols),sourceFormat:'YUYV',nativeYuy2:true,
-    mosaic:true,plate:now.job.plateGrid,wells:now.job.wells,wellShots:now.job.wellShots||1,cross:now.job.cross||null,barcode:now.job.barcode||null,trial:!!now.job.trial,
+    mosaic:true,plate:now.job.plateGrid,wells:now.job.wells,wellShots:now.job.wellShots||1,cross:now.job.cross?{...now.job.cross,guardMs:this.align.crossGuardMs??1100,afterMs:this.align.crossAfterMs??150}:null,barcode:now.job.barcode||null,trial:!!now.job.trial,
     alignment:now.job.alignmentCalibration?{enabled:true,alignedWells:now.job.wells.filter(w=>w.alignment?.aligned).map(w=>w.well),unalignedWells:now.job.wells.filter(w=>!w.alignment?.aligned).map(w=>w.well),tolerancePx:this.align.tolerancePx,calibratedAt:now.job.alignmentCalibration.calibratedAt,
      plateModel:now.job.plateModel?{wells:now.job.plateModel.wells,shift:now.job.plateModel.shift,rotation:now.job.plateModel.rotation,scale:now.job.plateModel.scale}:null}:{enabled:false},
     totalSeconds:now.job.acquisitionDone?(Date.now()-now.job.startedAt)/1000:now.job.wells.reduce((s,w)=>s+(w.totalSeconds||0),0),
