@@ -155,10 +155,12 @@
 .net-acts{display:flex;gap:0.5rem}.net-sub{margin:0.5rem 0 0;font-size:1rem}
 .net-ssid{font-style:normal;color:#2e4a8c}
 /* 십자 촬영 썸네일 */
-.wc-shots{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;padding:0 0.25rem}
-.wc-shots button{appearance:none;border:1px solid #c3cad5;padding:0;background:#101827;display:grid;min-height:0;border-radius:4px;overflow:hidden}
+/* 십자 촬영 5장: 카드 아래쪽 영상 위에 띠로 겹친다(카드 높이는 그대로). */
+.wc-shots{position:absolute;left:0.375rem;right:0.375rem;bottom:3rem;display:grid;grid-template-columns:repeat(5,1fr);gap:2px;z-index:1}
+.wc-shots button{appearance:none;border:1px solid #ffffffaa;padding:0;background:#101827;display:grid;min-height:0;border-radius:4px;overflow:hidden;cursor:pointer}
 .wc-shots button img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
-.wc-shots button small{font-size:0.625rem;color:#fff;background:#1d2f5c;line-height:1.2}
+.wc-shots button small{font-size:0.625rem;color:#fff;background:#1d2f5ccc;line-height:1.3}
+.well-card .wc-zoom{bottom:0.375rem}
 /* 대기 모드 절전 */
 .sleep-overlay{position:fixed;inset:0;z-index:80;background:#05091a;color:#aab4c8;display:grid;place-content:center;justify-items:center;gap:0.5rem;text-align:center}
 .sleep-overlay b{font-size:2rem;color:#e6ebf5}.sleep-overlay small{font-size:1.25rem;color:#6b768c}
