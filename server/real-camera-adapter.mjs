@@ -353,15 +353,26 @@ export class RealCameraAdapter extends EventEmitter {
  async measureCross(j){
   const um=this.imageScale().umPerPx;if(!um)return;
   const pairs=[],refs=[];
-  for(const w of j.wells)for(const s of w.shots||[]){if(s.shot==='C'||!s.preview)continue;pairs.push([join(this.camera.directory,w.preview),join(this.camera.directory,s.preview)]);refs.push({w,s});}
+  const scale=3840/1280;	// previews are 1280 px wide
+  // Expected displacement of each shifted frame (calibration matrix x step delta, preview px): at
+  // 17.5 mm the shift is about half the frame and the measurement needs it to resolve wrap-around.
+  const K=j.alignmentCalibration?.pixelsPerStep||null;
+  for(const w of j.wells){
+   const centre=(w.shots||[]).find(x=>x.shot==='C');
+   for(const s of w.shots||[]){
+    if(s.shot==='C'||!s.preview)continue;
+    const pair={ref:join(this.camera.directory,w.preview),img:join(this.camera.directory,s.preview)};
+    if(K&&centre?.target&&s.target){const sx=s.target.x-centre.target.x,sy=s.target.y-centre.target.y;pair.dx=(K.xx*sx+K.yx*sy)/scale;pair.dy=(K.xy*sx+K.yy*sy)/scale;}
+    pairs.push(pair);refs.push({w,s});
+   }
+  }
   if(!pairs.length)return;
   const results=await measureShifts(pairs,{timeoutMs:60000});
-  const scale=3840/1280;	// previews are 1280 px wide
   const samples={x:[],y:[]};
   results.forEach((r,i)=>{
    const {w,s}=refs[i];if(!Number.isFinite(r?.dx))return;
    const dx=r.dx*scale,dy=r.dy*scale,px=Math.hypot(dx,dy);
-   s.measured={dxPx:Math.round(dx),dyPx:Math.round(dy),mm:Math.round(px*um/1000*100)/100,strength:r.strength};
+   s.measured={dxPx:Math.round(dx),dyPx:Math.round(dy),mm:Math.round(px*um/1000*100)/100,strength:r.strength,...(r.method?{method:r.method}:{})};
    const centre=w.shots.find(x=>x.shot==='C'),steps=centre?.target&&s.target?{x:s.target.x-centre.target.x,y:s.target.y-centre.target.y}:null;
    if(!steps||s.clamped||px<50)return;
    const axis=s.shot.startsWith('X')?'x':'y',moved=Math.abs(steps[axis]);

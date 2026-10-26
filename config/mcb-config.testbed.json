@@ -1,5 +1,5 @@
 {
- "_comment": "Process recipe (test jig 2026-10-07), MCB full steps after homing. axes: which MCB motor does what. One 6-well plate per tier: the trayZ range is split into `tiers` sections (tier n = centre of section n, app tier 1 = bottom; the app's 3 columns of a tier are the same plate); wells = `wellColumns` sections of the cameraX range x `wellRows` sections of the cameraY range (one frame per well, 2 x 3 mosaic). Ranges (RANGE) and park positions (HDIR x HPARK) are read from the MCB firmware before every job. trayOut: trayX position with the tray out. captureZ: trayZ height for the capture, lens tip to subject 110 mm (measured: Z 400 = 90 mm, 500 = 95, 720 = 110, 800 = 115, about 0.064 mm/step; Z up = farther). Add \"speedHz\" only to override the firmware default speed. captureZ 875 (2026-10-21): the tier height itself, so the whole 6-well rim (about 3090 px across at 3840x3040) fits the frame for well-centre alignment; 720 (110 mm) showed only the inner 90 %. Raise further (about 1000) only after checking the clearance below the extended tray. wellDiameterMm: inner diameter at the well bottom (6-well plate), used with the calibrated rim ring to state the image scale (um per pixel).",
+ "_comment": "Process recipe (test jig 2026-10-07), MCB full steps after homing. axes: which MCB motor does what. One 6-well plate per tier: the trayZ range is split into `tiers` sections (tier n = centre of section n, app tier 1 = bottom; the app's 3 columns of a tier are the same plate); wells = `wellColumns` sections of the cameraX range x `wellRows` sections of the cameraY range (one frame per well, 2 x 3 mosaic). Ranges (RANGE) and park positions (HDIR x HPARK) are read from the MCB firmware before every job. trayOut: trayX position with the tray out. captureZ: trayZ height for the capture, lens tip to subject 110 mm (measured: Z 400 = 90 mm, 500 = 95, 720 = 110, 800 = 115, about 0.064 mm/step; Z up = farther). Add \"speedHz\" only to override the firmware default speed. captureZ 875 (2026-10-21): the tier height itself, so the whole 6-well rim (about 3090 px across at 3840x3040) fits the frame for well-centre alignment; 720 (110 mm) showed only the inner 90 %. Raise further (about 1000) only after checking the clearance below the extended tray. wellDiameterMm: inner diameter at the well bottom (6-well plate), used with the calibrated rim ring to state the image scale (um per pixel). crossOffsetMm 17.5 (2026-10-26): camera shift of the four 십자 촬영 frames around the well centre, half the well diameter; shots that would run past an axis end are clamped there and flagged (on this jig: column-1 X+, row-1 Y-, and 1-1.5 mm short at column-3 X- / row-2 Y+).",
  "enabled": true,
  "axes": {
   "cameraX": 1,
@@ -12,5 +12,6 @@
  "wellRows": 2,
  "trayOut": 450,
  "captureZ": 875,
- "wellDiameterMm": 34.8
+ "wellDiameterMm": 34.8,
+ "crossOffsetMm": 17.5
 }

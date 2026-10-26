@@ -9,9 +9,10 @@ import {fileURLToPath} from 'node:url';
 const PY=process.env.COLONY_PYTHON||'python3';
 const script=name=>fileURLToPath(new URL(`../device/${name}`,import.meta.url));
 
-function lines(args,timeoutMs){
+function lines(args,timeoutMs,input=null){
  return new Promise(resolve=>{
-  let out='',err='';const child=spawn(PY,args,{stdio:['ignore','pipe','pipe']});
+  let out='',err='';const child=spawn(PY,args,{stdio:[input==null?'ignore':'pipe','pipe','pipe']});
+  if(input!=null){child.stdin.on('error',()=>{});child.stdin.end(input);}
   const timer=setTimeout(()=>child.kill('SIGKILL'),timeoutMs);
   child.stdout.on('data',b=>{out+=b;});child.stderr.on('data',b=>{err=(err+b).slice(-1000);});
   child.on('error',()=>{clearTimeout(timer);resolve({rows:[],error:'spawn failed'});});
@@ -48,9 +49,14 @@ export async function changeScores(pairs,{timeoutMs=60000}={}){
  return pairs.map((_,i)=>rows[i]||{score:null,error:'NO_RESULT'});
 }
 
-/** pairs: [[ref,img],...] -> [{dx,dy,strength}|{dx:null,error}] in input-image pixels (device/shift_measure.py). */
+/**
+ * pairs: [[ref,img],...] or [{ref,img,dx,dy},...] with dx,dy the expected content displacement in
+ * input-image pixels (resolves the wrap-around of shifts near half a frame, device/shift_measure.py)
+ * -> [{dx,dy,strength,method}|{dx:null,error}] in input-image pixels, same order.
+ */
 export async function measureShifts(pairs,{timeoutMs=60000}={}){
  if(!pairs.length)return [];
- const {rows}=await lines([script('shift_measure.py'),...pairs.flat()],timeoutMs);
+ const rows_=pairs.map(p=>Array.isArray(p)?{ref:p[0],img:p[1]}:{ref:p.ref,img:p.img,dx:p.dx??null,dy:p.dy??null});
+ const {rows}=await lines([script('shift_measure.py'),'--json'],timeoutMs,rows_.map(r=>JSON.stringify(r)).join('\n')+'\n');
  return pairs.map((_,i)=>rows[i]||{dx:null,dy:null,error:'NO_RESULT'});
 }

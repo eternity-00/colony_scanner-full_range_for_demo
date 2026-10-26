@@ -1,5 +1,5 @@
 {
- "_comment": "Process recipe for the PRODUCTION mechanics (placeholder copied from the testbed jig 2026-10-23). Replace tiers/wellColumns/wellRows/trayOut/captureZ/wellDiameterMm with the measured values of the production unit; ranges and park positions are read from the MCB firmware before every job.",
+ "_comment": "Process recipe for the PRODUCTION mechanics (placeholder copied from the testbed jig 2026-10-23). Replace tiers/wellColumns/wellRows/trayOut/captureZ/wellDiameterMm with the measured values of the production unit; ranges and park positions are read from the MCB firmware before every job. crossOffsetMm 17.5: 십자 촬영 shift around the well centre (half the well diameter); the production camera travel must exceed the well grid by at least this much on every side or the outer shots are clamped at the axis ends.",
  "enabled": true,
  "axes": {
   "cameraX": 1,
@@ -12,5 +12,6 @@
  "wellRows": 2,
  "trayOut": 450,
  "captureZ": 875,
- "wellDiameterMm": 34.8
+ "wellDiameterMm": 34.8,
+ "crossOffsetMm": 17.5
 }
