@@ -248,18 +248,24 @@ export function SettingsScreen({state, send, operator, setOperator, onRole,
           </div>
           {/*
             * Well 한 칸을 가운데 한 장만 찍을지, 상하좌우까지 다섯 장을 찍을지.
-            * 쓰는 값이 1 과 5 둘뿐이라 스위치로 둔다. 루틴 저장 때 함께 저장된다.
+            * 쓰는 값이 1 과 5 둘뿐이라 스위치로 둔다. 옆의 자동 촬영 스위치와 같이 누르는 즉시
+            * 적용된다(저장 버튼 아래에 있는 스위치가 저장을 기다리면 안 된다, 2026-10-26).
+            * 저장된 루틴 값에 장수만 바꿔 보내므로 위 칸의 저장 전 편집값은 건드리지 않는다.
             */}
           <div className="sg-opts">
             <div>
               <span>
                 <b>Well 십자 촬영</b>
-                <em>Well 한 칸을 가운데 · 상하좌우 다섯 장으로 나눠 찍습니다 · 루틴 저장 시 적용</em>
+                <em>Well 한 칸을 가운데 · 상하좌우 다섯 장으로 나눠 찍습니다 · 바로 적용</em>
               </span>
               <Toggle
-                label={`Well당 ${routine.wellShots}장`}
-                checked={routine.wellShots === 5}
-                onChange={on => setRoutine(r => ({...r, wellShots: on ? 5 : 1}))}
+                label={`Well당 ${state.routine.wellShots}장`}
+                checked={state.routine.wellShots === 5}
+                onChange={on => {
+                  const wellShots = on ? 5 : 1;
+                  setRoutine(r => ({...r, wellShots}));
+                  void send('routine', 0, {...state.routine, wellShots});
+                }}
               />
             </div>
             <div>

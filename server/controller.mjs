@@ -334,7 +334,10 @@ export class Controller extends EventEmitter {
     // 최대 배양 기간은 관리자만 바꾼다(1차 피드백 2.2 · 4.3). 주기·지연·Well 촬영 장수는 사용자 업무.
     assert(args.days===this.db.routine.days||this.session.role==='admin'||source==='admin-tool','FORBIDDEN','총 배양 기간 변경은 관리자 권한이 필요합니다.',403);
     assert(args.wellShots===undefined||[1,5].includes(args.wellShots),'INVALID_ROUTINE','Well 촬영 장수는 1 또는 5여야 합니다.',400);
-    this.db.routine={cycleHours:args.cycleHours,days:args.days,delay:args.delay,wellShots:args.wellShots??this.db.routine.wellShots??1};this.log('INFO','공통 루틴 저장 · 전체 일정 재산정');
+    const before=this.db.routine,next={cycleHours:args.cycleHours,days:args.days,delay:args.delay,wellShots:args.wellShots??before.wellShots??1};
+    this.db.routine=next;
+    const scheduleChanged=next.cycleHours!==before.cycleHours||next.days!==before.days||next.delay!==before.delay;
+    this.log('INFO',scheduleChanged?`공통 루틴 저장 · 전체 일정 재산정${next.wellShots!==before.wellShots?` · Well ${next.wellShots}장`:''}`:next.wellShots!==before.wellShots?`Well 십자 촬영 ${next.wellShots===5?'켜짐 (Well당 5장)':'꺼짐 (Well당 1장)'}`:'공통 루틴 저장 (변경 없음)');
    }else if(command==='autoRun'){
     assert(typeof args.enabled==='boolean','INVALID_VALUE','enabled는 boolean이어야 합니다.',400);this.db.autoRun=args.enabled;this.log('INFO',`자동 촬영 ${args.enabled?'활성화':'비활성화'}`);
    }else if(command==='settings'){
