@@ -37,6 +37,9 @@ const alignment=motion?new AlignmentStore(process.env.COLONY_ALIGNMENT_FILE||joi
 const adapter=real?new RealCameraAdapter({base,camera,dataDir,motion,alignment}):base;
 const controller=new Controller({dataDir,adapter,profile});
 controller.filesDir=camera?.directory||null;	// per-well previews for the run-to-run change score (A11)
+// Build id of the UI bundle: the kiosk browser reloads itself when a new bundle is deployed (it keeps
+// running across colony.service restarts, so without this it showed the old UI until a manual reload).
+try{controller.build=(readFileSync(join(root,'dist','index.html'),'utf8').match(/index-([A-Za-z0-9_-]+)\.js/)||[])[1]||null;}catch{controller.build=null;}
 
 // firmware parameters vs the profile's expected values (RANGE, USTEP ...): a warning, not a stop
 let firmwareCheck={checkedAt:null,ok:null,mismatches:[]};

@@ -172,3 +172,14 @@
 .sg-choice{display:flex;flex-wrap:wrap;gap:0.375rem;flex:none}.sg-choice button{width:auto;min-width:4.5rem;min-height:2.5rem;padding:0 0.75rem}
 .net-host{display:grid;grid-template-columns:minmax(0,1fr) 7rem;gap:0.5rem;height:auto}.net-host input{width:100%;min-height:2.5rem;text-align:left}
 .rm-left .p-card-head{flex-wrap:wrap}
+/* 십자 촬영 보기 (CrossViewer) */
+.rc-cross,.sm-cross{min-height:2.5rem;padding:0 0.875rem;background:#e8edf8;border:1px solid #8195c2;color:#1d2f5c;font-weight:700}
+.cv-wells{display:flex;gap:0.25rem;margin-left:auto}.cv-wells button{min-height:2.25rem;padding:0 0.625rem;font-size:0.8125rem}.cv-wells button.selected{background:#2e4a8c;color:#fff;border-color:#2e4a8c}
+.modal.wide>.cv-grid{flex:1;min-height:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));gap:0.375rem;padding:0.5rem 1.5rem;margin:0}
+.cv-shot{appearance:none;border:1px solid #c3cad5;border-radius:6px;padding:0;background:#101827;position:relative;min-height:0;overflow:hidden;cursor:pointer;display:block}
+.cv-shot.centre{border:2px solid #2e4a8c}
+.cv-shot img{width:100%;height:100%;object-fit:contain;display:block}
+.cv-shot b{position:absolute;left:0.375rem;top:0.375rem;background:#1d2f5ccc;color:#fff;padding:0.125rem 0.5rem;border-radius:4px;font-size:0.8125rem}
+.cv-shot b em{font-style:normal;color:#ffd166}
+.cv-empty{display:grid;place-items:center;color:#7a8290;font-size:0.8125rem;border:1px dashed #c3cad5;border-radius:6px}
+.cv-none{padding:2rem;text-align:center;color:#5c6672}

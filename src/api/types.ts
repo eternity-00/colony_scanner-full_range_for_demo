@@ -75,6 +75,8 @@ export interface CaptureShot {
   raw?: string;
   sha256?: string;
   target?: {x: number; y: number} | null;
+  /** 요청한 이동량이 축 끝에 걸려 줄어든 프레임. */
+  clamped?: boolean;
 }
 
 export interface BarcodeHit {
@@ -206,6 +208,8 @@ export interface CaptureRecord {
   cross?: {x: number; y: number; mm: number; source: string} | null;
   barcode?: BarcodeResult | null;
   trial?: boolean;
+  /** 십자 이동 프레임이 보관 정책(최근 1회)으로 지워진 회차. */
+  crossDropped?: boolean;
 }
 
 export type RemoveReason = 'done' | 'positive' | 'contaminated' | 'moved' | 'other';
@@ -394,6 +398,8 @@ export interface AppState {
   settings: UserSettings;
   /** 대기 모드(플레이트 없음) 진입 시각. 아니면 null. */
   idle: {since: number} | null;
+  /** UI 번들 식별자. 바뀌면 화면이 스스로 새로 고친다(배포 뒤 키오스크). */
+  build?: string | null;
   serverLink: ServerLink | null;
   alarms: Alarm[];
   envHistory: EnvSample[];

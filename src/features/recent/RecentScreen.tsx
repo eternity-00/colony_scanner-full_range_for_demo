@@ -2,8 +2,9 @@ import {useEffect, useMemo, useState} from 'react';
 import type {AppState, Plate, Run} from '../../api/types.ts';
 import {WELLS} from '../../config/defines.ts';
 import {Badge} from '../../shared/Badge.tsx';
+import {CrossViewer} from '../../shared/CrossViewer.tsx';
 import {fmt} from '../../utils/datetime.ts';
-import {active, elapsedDays, failedWells, imgSrc, pos, recipeName, shots, totalRuns} from '../../utils/plate.ts';
+import {active, elapsedDays, failedWells, imgSrc, isCrossRun, latestCrossRun, pos, recipeName, shots, totalRuns} from '../../utils/plate.ts';
 
 interface Props {
   state: AppState;
@@ -24,6 +25,7 @@ export function RecentScreen({state, openViewer, openDetail}: Props) {
   const [sort, setSort] = useState<Sort>('days');
   const [index, setIndex] = useState(0);
   const [runIndex, setRunIndex] = useState<number | null>(null);
+  const [cross, setCross] = useState<{plate: Plate; run: Run} | null>(null);
 
   const plates = useMemo(() => {
     const list = active(state).filter(p => state.devices.some(d => d.id === p.deviceId));
@@ -43,6 +45,8 @@ export function RecentScreen({state, openViewer, openDetail}: Props) {
   const images = run ? shots(run) : [];
   const al = run?.capture?.alignment;
   const code = run?.capture?.barcode;
+  // 십자 촬영: 보고 있는 회차가 십자면 그 회차, 아니면 이 플레이트의 가장 최근 십자 회차(이동 프레임은 최근 1회만 남는다)
+  const crossTarget = plate ? (run && isCrossRun(run) ? {plate, run} : latestCrossRun(state, plate)) : null;
 
   const go = (step: number) => {
     setIndex(i => (plates.length ? (i + step + plates.length) % plates.length : 0));
@@ -124,6 +128,11 @@ export function RecentScreen({state, openViewer, openDetail}: Props) {
               <b>보관 중인 영상이 없습니다{plate.runs.length ? ' (보존 기간 경과)' : ' (촬영 전)'}</b>
             )}
             <span className="rc-grow" />
+            {crossTarget && (
+              <button className="rc-cross" onClick={() => setCross(crossTarget)}>
+                십자 촬영 보기{crossTarget.run !== run ? ` · ${crossTarget.run.n}회차` : ''}
+              </button>
+            )}
             {held.length > 1 && (
               <select
                 aria-label="회차 선택"
@@ -168,6 +177,7 @@ export function RecentScreen({state, openViewer, openDetail}: Props) {
           )}
         </div>
       )}
+      {cross && <CrossViewer plate={cross.plate} run={cross.run} onClose={() => setCross(null)} />}
     </div>
   );
 }

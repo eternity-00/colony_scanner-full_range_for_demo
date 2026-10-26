@@ -71,7 +71,14 @@ export default function App() {
   // 최초 상태를 한 번 읽고, 이후에는 SSE 로 받는다.
   useEffect(() => {
     let live = true;
+    let build: string | null | undefined;
     const apply = (s: AppState) => {
+      // 새 번들이 배포되면(서버 재시작 뒤 build 가 바뀜) 키오스크가 스스로 새로 고친다.
+      if (build && s.build && s.build !== build) {
+        location.reload();
+        return;
+      }
+      build = s.build ?? build;
       // 트레이 배치(단 × 열)는 프로필에서 온다. 슬롯 번호 → 단/열 변환이 이 값을 쓴다.
       configureLayout(s.profile?.layout);
       setState(s);

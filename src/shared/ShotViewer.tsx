@@ -4,6 +4,7 @@ import {SHOT_LABEL, WELLS} from '../config/defines.ts';
 import {fmt} from '../utils/datetime.ts';
 import {failedWells, imgSrc, pos, shots} from '../utils/plate.ts';
 import {Badge} from './Badge.tsx';
+import {CrossViewer} from './CrossViewer.tsx';
 import {ImageDetail, type DetailImage} from './ImageDetail.tsx';
 import {Modal} from './Modal.tsx';
 
@@ -43,6 +44,7 @@ export function ShotViewer({target, onClose}: Props) {
   const {plate, run, wellIndex} = target;
   const images = run ? shots(run) : [];
   const [detail, setDetail] = useState<number | null>(null);
+  const [crossOpen, setCrossOpen] = useState<number | null>(null);
   const originals = run ? detailImages(run) : [];
   const al = run?.capture?.alignment;
   const code = run?.capture?.barcode;
@@ -76,7 +78,11 @@ export function ShotViewer({target, onClose}: Props) {
             웰 중심 정렬 {alignedSet.size}/{WELLS}
           </Badge>
         )}
-        {cross && <Badge type="info">십자 촬영 · Well당 5장</Badge>}
+        {cross && (
+          <button className="sm-cross" onClick={() => setCrossOpen(1)}>
+            십자 촬영 보기 · Well당 5장
+          </button>
+        )}
         {code && (
           <Badge type={code.value ? 'good' : code.scanned ? 'warn' : 'info'}>
             {code.value ? `바코드 ${code.value}` : code.scanned ? '바코드 미인식' : '바코드 판독 불가'}
@@ -114,14 +120,7 @@ export function ShotViewer({target, onClose}: Props) {
                 {cross && file && (
                   <span className="wc-shots" aria-label="십자 촬영 5장">
                     {(run.capture?.wells?.find(w => w.well === i + 1)?.shots ?? []).map(s => (
-                      <button
-                        key={s.id}
-                        title={SHOT_LABEL[s.shot] ?? s.shot}
-                        onClick={() => {
-                          const at = originals.findIndex(o => o.src.endsWith(`/${s.image}`));
-                          setDetail(at >= 0 ? at : 0);
-                        }}
-                      >
+                      <button key={s.id} title={SHOT_LABEL[s.shot] ?? s.shot} onClick={() => setCrossOpen(i + 1)}>
                         <img src={`/api/v1/hardware/files/${s.preview}`} alt={`Well ${i + 1} ${SHOT_LABEL[s.shot] ?? s.shot}`} />
                         <small>{SHOT_LABEL[s.shot] ?? s.shot}</small>
                       </button>
@@ -160,6 +159,7 @@ export function ShotViewer({target, onClose}: Props) {
           onClose={() => setDetail(null)}
         />
       )}
+      {crossOpen !== null && run && <CrossViewer plate={plate} run={run} well={crossOpen} onClose={() => setCrossOpen(null)} />}
     </Modal>
   );
 }

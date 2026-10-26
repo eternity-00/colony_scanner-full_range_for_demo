@@ -84,6 +84,19 @@ export const endSoon = (s: AppState, p: Plate) =>
 export const dueNow = (s: AppState, p: Plate) =>
   !p.paused && p.runs.length < totalRuns(s, p) && nextAt(s, p) <= s.serverTime;
 
+/** 십자 촬영(이동 프레임이 남아 있는) 회차인지. */
+export const isCrossRun = (r?: Run | null) =>
+  !!r && r.imageState === 'held' && !!r.capture?.wells?.some(w => (w.shots?.length ?? 0) > 1);
+
+/** 가장 최근 십자 촬영 회차(이동 프레임 보관 중인 것). 플레이트를 주면 그 플레이트 안에서, 아니면 전체에서. */
+export const latestCrossRun = (s: AppState, p?: Plate | null): {plate: Plate; run: Run} | null => {
+  let best: {plate: Plate; run: Run} | null = null;
+  for (const plate of p ? [p] : active(s))
+    for (const run of plate.runs)
+      if (isCrossRun(run) && (!best || run.at > best.run.at)) best = {plate, run};
+  return best;
+};
+
 /** 투입 후 경과 일수(D+n, 0부터). */
 export const elapsedDays = (p: Plate, now: number) => Math.max(0, Math.floor((now - p.registeredAt) / 86400000));
 
