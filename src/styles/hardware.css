@@ -84,7 +84,7 @@
 .hm-acts.three{grid-template-columns:repeat(3,minmax(0,1fr))}
 /* 2026-10-26 요청: 글자는 버튼 가운데, 아이콘은 왼쪽 끝, 화살표는 오른쪽 끝에 고정. */
 .hm-page .hm-acts>.home-act{justify-content:center;padding-left:4.5rem;padding-right:4.5rem}
-.hm-page .hm-acts>.home-act>svg:not(.ha-go){position:absolute;left:1.75rem;top:50%;transform:translateY(-50%)}
+.hm-page .hm-acts>.home-act>svg:not(.ha-go){position:absolute;left:calc(1.75rem + 10px);top:50%;transform:translateY(-50%)}
 .hm-page .hm-acts>.home-act>span{align-items:center;text-align:center}
 .hm-page .hm-acts>.home-act.recent b{color:#1d2f5c}.hm-page .hm-acts>.home-act.recent small{color:#2e4a8c}
 .hm-page .hm-acts>.home-act.recent>svg.dico{width:2.5rem;height:2.5rem;color:#2e4a8c;stroke-width:1.8}
