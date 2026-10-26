@@ -25,6 +25,7 @@ test('maintenance API: pin, lock, blocked commands, recipe validation',async()=>
   assert.equal((await call('/api/state',{pin:null})).data.maintenance.by,'test');
   const blocked=await command('pause',1);assert.equal(blocked.status,423);assert.equal(blocked.data.code,'MAINTENANCE');
   assert.equal((await command('home',1)).data.code,'FORBIDDEN','admin-only check comes first');
+  await command('role.login',0,{pin:'4321'});	// settings are admin-only since 2026-10-26
   assert.equal((await command('settings',0,{alignment:true})).status,202);
   // no MCB in the virtual profile
   assert.equal((await call('/api/v1/maintenance/mcb',{method:'POST',body:{steps:['PING']}})).data.code,'NO_MOTION');

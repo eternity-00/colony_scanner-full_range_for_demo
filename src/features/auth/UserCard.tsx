@@ -5,7 +5,6 @@ import {ADMIN_IDLE_LIMIT_SEC, type SendCommand} from '../../config/defines.ts';
 interface Props {
   state: AppState;
   send: SendCommand;
-  operator: string;
   /** 사용자 설정 화면으로 보낸다. */
   onSettings: () => void;
   /** PIN 을 받아 관리자로 올린다. */
@@ -24,7 +23,7 @@ interface Props {
  * 자리다. 누른 곳에 붙어 있으면 어디서 나온 것인지가 눈으로 이어지고, 뒤 화면을
  * 어둡게 하지 않으니 보던 것을 잃지 않는다.
  */
-export function UserCard({state, send, operator, onSettings, onUpgrade, onClose}: Props) {
+export function UserCard({state, send, onSettings, onUpgrade, onClose}: Props) {
   const isAdmin = state.session.role === 'admin';
   const idleLeft = Math.max(0, ADMIN_IDLE_LIMIT_SEC - Math.floor(state.session.idleFor / 1000));
 
@@ -47,16 +46,16 @@ export function UserCard({state, send, operator, onSettings, onUpgrade, onClose}
         </div>
 
         <div className="user-card">
-          <i aria-hidden="true">{operator.slice(0, 1)}</i>
+          <i aria-hidden="true">{isAdmin ? '관' : '사'}</i>
           <div>
-            <small>{isAdmin ? '관리자 · ADMIN' : '분석자 · ANALYST'}</small>
-            <b>{operator}</b>
+            <small>{isAdmin ? 'ADMIN' : 'USER'}</small>
+            <b>{isAdmin ? '관리자' : '사용자'}</b>
           </div>
         </div>
 
         <p className="user-note">
           {isAdmin
-            ? `무조작 ${idleLeft}초 후 분석자로 자동 해제됩니다.`
+            ? `무조작 ${idleLeft}초 후 사용자로 자동 해제됩니다.`
             : '장비를 움직이는 동작에는 PIN 이 필요합니다.'}
         </p>
 
@@ -70,7 +69,7 @@ export function UserCard({state, send, operator, onSettings, onUpgrade, onClose}
                 onClose();
               }}
             >
-              분석자로 전환
+              사용자로 전환
             </button>
           ) : (
             <button className="primary" onClick={onUpgrade}>

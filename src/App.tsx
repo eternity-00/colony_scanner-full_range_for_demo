@@ -63,9 +63,6 @@ export default function App() {
   const [menu, setMenu] = useState(false);
   const [exitAsk, setExitAsk] = useState(false);
   const [exiting, setExiting] = useState(false);
-  const [operator, setOperator] = useState(
-    () => localStorage.getItem('colony-operator') || '김분석',
-  );
   const layoutWidth = useLayoutWidth();
 
   // 최초 상태를 한 번 읽고, 이후에는 SSE 로 받는다.
@@ -265,8 +262,6 @@ export default function App() {
         onExit={() => setExitAsk(true)}
         state={state}
         send={execute}
-        operator={operator}
-        setOperator={setOperator}
         onRole={() => setRoleDialog(true)}
       />
     ),
@@ -288,7 +283,6 @@ export default function App() {
         tab={visible}
         clock={hms(state.serverTime)}
         day={ymd(state.serverTime)}
-        operator={operator}
         onMenu={() => setMenu(true)}
         onAccount={() => setUserCard(true)}
         onHome={() => setTab('overview')}
@@ -357,7 +351,6 @@ export default function App() {
         <UserCard
           state={state}
           send={execute}
-          operator={operator}
           onSettings={() => {
             setUserCard(false);
             setTab('settings');

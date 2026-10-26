@@ -10,7 +10,6 @@ interface Props {
   clock: string;
   /** 2026-09-30 */
   day: string;
-  operator: string;
   /** 왼쪽 색면(햄버거)을 눌렀을 때 — 서랍을 연다. */
   onMenu: () => void;
   /** 계정 칩을 눌렀을 때 — 말풍선을 연다. */
@@ -31,11 +30,11 @@ interface Props {
  *
  * 알림 종은 없다 — 알람은 홈의 알람 칸이 맡는다.
  */
-export function Header({state, tab, clock, day, operator, onMenu, onAccount, onHome}: Props) {
+export function Header({state, tab, clock, day, onMenu, onAccount, onHome}: Props) {
   const devices = state.devices;
   const linked = devices.filter(d => d.connected).length;
   const envAlarm = envAlarmActive(state);
-  const role = state.session.role === 'admin' ? '관리자' : '분석자';
+  const role = state.session.role === 'admin' ? '관리자' : '사용자';
   const name = TABS.find(([key]) => key === tab);
 
   return (
@@ -86,10 +85,8 @@ export function Header({state, tab, clock, day, operator, onMenu, onAccount, onH
         </span>
 
         <button className={`role-chip ${state.session.role}`} onClick={onAccount}>
-          <i>{operator.slice(0, 1)}</i>
-          <span className="who">
-            {operator} · {role}
-          </span>
+          <i>{role.slice(0, 1)}</i>
+          <span className="who">{role}</span>
         </button>
       </div>
     </header>

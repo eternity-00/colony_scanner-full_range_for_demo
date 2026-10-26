@@ -52,7 +52,7 @@ export function RoleDialog({state, send, onClose, reason, onAuthed}: Props) {
       onClose={onClose}
       onConfirm={asking ? login : logout}
       confirmDisabled={asking && (pin.length !== PIN_LENGTH || state.session.lockedFor > 0)}
-      confirmLabel={asking ? (reason ? '확인하고 계속' : '확인') : '분석자로 전환'}
+      confirmLabel={asking ? (reason ? '확인하고 계속' : '확인') : '사용자로 전환'}
     >
       {state.session.role === 'admin' && !reason ? (
         <p>관리자 권한이 열려 있습니다.</p>

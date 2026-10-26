@@ -18,13 +18,14 @@ const MAX_INCUBATION_DAYS=42;
 // 관리자만. 플레이트를 넣고 찍고 결과를 받는 일(capture/pause/resume/retry/register/remove)과
 // 루틴·autoRun·촬영 방식(settings)은 사용자의 정상 업무이므로 열어둔다.
 // src/config/defines.ts 의 ADMIN_ACTION 과 같은 목록이어야 한다.
-const ADMIN_ONLY=['stop','home','reset','clearError','calibrate','focusStop','environment','alarmSettings','plateResult','serverSettings'];
+// 2026-10-26: 사용자 설정 화면 전체가 관리자 전용이 되면서 settings · routine · autoRun · recipe.* 도 포함.
+const ADMIN_ONLY=['stop','home','reset','clearError','calibrate','focusStop','environment','alarmSettings','plateResult','serverSettings','settings','routine','autoRun','recipe.save','recipe.delete'];
 // 알림 규칙 기본값(1차 피드백 2.2 · 3.2, M3 환경 설정): 관리자만 바꾼다(alarmSettings).
 // changeThreshold: 회차 간 Well 영상 변화 지표(0~1, device/change_score.py)가 이 값을 넘으면 「이전 영상과 차이 큼」 알람(M3 A11).
 const DEFAULT_ALARMS={tempTolerance:1,tempMinutes:5,humidityMin:60,humidityMax:95,humidityMinutes:10,changeThreshold:0.15};
 // 사용자 설정 기본값: endSoonHours = 「종료 예정」으로 세는 남은 시간(M3 A2), barcode = 촬영마다 바코드 판독 + 미인식 알람(M3 B6→적용),
 // idleMinutes = 플레이트가 하나도 없는 상태가 이어지면 대기 모드(카메라 점검 간격 완화 · 화면 절전, M3 A13; 0 = 끔), server = PC 전송 서버 주소(M3 A8).
-const DEFAULT_SETTINGS={endSoonHours:24,barcode:true,idleMinutes:10,server:{host:'',port:8080,apiKey:''}};
+const DEFAULT_SETTINGS={endSoonHours:1,barcode:true,idleMinutes:10,server:{host:'',port:8080,apiKey:''}};
 // 플레이트 제거 사유(M3 A4 — 제거 흐름에 사유 기록). done: 배양 종료, positive: 조기 양성, contaminated: 오염, moved: 위치 이동, other: 기타.
 export const REMOVE_REASONS=['done','positive','contaminated','moved','other'];
 export const REASON_LABEL={done:'정상 종료',positive:'조기 양성',contaminated:'오염',moved:'위치 이동',other:'기타'};
@@ -68,6 +69,7 @@ export class Controller extends EventEmitter {
   this.db.settings={alignment:profile?.alignment?.enabled??false,...DEFAULT_SETTINGS,...(this.db.settings||{})};
   this.db.settings.alarms={...DEFAULT_ALARMS,...(this.db.settings.alarms||{})};
   this.db.settings.server={...DEFAULT_SETTINGS.server,...(this.db.settings.server||{})};
+  this.db.settings.endSoonHours=1;	// 종료 예정 기준은 1시간 고정(2026-10-26)
   // 레시피(M3 A7): 이름 · 배양 기간 · 촬영 주기 · 지연 · Well 장수 · 검사 항목. 기본 레시피는 공통 루틴(routine)이고 플레이트는 recipeId 로 참조한다.
   this.db.recipes=Array.isArray(this.db.recipes)?this.db.recipes:[];
   this.idleSince=null;this.noPlatesSince=Date.now();this.serverLink=null;this.lastServerCheck=0;
@@ -344,7 +346,7 @@ export class Controller extends EventEmitter {
     // 사용자 설정: alignment(촬영 방식) · endSoonHours(종료 예정 기준) · barcode(바코드 판독) · idleMinutes(대기 모드)
     const next={...this.db.settings},notes=[];
     if(args.alignment!==undefined){assert(typeof args.alignment==='boolean','INVALID_VALUE','alignment는 boolean이어야 합니다.',400);next.alignment=args.alignment;notes.push(`촬영 방식 · ${args.alignment?'웰 중심 자동 정렬':'기존 격자 위치'}`);}
-    if(args.endSoonHours!==undefined){assert(validInt(args.endSoonHours,1,168),'INVALID_VALUE','종료 예정 기준은 1~168시간입니다.',400);next.endSoonHours=args.endSoonHours;notes.push(`종료 예정 기준 ${args.endSoonHours}시간`);}
+    // endSoonHours 는 2026-10-26 부터 1시간 고정(화면에서 바꿀 수 없다).
     if(args.barcode!==undefined){assert(typeof args.barcode==='boolean','INVALID_VALUE','barcode는 boolean이어야 합니다.',400);next.barcode=args.barcode;notes.push(`바코드 판독 ${args.barcode?'켜짐':'꺼짐'}`);}
     if(args.idleMinutes!==undefined){assert(validInt(args.idleMinutes,0,240),'INVALID_VALUE','대기 모드 진입 시간은 0~240분입니다.',400);next.idleMinutes=args.idleMinutes;notes.push(`대기 모드 ${args.idleMinutes?`${args.idleMinutes}분`:'끔'}`);}
     assert(notes.length,'INVALID_VALUE','바꿀 설정이 없습니다.',400);

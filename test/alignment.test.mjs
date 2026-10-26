@@ -149,6 +149,7 @@ test('the alignment setting is persisted by the controller and handed to the ada
  let c=new Controller({features:{demoPlates:true},dataDir:dir,adapter,autoTick:false});
  try{
   assert.equal(c.snapshot().settings.alignment,false);assert.equal(settings.at(-1).alignment,false);
+  await c.execute({requestId:'settings_login',command:'role.login',deviceId:0,args:{pin:'0000'}});	// settings are admin-only
   await c.execute({requestId:'settings_request_1',command:'settings',deviceId:0,args:{alignment:true}});
   assert.equal(settings.at(-1).alignment,true);
   await assert.rejects(c.execute({requestId:'settings_request_2',command:'settings',deviceId:0,args:{alignment:'yes'}}),e=>e.code==='INVALID_VALUE');

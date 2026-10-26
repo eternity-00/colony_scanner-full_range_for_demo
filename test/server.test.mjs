@@ -79,11 +79,11 @@ test('alarms: environment rule, ack, history, early positive, admin-only incubat
  const at=n=>c.evaluateAlarms(n);
  try{
   assert.deepEqual(c.snapshot().settings.alarms,{tempTolerance:1,tempMinutes:5,humidityMin:60,humidityMax:95,humidityMinutes:10,changeThreshold:0.15});
-  // analyst may change cycle/delay but not the incubation limit
-  await c.execute(request(200,'routine',0,{cycleHours:6,days:42,delay:0}));
-  await rejects(c.execute(request(201,'routine',0,{cycleHours:6,days:30,delay:0})),'FORBIDDEN');
+  // the whole settings screen is admin-only (2026-10-26): routine and alarm rules refuse the analyst
+  await rejects(c.execute(request(200,'routine',0,{cycleHours:6,days:42,delay:0})),'FORBIDDEN');
   await rejects(c.execute(request(202,'alarmSettings',0,{tempMinutes:0})),'FORBIDDEN');
   await c.execute(request(203,'role.login',0,{pin:'0000'}));
+  await c.execute(request(201,'routine',0,{cycleHours:6,days:42,delay:0}));
   await c.execute(request(204,'routine',0,{cycleHours:6,days:30,delay:0}));assert.equal(c.snapshot().routine.days,30);
   await c.execute(request(205,'alarmSettings',0,{tempMinutes:0,humidityMinutes:0}));
   await rejects(c.execute(request(206,'environment',0,{temperature:99})),'INVALID_ENV');await rejects(c.execute(request(218,'alarmSettings',0,{humidityMin:80,humidityMax:70})),'INVALID_VALUE');
@@ -157,8 +157,10 @@ test('recipes, trial shot, remove reason, barcode / change / result alarms, sett
   const pc=await c.execute({requestId:'pc_result_0001',command:'plateResult',deviceId:1,args:{barcode:'PL-2026-00042',result:'contaminated',note:'PC 판독'}},'pc');
   assert.equal(pc.plateId,plate.id);assert.ok(c.snapshot().alarms.some(a=>a.key===`done:${plate.id}`&&!a.clearedAt&&a.reason==='contaminated'));
   // user settings and server settings (admin)
-  await c.execute(request(314,'settings',0,{endSoonHours:6,idleMinutes:0}));assert.equal(c.snapshot().settings.endSoonHours,6);
-  await rejects(c.execute(request(315,'settings',0,{endSoonHours:0})),'INVALID_VALUE');
+  await c.execute(request(313,'role.login',0,{pin:'0000'}));	// the admin session idled out during the time jumps above
+  await c.execute(request(314,'settings',0,{idleMinutes:0}));assert.equal(c.snapshot().settings.endSoonHours,1);	// 종료 예정 기준은 1시간 고정
+  await rejects(c.execute(request(315,'settings',0,{endSoonHours:6})),'INVALID_VALUE');
+  await c.execute(request(3159,'role.logout',0));
   await rejects(c.execute(request(316,'serverSettings',0,{host:'pc.local',port:9000})),'FORBIDDEN');
   await c.execute(request(317,'role.login',0,{pin:'0000'}));await c.execute(request(318,'serverSettings',0,{host:'127.0.0.1',port:1,apiKey:'k1'}));
   assert.deepEqual(c.snapshot().settings.server,{host:'127.0.0.1',port:1,hasKey:true});

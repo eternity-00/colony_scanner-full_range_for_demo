@@ -53,8 +53,8 @@ try{
   // settings: 레시피 추가, 알림 · 대기, 외부 연결
   await drawer('사용자 설정');await page.locator('.settings-nav').getByRole('button',{name:'레시피'}).click();await page.getByRole('button',{name:/레시피 추가/}).click();
   await page.locator('.rp-edit input').first().fill('빠른 검사');await page.locator('.rp-edit').getByRole('button',{name:'저장'}).click();await page.locator('.rp-row:not(.base)').waitFor();
-  await page.locator('.settings-nav').getByRole('button',{name:/알림 · 대기/}).click();await page.locator('.sg-choice button',{hasText:'6시간'}).first().click();await page.waitForTimeout(200);
-  await page.locator('.settings-nav').getByRole('button',{name:'외부 연결'}).click();assert.match(await page.locator('main').innerText(),/PC 전송 서버/);
+  await page.locator('.settings-nav').getByRole('button',{name:'알람'}).click();assert.match(await page.locator('main').innerText(),/종료 1시간 전/);await page.locator('.settings-nav').getByRole('button',{name:'촬영'}).click();await page.locator('.sg-opts .toggle').first().waitFor();
+  await page.locator('.settings-nav').getByRole('button',{name:'연결'}).click();assert.match(await page.locator('main').innerText(),/PC 전송 서버/);
   // device fault from the external console propagates, device screen shows it
   const sim=await browser.newPage({viewport:{width:1100,height:820}});await sim.goto(`http://127.0.0.1:${consolePort}?api=http://127.0.0.1:${enginePort}/api`);await sim.waitForSelector('.device');await sim.locator('.device').first().getByText('Z축 오류 주입').click();await sim.locator('.device').first().getByText('오류 Z_LIMIT').waitFor({timeout:5000});
   await drawer('장비');await page.locator('.dv-alert.bad').getByText(/Z축/).waitFor({timeout:5000});
