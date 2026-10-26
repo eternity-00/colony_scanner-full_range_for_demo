@@ -21,7 +21,7 @@
 .ig b.okv{color:#4e8f47}
 
 /* 손가락으로 누르는 버튼이라 키를 키운다. 머리 줄에서 덜어낸 높이를 여기 넣는다. */
-.actbar{display:grid;grid-template-columns:repeat(4,1fr);gap:0.5rem;margin-top:0.625rem}
+.actbar{display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;margin-top:0.625rem}
 /* 넉 장이 한 줄을 다 쓰는데 글자가 그 안에서 작았다. 칸을 키우는 대신
    글자를 키워 면을 채운다 — 누르는 자리는 이미 196px 로 넓다. */
 .actbar button{min-height:3.625rem;font-size:1.125rem;font-weight:800;white-space:nowrap;padding:0.375rem 0.5rem}

@@ -1,5 +1,5 @@
 import {useEffect} from 'react';
-import {APP_VERSION, tabsFor, type TabKey} from '../config/defines.ts';
+import {APP_VERSION, drawerTabs, type TabKey} from '../config/defines.ts';
 import {TabIcon} from '../shared/TabIcon.tsx';
 
 interface Props {
@@ -46,7 +46,7 @@ export function MenuDrawer({open, tab, isAdmin, onSelect, onClose}: Props) {
         </div>
         <div className="drawer-list">
           {/* 홈은 헤더의 홈 버튼이 맡아 서랍에서는 뺀다 — 서랍이 꽉 차 보였다(혜원님 10/14). */}
-          {tabsFor(isAdmin)
+          {drawerTabs(isAdmin)
             .filter(([key]) => key !== 'overview')
             .map(([key, ko, en]) => (
             <button

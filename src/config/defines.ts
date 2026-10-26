@@ -33,8 +33,9 @@ export type SendCommand = (
  * 장비 화면만 통째로 감춘다. 버튼(원점 복귀·모듈 초기화·오류 해제·캘리브레이션)을
  * 빼고 나면 모듈 상태 목록만 남고, 그건 현황 카드의 「점검 필요」 배지가 이미 보여준다.
  *
- * 촬영 화면(running)은 메뉴에 없다(2026-10-26): 촬영이 시작되면 App 이 잠시 띄우고
- * 끝나면 원래 화면으로 돌아간다. 나머지는 보여주되 장비를 움직이는 버튼만 막는다.
+ * 서랍 메뉴에 없는 화면(DRAWER_HIDDEN, 2026-10-26): 최근 영상 · 등록 · 제거는 홈의 세 버튼으로,
+ * 촬영은 촬영이 시작될 때 App 이 띄우거나 홈 스캐너 줄로 들어간다. 나머지는 보여주되 장비를
+ * 움직이는 버튼만 막는다.
  */
 export const TABS: readonly (readonly [TabKey, string, string, boolean])[] = [
   ['overview', '홈', 'Home', false],
@@ -43,6 +44,7 @@ export const TABS: readonly (readonly [TabKey, string, string, boolean])[] = [
   ['register', '등록', 'Register', false],
   ['remove', '제거', 'Remove', false],
   ['detail', '상세', 'Detail', false],
+  ['running', '촬영', 'Capture', false],
   ['history', '이력', 'History', false],
   ['device', '장비', 'Device', true],
   ['settings', '사용자 설정', 'Settings', false],
@@ -103,6 +105,10 @@ export const FAULT_LABEL: Record<string, string> = {
 /** 역할에 따라 볼 수 있는 탭. */
 export const tabsFor = (isAdmin: boolean) =>
   TABS.filter(([, , , adminOnly]) => isAdmin || !adminOnly);
+
+/** 화면으로는 있지만 서랍 메뉴에는 넣지 않는 탭. */
+export const DRAWER_HIDDEN: readonly TabKey[] = ['recent', 'register', 'remove', 'running'];
+export const drawerTabs = (isAdmin: boolean) => tabsFor(isAdmin).filter(([key]) => !DRAWER_HIDDEN.includes(key));
 
 /** 촬영 작업의 6단계. 그 외 명령(home/calibrate/reset)은 3단계. */
 export const STAGES = ['이송', '물기 제거', '촬영', '수납 복귀', '전송', 'PC 저장'];

@@ -29,7 +29,10 @@ try{
   for(let i=0;i<4;i++)await page.locator('.modal').getByRole('button',{name:'0',exact:true}).click();
   await page.locator('.modal').getByRole('button',{name:/^확인$/}).click();await page.waitForTimeout(200);assert.match(await page.locator('.role-chip').innerText(),/관리자/);
   // tray follows the profile layout (virtual profile: 8 x 3)
-  await drawer('등록');assert.equal(await page.locator('.registration .cell').count(),24);
+  // 최근 영상 · 등록 · 제거 are not in the drawer any more: they open from the three home buttons
+  const home=async()=>{await page.locator('header .wm-home').click();await page.waitForSelector('.hm-page');await page.waitForTimeout(150);};
+  const homeAct=async cls=>{await home();await page.locator(`.hm-acts .home-act.${cls}`).click();await page.waitForTimeout(200);};
+  await homeAct('reg');assert.equal(await page.locator('.registration .cell').count(),24);
   // registration wizard: 위치 → 레시피 → 투입(확인) → 시험 촬영(건너뛰기) → 배양 시작
   await page.locator('.registration .cell:not([disabled])').nth(4).click();
   await page.getByRole('button',{name:/다음 · 레시피 선택/}).click();assert.equal(await page.locator('.rg-recipe-list button').count(),1,'기본 루틴만');
@@ -39,7 +42,8 @@ try{
   await page.waitForFunction(()=>!document.querySelector('.rg-trial-run'),null,{timeout:8000});
   await page.getByRole('button',{name:/다음 · 배양 시작|건너뛰기/}).click();await page.getByRole('button',{name:/^배양 시작$/}).click();await page.waitForSelector('.hm-page');
   // the trial is not a run: 최근 영상 says 촬영 전, home 배양 중 = 1
-  await drawer('최근 영상');assert.match(await page.locator('.rc-body').innerText(),/촬영 전/);
+  // the trial is not a run; the scheduler (virtual profile autoRun, delay 0) may already have taken the first real run by now
+  await homeAct('recent');assert.match(await page.locator('.rc-body').innerText(),/촬영 전|1회차/);
   // settings: alignment section exists, virtual profile says so
   await drawer('사용자 설정');await page.locator('.settings-nav').getByRole('button',{name:/카메라 정렬/}).click();assert.match(await page.locator('main').innerText(),/가상 장비 — 해당 없음|웰 중심 자동 정렬/);
   // capture now from the detail screen, then the viewer shows six placeholders
@@ -48,8 +52,8 @@ try{
   await page.locator('.cp-ctrl').waitFor({timeout:3000});await page.waitForTimeout(1200);
   await drawer('상세');await page.locator('.tray .cell').nth(4).click();await page.getByRole('button',{name:'보기'}).first().click();assert.match(await page.locator('.modal').innerText(),/Well 1–6/);assert.equal(await page.locator('.well-set img').count(),6);await page.locator('.modal-x').click();
   // 최근 영상 now shows the run; 제거 flow with a reason
-  await drawer('최근 영상');assert.equal(await page.locator('.rc-wells img').count(),6);assert.match(await page.locator('.rc-title').innerText(),/D\+0/);
-  await drawer('제거');await page.locator('.rm-reasons button',{hasText:'기타'}).click();await page.getByRole('button',{name:/^플레이트 제거$/}).click();await page.locator('.modal').getByRole('button',{name:/^제거$/}).click();
+  await homeAct('recent');assert.equal(await page.locator('.rc-wells img').count(),6);assert.match(await page.locator('.rc-title').innerText(),/D\+0/);
+  await homeAct('out');await page.locator('.rm-reasons button',{hasText:'기타'}).click();await page.getByRole('button',{name:/^플레이트 제거$/}).click();await page.locator('.modal').getByRole('button',{name:/^제거$/}).click();
   await page.locator('.modal').getByRole('button',{name:/꺼내고 문을 닫았습니다/}).click();await page.waitForSelector('.hm-page');
   await drawer('이력');assert.match(await page.locator('.hs-row').first().innerText(),/반출 · 기타/);
   // settings: 레시피 추가, 알림 · 대기, 외부 연결

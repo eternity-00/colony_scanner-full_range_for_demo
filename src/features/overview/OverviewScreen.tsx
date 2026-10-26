@@ -17,6 +17,8 @@ interface Props {
   onDevice: () => void;
   /** 스캐너 상태 칸을 눌렀을 때 — 칸별로 보는 현황 화면. */
   onStatus: () => void;
+  /** 촬영 중일 때 스캐너 줄을 누르면 — 촬영 화면(메뉴에 없는 화면의 입구, 2026-10-26). */
+  onCapture: () => void;
   onNeedAdmin: (where: string, what: string) => void;
 }
 
@@ -30,7 +32,7 @@ interface Props {
  * 종료 예정 = 남은 배양 시간이 설정값(기본 24시간) 안인 플레이트 수.
  * 이슈가 없으면 요약 줄이 조용해진다(알람 0건이면 로그를 한 줄로 접는다, A14).
  */
-export function OverviewScreen({state, openDetail, openRegister, openRemove, onRecent, onStatus, onDevice, onNeedAdmin}: Props) {
+export function OverviewScreen({state, openDetail, openRegister, openRemove, onRecent, onStatus, onCapture, onDevice, onNeedAdmin}: Props) {
   const device = state.devices[0];
   if (!device) return null;
 
@@ -44,7 +46,7 @@ export function OverviewScreen({state, openDetail, openRegister, openRemove, onR
   const soon = plates.filter(p => endSoon(state, p)).length;
   const withImages = plates.filter(p => p.runs.some(r => r.imageState === 'held')).length;
   const next = scannerNext(state, device);
-  const capturing = device.job?.status === 'running' && device.job.type === 'capture';
+  const capturing = !!device.job && ['running', 'paused'].includes(device.job.status) && device.job.type === 'capture' && !device.job.trial;
   const alerts = alertItems(state, {onDevice, onPlate: openDetail, onNeedAdmin}).filter(a => a.kind !== 'shot');
   const quiet = alerts.length === 0;
   const logs = state.logs.slice(0, quiet ? 1 : 2);
@@ -150,15 +152,15 @@ export function OverviewScreen({state, openDetail, openRegister, openRemove, onR
         </div>
       </div>
 
-      <button className="hm-bar" onClick={onStatus}>
+      <button className={`hm-bar ${capturing ? 'capturing' : ''}`} onClick={capturing ? onCapture : onStatus}>
         <b>{device.name}</b>
         <Badge type={next.badgeType}>{next.badge}</Badge>
         <span className="hm-next">
           다음 촬영{' '}
-          <b className={capturing || next.scheduled ? '' : 'idle'}>{capturing ? '지금 촬영 중' : next.label}</b>
+          <b className={capturing || next.scheduled ? '' : 'idle'}>{capturing ? (device.job?.status === 'paused' ? '촬영 일시정지' : '지금 촬영 중') : next.label}</b>
         </span>
         <span className="hm-go">
-          현황 보기
+          {capturing ? '촬영 화면 보기' : '현황 보기'}
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M9 6l6 6-6 6" />
           </svg>

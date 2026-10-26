@@ -143,15 +143,7 @@ export function DetailScreen({
                   <ActIcon name="send" />
                   재전송
                 </button>
-                {/* 반출은 버튼 넷 중 눈에 띄게 둔다 — 홈 「반출 대기」와 같은 초록.
-                    촬영을 다 마친 판이면 꽉 찬 면으로 — 지금 해야 할 일이다. */}
-                <button
-                  className={`remove-btn ${done ? 'due' : ''}`}
-                  onClick={() => send('remove', device.id, {plateId: plate.id}, null, true)}
-                >
-                  <ActIcon name="eject" />
-                  플레이트 반출
-                </button>
+                {/* 플레이트 반출 버튼은 뺐다(2026-10-26) — 제거는 홈 「제거」의 사유 입력 흐름으로만. */}
               </div>
             </>
           ) : (
