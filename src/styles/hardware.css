@@ -70,7 +70,7 @@
 .env-svg{height:150px;max-width:none}
 .st-side>.env-card{margin-bottom:0}
 @media (max-height:700px){.env-item b{font-size:1.0625rem}.hm-alerts li,.hm-logs li{font-size:0.75rem}}
-.env-settings{display:grid;gap:1rem;align-content:start;overflow-y:auto;min-height:0;height:100%}
+.env-settings{display:grid;grid-auto-rows:max-content;gap:1rem;align-content:start;overflow-y:auto;min-height:0;height:100%}	/* 행은 내용 높이: .p-card 의 min-height:0 때문에 카드가 눌려 겹치던 문제(알람, 2026-10-26) */
 .env-settings .sg-block{display:grid;gap:0.75rem}
 .env-settings .fields{display:grid;gap:0.5rem}
 .env-settings button.primary{justify-self:end;min-width:12rem}
