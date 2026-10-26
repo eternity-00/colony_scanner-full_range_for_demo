@@ -16,6 +16,8 @@ export class VirtualDeviceAdapter extends EventEmitter {
   const d=this.get(id),active=d.job&&['running','paused'].includes(d.job.status);
   if(!d.connected)throw new DeviceError('DEVICE_OFFLINE','가상장비 연결이 끊어졌습니다.');
   if(type==='stop') {if(!active)throw new DeviceError('NO_JOB','진행 중인 작업이 없습니다.');this.fail(d,'ESTOP','비상 정지');return;}
+  // 사용자 중단(2026-10-26 촬영 화면의 「중단」): 비상 정지와 달리 장비 오류를 남기지 않는다 — 다음 촬영은 바로 시작할 수 있다.
+  if(type==='cancel'){if(!active)throw new DeviceError('NO_JOB','진행 중인 작업이 없습니다.');d.job.cancelled=true;this.fail(d,'CANCELLED','사용자 중단');d.fault=null;return;}
   if(type==='pause'||type==='resume'){
    if(!active)throw new DeviceError('NO_JOB','진행 중인 작업이 없습니다.');
    if(type==='resume'&&(d.fault||d.doorOpen))throw new DeviceError('INTERLOCK','도어 또는 오류 상태를 먼저 해제하세요.');

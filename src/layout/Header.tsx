@@ -35,7 +35,7 @@ export function Header({state, tab, clock, day, onMenu, onAccount, onHome}: Prop
   const linked = devices.filter(d => d.connected).length;
   const envAlarm = envAlarmActive(state);
   const role = state.session.role === 'admin' ? '관리자' : '사용자';
-  const name = TABS.find(([key]) => key === tab);
+  const name = TABS.find(([key]) => key === tab) ?? (tab === 'running' ? (['running', '촬영', 'Capture', false] as const) : undefined);
 
   return (
     <header>

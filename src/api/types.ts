@@ -58,6 +58,8 @@ export interface Job {
   plateGrid?: {tier: number; label: string};
   /** 시험 촬영(등록 마법사): 회차로 세지 않는다. */
   trial?: boolean;
+  /** 사용자가 「중단」으로 끝낸 작업(status failed, 장비 오류 없음). */
+  cancelled?: boolean;
   /** Well 당 촬영 장수(1 또는 5). */
   wellShots?: number;
   /** 십자 촬영 중 지금 찍는 위치(C · X+ · Y− · X− · Y+). */
@@ -156,6 +158,8 @@ export interface Run {
   n: number;
   at: number;
   imageState: ImageState;
+  /** 사용자 중단으로 끝난 회차(imageState failed, 알람 없음). */
+  cancelled?: boolean;
   /** 레거시 단일 영상. 6-well 세트로 옮겨간 뒤로는 null. */
   image: string | null;
   /**

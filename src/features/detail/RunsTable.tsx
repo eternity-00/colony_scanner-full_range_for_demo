@@ -23,6 +23,8 @@ interface Shot {
   at: number;
   transferred: boolean;
   state: ImageState;
+  /** 사용자 중단으로 끝난 회차. */
+  cancelled?: boolean;
   image?: string | null;
 }
 
@@ -74,6 +76,7 @@ export function RunsTable({plate, onView, fill = false}: Props) {
         at: run.at,
         transferred: run.transferred,
         state: run.imageState,
+        cancelled: run.cancelled,
         image: images[i],
       });
     }
@@ -145,7 +148,7 @@ export function RunsTable({plate, onView, fill = false}: Props) {
                     <span
                       className={`shotcount ${row.state === 'failed' || row.state === 'held' ? 'fail' : 'gone'}`}
                     >
-                      {row.state === 'failed' || row.state === 'held' ? '촬영 실패' : '보존기간 경과'}
+                      {row.state === 'failed' || row.state === 'held' ? (row.cancelled ? '사용자 중단' : '촬영 실패') : '보존기간 경과'}
                     </span>
                   )}
                 </td>

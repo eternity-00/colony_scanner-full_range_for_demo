@@ -93,7 +93,7 @@ export class Controller extends EventEmitter {
    maintenance:this.maintenance?{...this.maintenance}:null,
    session:{role:this.session.role,lockedFor:Math.max(0,this.session.lockUntil-now),idleFor:this.session.idleAt?Math.max(0,now-this.session.idleAt):0},
    logs:structuredClone(this.db.logs.slice(0,100)),io:structuredClone(this.db.io),cameraBusy:this.adapter.camera?.snapshot().job.status==='running',
-   capabilities:['capture','pause','resume','stop','home','calibrate','reset','clearError'],storage:'server-json',build:this.build||null,...(this.extras?.()||{})};
+   capabilities:['capture','pause','resume','cancel','stop','home','calibrate','reset','clearError'],storage:'server-json',build:this.build||null,...(this.extras?.()||{})};
  }
  persist(){this.db.devices=this.adapter.snapshot();const tmp=this.stateFile+'.tmp';writeFileSync(tmp,JSON.stringify(this.db));renameSync(tmp,this.stateFile);}
  publish(){this.revision++;this.emit('state',this.snapshot());}
@@ -184,7 +184,7 @@ export class Controller extends EventEmitter {
    const unsent=p.runs.filter(r=>r.imageState!=='failed'&&!r.transferred).length;
    // Well 미검출(M3 A10): 정렬 촬영에서 테두리를 찾지 못한 Well (시험 촬영 결과도 같은 기준).
    const missed=last?.imageState==='held'?(last.capture?.alignment?.unalignedWells||[]):(!last&&p.trial?.imageState==='held'?(p.trial.capture?.alignment?.unalignedWells||[]):[]);
-   if(last?.imageState==='failed')put({key:`plate:${p.id}`,kind:'plate',level:'high',where,what:'촬영 실패',...ref});
+   if(last?.imageState==='failed'&&!last.cancelled)put({key:`plate:${p.id}`,kind:'plate',level:'high',where,what:'촬영 실패',...ref});
    else if(failedWells.length)put({key:`plate:${p.id}`,kind:'plate',level:'high',where,what:`Well ${failedWells.join('·')} 촬영 실패`,...ref});
    else if(missed.length)put({key:`plate:${p.id}`,kind:'plate',level:'normal',where,what:`Well ${missed.join('·')} 미검출 · 플레이트 안착 확인`,...ref});
    else if(unsent>=2)put({key:`plate:${p.id}`,kind:'plate',level:'normal',where,what:`미전송 ${unsent}건`,...ref});
@@ -228,7 +228,7 @@ export class Controller extends EventEmitter {
   this.io('RX',e.type,e.deviceId,e.requestId,e);
   if(e.type==='job.completed'||e.type==='job.failed'){
    const j=e.job;if(j.type==='capture'){
-    const p=this.db.plates.find(p=>p.id===j.plateId);if(p){const success=e.type==='job.completed',r={n:p.runs.length+1,at:Date.now(),imageState:success?'held':'failed',image:null,images:null,transferred:success&&e.transferred,error:success?null:e.message,requestId:e.requestId};
+    const p=this.db.plates.find(p=>p.id===j.plateId);if(p){const success=e.type==='job.completed',r={n:p.runs.length+1,at:Date.now(),imageState:success?'held':'failed',image:null,images:null,transferred:success&&e.transferred,error:success?null:e.message,requestId:e.requestId,...(j.cancelled?{cancelled:true}:{})};
      if(success){
       if(e.capture){r.capture=e.capture;r.image=e.image||null;r.images=imagesOf(e.capture)||(e.image?[`/api/images/${e.image}`]:null);}
       else {r.image=e.image||null;r.images=Array.from({length:WELLS},()=>e.image?`/api/images/${e.image}`:PLACEHOLDER);}
@@ -250,7 +250,8 @@ export class Controller extends EventEmitter {
      this.evaluateAlarms(Date.now());
     }
    }
-   this.log(e.type==='job.failed'?'ERROR':'INFO',`SCANNER ${e.deviceId} · ${j.type} ${e.type==='job.failed'?`실패 (${e.message})`:'완료'}`);
+   if(j.cancelled)this.log('INFO',`SCANNER ${e.deviceId} · ${j.type} 사용자 중단${j.plateId?` · ${j.plateId}`:''}`);
+   else this.log(e.type==='job.failed'?'ERROR':'INFO',`SCANNER ${e.deviceId} · ${j.type} ${e.type==='job.failed'?`실패 (${e.message})`:'완료'}`);
   }
   this.persist();this.publish();
  }

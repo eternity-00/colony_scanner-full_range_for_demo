@@ -174,3 +174,20 @@ test('recipes, trial shot, remove reason, barcode / change / result alarms, sett
   await c.execute(request(323,'register',1,{slot:1}));c.evaluateIdle(Date.now());assert.equal(c.snapshot().idle,null);
  }finally{c.close();rmSync(dir,{recursive:true,force:true});}
 });
+
+test('cancel: a user cancel ends the capture without a device fault, records a cancelled run and raises no alarm',async()=>{
+ const dir=mkdtempSync(join(tmpdir(),'colony-test-'));const adapter=new VirtualDeviceAdapter({stageMs:50});const c=new Controller({dataDir:dir,adapter,autoTick:false,profile});
+ try{
+  await c.execute(request(400,'role.login',0,{pin:'0000'}));await c.execute(request(401,'autoRun',0,{enabled:false}));await c.execute(request(402,'role.logout',0));
+  await c.execute(request(403,'register',1,{slot:1}));const plate=c.snapshot().plates[0];
+  await c.execute(request(404,'capture',1,{plateId:plate.id}));assert.equal(c.snapshot().devices[0].job.status,'running');
+  await c.execute(request(405,'pause',1));assert.equal(c.snapshot().devices[0].job.status,'paused');
+  await c.execute(request(406,'cancel',1));	// allowed for the analyst, also from paused
+  const d=c.snapshot().devices[0];assert.equal(d.job.status,'failed');assert.equal(d.job.cancelled,true);assert.equal(d.fault,null);
+  const p=c.snapshot().plates[0];assert.equal(p.runs.length,1);assert.equal(p.runs[0].imageState,'failed');assert.equal(p.runs[0].cancelled,true);
+  c.evaluateAlarms(Date.now());assert.ok(!c.snapshot().alarms.some(a=>a.key===`plate:${p.id}`&&!a.clearedAt),'no 촬영 실패 alarm for a user cancel');
+  await rejects(c.execute(request(407,'cancel',1)),'NO_JOB');
+  await c.execute(request(408,'capture',1,{plateId:plate.id}));assert.equal(c.snapshot().devices[0].job.status,'running');	// restart works right away
+  await c.execute(request(409,'cancel',1));
+ }finally{c.close();rmSync(dir,{recursive:true,force:true});}
+});

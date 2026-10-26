@@ -43,7 +43,9 @@ try{
   // settings: alignment section exists, virtual profile says so
   await drawer('사용자 설정');await page.locator('.settings-nav').getByRole('button',{name:/카메라 정렬/}).click();assert.match(await page.locator('main').innerText(),/가상 장비 — 해당 없음|웰 중심 자동 정렬/);
   // capture now from the detail screen, then the viewer shows six placeholders
-  await drawer('상세');await page.locator('.tray .cell').nth(4).click();await page.getByRole('button',{name:/촬영 시작/}).click();await page.waitForTimeout(1200);
+  await drawer('상세');await page.locator('.tray .cell').nth(4).click();await page.getByRole('button',{name:/촬영 시작/}).click();
+  // the capture screen is not in the menu: it opens by itself while the job runs (big 일시정지 · 중단 buttons) and goes back afterwards
+  await page.locator('.cp-ctrl').waitFor({timeout:3000});await page.waitForTimeout(1200);
   await drawer('상세');await page.locator('.tray .cell').nth(4).click();await page.getByRole('button',{name:'보기'}).first().click();assert.match(await page.locator('.modal').innerText(),/Well 1–6/);assert.equal(await page.locator('.well-set img').count(),6);await page.locator('.modal-x').click();
   // 최근 영상 now shows the run; 제거 flow with a reason
   await drawer('최근 영상');assert.equal(await page.locator('.rc-wells img').count(),6);assert.match(await page.locator('.rc-title').innerText(),/D\+0/);

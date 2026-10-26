@@ -1,4 +1,4 @@
-import {useEffect, useState, type ReactNode} from 'react';
+import {useEffect, useState, type ReactNode, useRef} from 'react';
 import {command, getState, subscribe} from './api/client.ts';
 import type {AppState, CommandArgs, CommandError, Plate} from './api/types.ts';
 import {
@@ -46,6 +46,9 @@ const TOUCH_INTERVAL_MS = 10000;
 export default function App() {
   const [state, setState] = useState<AppState | null>(null);
   const [tab, setTab] = useState<TabKey>('overview');
+  /** 촬영 화면은 메뉴에 없다: 촬영이 시작되면 잠시 띄우고, 끝나면 보고 있던 화면으로 돌아간다(2026-10-26). */
+  const returnTab = useRef<TabKey>('overview');
+  const shownJob = useRef<string | null>(null);
   const [detail, setDetail] = useState({deviceId: 1, slot: 1});
   const [notice, setNotice] = useState<Notice | null>(null);
   const [confirmModal, setConfirmModal] = useState<ConfirmModal | null>(null);
@@ -190,6 +193,26 @@ export default function App() {
     return run();
   };
 
+  const job = state?.devices[0]?.job;
+  const jobId = job?.id ?? null;
+  const jobStatus = job?.status ?? null;
+  useEffect(() => {
+    if (!job || job.type !== 'capture' || job.trial) return;
+    // 새 촬영이 시작되면 촬영 화면으로(등록 · 제거 흐름 중에는 끼어들지 않는다).
+    if (['running', 'paused'].includes(job.status) && shownJob.current !== job.id) {
+      shownJob.current = job.id;
+      if (tab === 'register' || tab === 'remove') return;
+      if (tab !== 'running') returnTab.current = tab;
+      setTab('running');
+      return;
+    }
+    // 끝난 촬영: 완료 · 장비 오류는 잠시 보여 주고 돌아간다. 사용자 중단은 「재시작」을 누를 때까지 남는다.
+    if (tab === 'running' && shownJob.current === job.id && (job.status === 'completed' || (job.status === 'failed' && !job.cancelled))) {
+      const t = setTimeout(() => setTab(current => (current === 'running' ? (returnTab.current === 'running' ? 'overview' : returnTab.current) : current)), job.status === 'completed' ? 2500 : 4000);
+      return () => clearTimeout(t);
+    }
+  }, [jobId, jobStatus, tab]); // eslint-disable-line react-hooks/exhaustive-deps
+
   if (!state) {
     return (
       <div className="boot" data-w={layoutWidth}>
@@ -269,7 +292,8 @@ export default function App() {
 
   const isAdmin = state.session.role === 'admin';
   // 관리자 권한이 5분 무조작으로 풀리면, 보고 있던 관리자 화면에서도 빠져나온다.
-  const visible = tabsFor(isAdmin).some(([key]) => key === tab) ? tab : 'overview';
+  const visible = tab === 'running' || tabsFor(isAdmin).some(([key]) => key === tab) ? tab : 'overview';
+
 
   const idleLeft = Math.max(0, ADMIN_IDLE_LIMIT_SEC - Math.floor(state.session.idleFor / 1000));
   const expiring = isAdmin && state.session.idleFor >= ADMIN_IDLE_WARN_MS;

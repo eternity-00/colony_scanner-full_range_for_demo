@@ -52,7 +52,7 @@ export class RealCameraAdapter extends EventEmitter {
     // Wait for conversion processes to exit before removing their published files.
     if(this.camera.child)this.camera.child.once('close',cleanup);else cleanup();
    }	// partial plate: drop its frames
-   if(e.type==='job.failed'&&this.motion&&(j.motionWaiting||j.realCamera||j.realMotion))this.motion.stop();
+   if(e.type==='job.failed'&&!j.cancelled&&this.motion&&(j.motionWaiting||j.realCamera||j.realMotion))this.motion.stop();
    if(e.type==='job.failed'||e.type==='job.completed')this.slowCameraAxes(false);
    if(e.job){e.job={...j};if(e.type==='job.completed'){e.image=j.image;e.capture=j.capture;}}
    this.emit('event',e);this.emit('change');
@@ -316,6 +316,8 @@ export class RealCameraAdapter extends EventEmitter {
     if(j.acquisitionDone&&!j.equipmentFinishedAt){j.processingError=error.message.slice(0,600);this.emit('change');}
     else this.sim.fail(d,'CAMERA_ERROR',error.message.slice(0,600));
    }
+   // 사용자 중단: 진행 중이던 이동은 끝까지 가게 두고(모터 위치를 잃지 않게) 트레이를 수납 위치로 되돌린다.
+   else if(j.cancelled&&!j.acquisitionDone&&this.motion&&j.slot!=null){j.equipmentStatus='returning';this.emit('change');await this.motion.run(this.motion.returnSteps(j.slot),180).catch(()=>{});}
   }
  }
  async acquireWell(d,well,active){
