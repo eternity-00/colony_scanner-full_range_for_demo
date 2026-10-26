@@ -82,9 +82,10 @@
 /* ---- 2026-10-26: M3 적용 가능 항목(A1~A15) · 십자 촬영 · 바코드 ---- */
 /* 홈: 세 버튼 · 배양 현황 셋 */
 .hm-acts.three{grid-template-columns:repeat(3,minmax(0,1fr))}
-/* 2026-10-26 요청: 아이콘 · 글자를 가운데가 아니라 왼쪽에 붙여 둔다(화살표는 오른쪽 끝 그대로). */
-.hm-page .hm-acts>.home-act{justify-content:flex-start;padding-left:2.5rem;padding-right:4.5rem}
-.hm-page .hm-acts>.home-act>span{align-items:flex-start;text-align:left}
+/* 2026-10-26 요청: 글자는 버튼 가운데, 아이콘은 왼쪽 끝, 화살표는 오른쪽 끝에 고정. */
+.hm-page .hm-acts>.home-act{justify-content:center;padding-left:4.5rem;padding-right:4.5rem}
+.hm-page .hm-acts>.home-act>svg:not(.ha-go){position:absolute;left:1.75rem;top:50%;transform:translateY(-50%)}
+.hm-page .hm-acts>.home-act>span{align-items:center;text-align:center}
 .hm-page .hm-acts>.home-act.recent b{color:#1d2f5c}.hm-page .hm-acts>.home-act.recent small{color:#2e4a8c}
 .hm-page .hm-acts>.home-act.recent>svg.dico{width:2.5rem;height:2.5rem;color:#2e4a8c;stroke-width:1.8}
 .hm-big.three{grid-template-columns:repeat(3,minmax(0,1fr))}
