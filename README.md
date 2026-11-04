@@ -39,6 +39,11 @@ npm run check       # 위 셋 + 빌드
 
 실장비 확인은 파이에서 `node test/hardware-smoke.mjs` (스캐너 1 로 플레이트 1매 촬영) 와 `test/pipeline-live.mjs` 를 쓴다. 모두 장비가 움직인다.
 
+## 실 장비 점검 기록
+
+[2026-11-04 OvenScanner 축 매칭·운용 범위·M3 수동 제어 상태](docs/commissioning/OVEN_SCANNER_20261104.md).
+자동 공정 레시피와 배포 프로필 전환은 포함하지 않습니다.
+
 ## 문서
 
 - [docs/HARDWARE.md](docs/HARDWARE.md) 실장비 동작 · 레시피와 펌웨어 파라미터
